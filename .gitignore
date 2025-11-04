@@ -1,0 +1,41 @@
+# 环境变量（包含私钥）
+.env
+**/.env
+
+# Sui 构建产物
+**/build/
+
+# 部署记录和文档（包含敏感信息）
+**/deployment.json
+**/deployed-*.json
+taixu-move/deployments/
+taixu-move/docs/
+
+# 日志
+*.log
+
+# 临时文件
+*.tmp
+*.temp
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+package-lock.json
+yarn.lock
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
