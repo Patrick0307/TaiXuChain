@@ -6,10 +6,10 @@ module lingstone::lingstone_coin {
     public struct LINGSTONE_COIN has drop {}
 
     /// 初始化函数，在模块发布时自动调用
-    fun init(witness: LINGSTONE_COIN, ctx: &mut TxContext) {
+    fun init(otw: LINGSTONE_COIN, ctx: &mut TxContext) {
         // 创建代币，设置小数位数为 9（Sui 标准）
         let (mut treasury_cap, metadata) = coin::create_currency<LINGSTONE_COIN>(
-            witness,
+            otw,
             9,                            // decimals (Sui 标准使用 9)
             b"LING",                      // symbol
             b"LingStone",                 // name

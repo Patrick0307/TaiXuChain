@@ -1,0 +1,161 @@
+.map-selection {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  padding: 40px 20px;
+  color: white;
+}
+
+.map-title {
+  font-size: 3rem;
+  margin-bottom: 30px;
+  text-shadow: 0 0 20px rgba(138, 43, 226, 0.8);
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+.character-info-bar {
+  display: flex;
+  gap: 20px;
+  padding: 15px 30px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 50px;
+  margin-bottom: 40px;
+  border: 2px solid rgba(138, 43, 226, 0.3);
+}
+
+.character-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #ffd700;
+}
+
+.character-class {
+  font-size: 1.2rem;
+  color: #87ceeb;
+}
+
+.character-level {
+  font-size: 1.2rem;
+  color: #90ee90;
+}
+
+.maps-container {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 1200px;
+}
+
+.map-card {
+  width: 280px;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 3px solid rgba(138, 43, 226, 0.3);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.map-card:hover {
+  transform: translateY(-10px);
+  border-color: rgba(138, 43, 226, 0.8);
+  box-shadow: 0 10px 40px rgba(138, 43, 226, 0.4);
+}
+
+.map-card.selected {
+  border-color: #ffd700;
+  background: rgba(255, 215, 0, 0.1);
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+}
+
+.map-icon {
+  font-size: 5rem;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 0 10px rgba(138, 43, 226, 0.6));
+}
+
+.map-name {
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+  color: #fff;
+}
+
+.map-description {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.map-difficulty {
+  margin-top: 15px;
+}
+
+.difficulty-badge {
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.difficulty-badge.Easy {
+  background: rgba(144, 238, 144, 0.3);
+  color: #90ee90;
+  border: 2px solid #90ee90;
+}
+
+.difficulty-badge.Medium {
+  background: rgba(255, 215, 0, 0.3);
+  color: #ffd700;
+  border: 2px solid #ffd700;
+}
+
+.difficulty-badge.Hard {
+  background: rgba(255, 69, 0, 0.3);
+  color: #ff4500;
+  border: 2px solid #ff4500;
+}
+
+.map-actions {
+  display: flex;
+  gap: 20px;
+}
+
+.confirm-button {
+  padding: 15px 50px;
+  font-size: 1.3rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+  box-shadow: 0 5px 20px rgba(138, 43, 226, 0.4);
+}
+
+.confirm-button:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 8px 30px rgba(138, 43, 226, 0.6);
+}
+
+.confirm-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@keyframes glow {
+  from {
+    text-shadow: 0 0 20px rgba(138, 43, 226, 0.8);
+  }
+  to {
+    text-shadow: 0 0 30px rgba(138, 43, 226, 1), 0 0 40px rgba(138, 43, 226, 0.8);
+  }
+}

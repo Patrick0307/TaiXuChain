@@ -12,10 +12,12 @@ module taixu::player {
     /// 错误码 - Error Codes
     const EInvalidClass: u64 = 0;
     const EMaxLevel: u64 = 1;
+    const EPlayerAlreadyExists: u64 = 2;
 
-    /// 玩家角色 NFT - Player Character NFT
+    /// 玩家角色 SBT (Soulbound Token) - Player Character SBT
+    /// 不可转移的身份 NFT，绑定到玩家钱包地址
     /// 只存储核心身份和等级信息，其他状态由游戏客户端管理
-    public struct Player has key, store {
+    public struct Player has key {
         id: UID,
         name: String,           // 玩家名称 - Player name
         class: u8,              // 职业 - Class (1=术士, 2=武者, 3=射手)
@@ -23,13 +25,22 @@ module taixu::player {
         exp: u64,               // 当前经验值 - Current experience
         exp_to_next_level: u64, // 升级所需经验 - Experience needed for next level
         created_at: u64,        // 创建时间 - Creation timestamp
-        owner: address,         // 拥有者 - Owner address
+        owner: address,         // 拥有者 - Owner address (永久绑定)
     }
 
     /// 玩家注册表 - Player Registry
     public struct PlayerRegistry has key {
         id: UID,
         total_players: u64,
+    }
+
+    /// 玩家创建事件 - Player Created Event
+    public struct PlayerCreatedEvent has copy, drop {
+        player_id: address,
+        name: String,
+        class: u8,
+        owner: address,
+        timestamp: u64,
     }
 
     /// 初始化 - Initialize
@@ -62,7 +73,21 @@ module taixu::player {
         };
 
         registry.total_players = registry.total_players + 1;
-        transfer::public_transfer(player, tx_context::sender(ctx));
+        
+        let player_address = tx_context::sender(ctx);
+        let player_id_addr = object::uid_to_address(&player.id);
+        
+        // 发出玩家创建事件
+        sui::event::emit(PlayerCreatedEvent {
+            player_id: player_id_addr,
+            name: player.name,
+            class: player.class,
+            owner: player_address,
+            timestamp: tx_context::epoch(ctx),
+        });
+        
+        // 使用 transfer 而不是 public_transfer，使其成为 SBT（不可转移）
+        transfer::transfer(player, player_address);
     }
 
     /// 获得经验值 - Gain experience

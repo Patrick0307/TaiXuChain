@@ -1,0 +1,42 @@
+.character-with-weapon {
+  position: relative;
+  display: inline-block;
+}
+
+.character-with-weapon.small {
+  width: 100px;
+  height: 150px;
+}
+
+.character-with-weapon.medium {
+  width: 200px;
+  height: 300px;
+}
+
+.character-with-weapon.large {
+  width: 300px;
+  height: 450px;
+}
+
+.game-character-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: crisp-edges;
+  image-rendering: -webkit-optimize-contrast;
+}
+
+.game-weapon-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: crisp-edges;
+  image-rendering: -webkit-optimize-contrast;
+  z-index: 10;
+}
