@@ -90,6 +90,45 @@ module taixu::player {
         transfer::transfer(player, player_address);
     }
 
+    /// 创建玩家角色（赞助版本）- Create player character (sponsored version)
+    /// 允许指定接收者地址，用于赞助交易
+    public fun create_player_for(
+        registry: &mut PlayerRegistry,
+        name: vector<u8>,
+        class: u8,
+        recipient: address,
+        ctx: &mut TxContext
+    ) {
+        assert!(class >= CLASS_MAGE && class <= CLASS_ARCHER, EInvalidClass);
+
+        let player = Player {
+            id: object::new(ctx),
+            name: string::utf8(name),
+            class,
+            level: 1,
+            exp: 0,
+            exp_to_next_level: 100,
+            created_at: tx_context::epoch(ctx),
+            owner: recipient,  // 使用指定的接收者
+        };
+
+        registry.total_players = registry.total_players + 1;
+        
+        let player_id_addr = object::uid_to_address(&player.id);
+        
+        // 发出玩家创建事件
+        sui::event::emit(PlayerCreatedEvent {
+            player_id: player_id_addr,
+            name: player.name,
+            class: player.class,
+            owner: recipient,
+            timestamp: tx_context::epoch(ctx),
+        });
+        
+        // 转移给指定的接收者
+        transfer::transfer(player, recipient);
+    }
+
     /// 获得经验值 - Gain experience
     /// 由游戏服务器在战斗结束后调用
     public fun gain_exp(player: &mut Player, exp_amount: u64) {
