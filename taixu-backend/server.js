@@ -20,7 +20,7 @@ app.get('/health', (req, res) => {
 // 赞助创建角色交易
 app.post('/api/sponsor/create-player', async (req, res) => {
   try {
-    const { playerAddress, name, classId } = req.body;
+    const { playerAddress, name, classId, customization } = req.body;
 
     if (!playerAddress || !name || !classId) {
       return res.status(400).json({ 
@@ -29,8 +29,11 @@ app.post('/api/sponsor/create-player', async (req, res) => {
     }
 
     console.log(`[Sponsor] Creating player for ${playerAddress}, name: ${name}, class: ${classId}`);
+    if (customization) {
+      console.log(`[Sponsor] Customization:`, customization);
+    }
 
-    const result = await sponsorCreatePlayer(playerAddress, name, classId);
+    const result = await sponsorCreatePlayer(playerAddress, name, classId, customization || {});
 
     res.json({ 
       success: true, 

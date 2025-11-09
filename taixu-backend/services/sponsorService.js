@@ -42,8 +42,9 @@ const REGISTRY_ID = process.env.REGISTRY_ID;
  * @param {string} playerAddress - 玩家钱包地址
  * @param {string} name - 角色名称
  * @param {number} classId - 职业 ID (1=Mage, 2=Warrior, 3=Archer)
+ * @param {object} customization - 角色自定义数据
  */
-export async function sponsorCreatePlayer(playerAddress, name, classId) {
+export async function sponsorCreatePlayer(playerAddress, name, classId, customization) {
   try {
     const sponsorAddress = sponsorKeypair.getPublicKey().toSuiAddress();
     
@@ -94,6 +95,14 @@ export async function sponsorCreatePlayer(playerAddress, name, classId) {
         tx.pure.vector('u8', Array.from(new TextEncoder().encode(name))),
         tx.pure.u8(classId),
         tx.pure.address(playerAddress),  // 指定接收者为玩家地址
+        // 角色自定义数据
+        tx.pure.vector('u8', Array.from(new TextEncoder().encode(customization.gender || 'male'))),
+        tx.pure.vector('u8', Array.from(new TextEncoder().encode(customization.skinColor || '#ffd4a3'))),
+        tx.pure.vector('u8', Array.from(new TextEncoder().encode(customization.hairStyle || 'short'))),
+        tx.pure.vector('u8', Array.from(new TextEncoder().encode(customization.hairColor || '#000000'))),
+        tx.pure.vector('u8', Array.from(new TextEncoder().encode(customization.clothesStyle || 'default'))),
+        tx.pure.vector('u8', Array.from(new TextEncoder().encode(customization.clothesColor || '#8b0000'))),
+        tx.pure.vector('u8', Array.from(new TextEncoder().encode(customization.shoesColor || '#4a4a4a'))),
       ],
     });
     

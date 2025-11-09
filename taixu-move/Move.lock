@@ -2,7 +2,7 @@
 
 [move]
 version = 3
-manifest_digest = "75AA574AC687D65C03A254D31DFAE587A84167666264D15934EDB21451AC00E9"
+manifest_digest = "E5FFD6EC707966B634A6A96EDABC852F99589C3469811AEA9341C98C982C1B01"
 deps_digest = "F8BBB0CCB2491CA29A3DF03D6F92277A4F3574266507ACD77214D37ECA3F3082"
 dependencies = [
   { id = "Sui", name = "Sui" },
@@ -24,3 +24,11 @@ dependencies = [
 compiler-version = "1.59.1"
 edition = "2024.beta"
 flavor = "sui"
+
+[env]
+
+[env.onechain-testnet]
+chain-id = "1bd5c965"
+original-published-id = "0x1b1e81216c4c889065ee9f4f239b48c04284eb187bc448c11cf46359df16e9bf"
+latest-published-id = "0x1b1e81216c4c889065ee9f4f239b48c04284eb187bc448c11cf46359df16e9bf"
+published-version = "1"

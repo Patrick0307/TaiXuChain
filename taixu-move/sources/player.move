@@ -16,7 +16,7 @@ module taixu::player {
 
     /// 玩家角色 SBT (Soulbound Token) - Player Character SBT
     /// 不可转移的身份 NFT，绑定到玩家钱包地址
-    /// 只存储核心身份和等级信息，其他状态由游戏客户端管理
+    /// 存储核心身份、等级信息和角色外观自定义数据
     public struct Player has key {
         id: UID,
         name: String,           // 玩家名称 - Player name
@@ -26,6 +26,14 @@ module taixu::player {
         exp_to_next_level: u64, // 升级所需经验 - Experience needed for next level
         created_at: u64,        // 创建时间 - Creation timestamp
         owner: address,         // 拥有者 - Owner address (永久绑定)
+        // 角色外观自定义 - Character Customization
+        gender: String,         // 性别 - Gender (male/female)
+        skin_color: String,     // 皮肤颜色 - Skin color (hex)
+        hair_style: String,     // 发型 - Hair style
+        hair_color: String,     // 头发颜色 - Hair color (hex)
+        clothes_style: String,  // 衣服样式 - Clothes style
+        clothes_color: String,  // 衣服颜色 - Clothes color (hex)
+        shoes_color: String,    // 鞋子颜色 - Shoes color (hex)
     }
 
     /// 玩家注册表 - Player Registry
@@ -57,6 +65,13 @@ module taixu::player {
         registry: &mut PlayerRegistry,
         name: vector<u8>,
         class: u8,
+        gender: vector<u8>,
+        skin_color: vector<u8>,
+        hair_style: vector<u8>,
+        hair_color: vector<u8>,
+        clothes_style: vector<u8>,
+        clothes_color: vector<u8>,
+        shoes_color: vector<u8>,
         ctx: &mut TxContext
     ) {
         assert!(class >= CLASS_MAGE && class <= CLASS_ARCHER, EInvalidClass);
@@ -70,6 +85,13 @@ module taixu::player {
             exp_to_next_level: 100,  // 1级升2级需要100经验
             created_at: tx_context::epoch(ctx),
             owner: tx_context::sender(ctx),
+            gender: string::utf8(gender),
+            skin_color: string::utf8(skin_color),
+            hair_style: string::utf8(hair_style),
+            hair_color: string::utf8(hair_color),
+            clothes_style: string::utf8(clothes_style),
+            clothes_color: string::utf8(clothes_color),
+            shoes_color: string::utf8(shoes_color),
         };
 
         registry.total_players = registry.total_players + 1;
@@ -97,6 +119,13 @@ module taixu::player {
         name: vector<u8>,
         class: u8,
         recipient: address,
+        gender: vector<u8>,
+        skin_color: vector<u8>,
+        hair_style: vector<u8>,
+        hair_color: vector<u8>,
+        clothes_style: vector<u8>,
+        clothes_color: vector<u8>,
+        shoes_color: vector<u8>,
         ctx: &mut TxContext
     ) {
         assert!(class >= CLASS_MAGE && class <= CLASS_ARCHER, EInvalidClass);
@@ -110,6 +139,13 @@ module taixu::player {
             exp_to_next_level: 100,
             created_at: tx_context::epoch(ctx),
             owner: recipient,  // 使用指定的接收者
+            gender: string::utf8(gender),
+            skin_color: string::utf8(skin_color),
+            hair_style: string::utf8(hair_style),
+            hair_color: string::utf8(hair_color),
+            clothes_style: string::utf8(clothes_style),
+            clothes_color: string::utf8(clothes_color),
+            shoes_color: string::utf8(shoes_color),
         };
 
         registry.total_players = registry.total_players + 1;
@@ -159,6 +195,15 @@ module taixu::player {
     public fun get_exp_to_next_level(player: &Player): u64 { player.exp_to_next_level }
     public fun get_created_at(player: &Player): u64 { player.created_at }
     public fun get_owner(player: &Player): address { player.owner }
+    
+    // 角色外观查询函数 - Customization Query Functions
+    public fun get_gender(player: &Player): String { player.gender }
+    public fun get_skin_color(player: &Player): String { player.skin_color }
+    public fun get_hair_style(player: &Player): String { player.hair_style }
+    public fun get_hair_color(player: &Player): String { player.hair_color }
+    public fun get_clothes_style(player: &Player): String { player.clothes_style }
+    public fun get_clothes_color(player: &Player): String { player.clothes_color }
+    public fun get_shoes_color(player: &Player): String { player.shoes_color }
 
     #[test_only]
     public fun init_for_testing(ctx: &mut TxContext) {

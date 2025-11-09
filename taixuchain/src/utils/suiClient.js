@@ -5,8 +5,8 @@ import { Transaction } from '@mysten/sui/transactions'
 export const suiClient = new SuiClient({ url: 'https://rpc-testnet.onelabs.cc:443' })
 
 // 从环境变量或配置文件读取
-export const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID || '0xc32962e7c4893115fcf3304c331fb24488df007734517470006bf19e06f2f175'
-export const REGISTRY_ID = import.meta.env.VITE_REGISTRY_ID || '0x1586d814c0cd790cf281073d8a2de6f8cf398001866b2c717154f4c5a18572d9'
+export const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID || '0x1b1e81216c4c889065ee9f4f239b48c04284eb187bc448c11cf46359df16e9bf'
+export const REGISTRY_ID = import.meta.env.VITE_REGISTRY_ID || '0x92f963482bb3319bf254e57c7050336e04cb91040f75e1ba98d19f5a1eb40f79'
 
 // 职业映射
 export const CLASS_MAP = {
@@ -20,9 +20,10 @@ export const CLASS_MAP = {
  * @param {string} name - 角色名称
  * @param {string} className - 职业名称 (Mage, Warrior, Archer)
  * @param {object} suiWallet - Sui 钱包对象
+ * @param {object} customization - 角色自定义数据
  * @returns {Promise<object>} 交易结果
  */
-export async function createPlayerOnChain(name, className, suiWallet) {
+export async function createPlayerOnChain(name, className, suiWallet, customization) {
   try {
     const classId = CLASS_MAP[className]
     if (!classId) {
@@ -60,6 +61,7 @@ export async function createPlayerOnChain(name, className, suiWallet) {
         playerAddress,
         name,
         classId,
+        customization: customization || {},
       }),
     })
 
