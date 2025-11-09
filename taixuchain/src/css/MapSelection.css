@@ -1,51 +1,113 @@
+/* 复古 MMORPG 地图选择风格 */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
 .map-selection {
   width: 100%;
   min-height: 100vh;
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.15) 0px,
+      transparent 1px,
+      transparent 2px,
+      rgba(0, 0, 0, 0.15) 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.15) 0px,
+      transparent 1px,
+      transparent 2px,
+      rgba(0, 0, 0, 0.15) 3px
+    ),
+    linear-gradient(180deg, #0a0e27 0%, #1a1a3e 50%, #2a1a4a 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
-  padding: 40px 20px;
-  color: white;
+  padding: 30px 20px;
+  font-family: 'Press Start 2P', cursive;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  overflow-y: auto;
 }
 
 .map-title {
-  font-size: 3rem;
-  margin-bottom: 30px;
-  text-shadow: 0 0 20px rgba(138, 43, 226, 0.8);
-  animation: glow 2s ease-in-out infinite alternate;
+  color: #ffd700;
+  font-size: 1.5rem;
+  margin-bottom: 35px;
+  text-shadow: 
+    4px 4px 0 #8b4513,
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000,
+    2px 2px 0 #000,
+    0 0 20px #ffd700;
+  letter-spacing: 3px;
+  line-height: 1.8;
+  text-align: center;
+  animation: titleGlow 2s ease-in-out infinite;
+}
+
+@keyframes titleGlow {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.2);
+  }
 }
 
 .character-info-bar {
-  display: flex;
-  gap: 20px;
-  padding: 15px 30px;
-  background: rgba(0, 0, 0, 0.4);
-  border-radius: 50px;
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      #2a1a4a 0px,
+      #2a1a4a 4px,
+      #3a2a5a 4px,
+      #3a2a5a 8px
+    );
+  padding: 25px 35px;
   margin-bottom: 40px;
-  border: 2px solid rgba(138, 43, 226, 0.3);
+  position: relative;
+  box-shadow: 
+    0 0 0 4px #8b7355,
+    0 0 0 8px #4a4a4a,
+    0 0 0 12px #8b7355,
+    inset 0 0 30px rgba(0, 0, 0, 0.5),
+    0 8px 0 rgba(0, 0, 0, 0.4);
+  max-width: 900px;
+  width: 100%;
 }
 
-.character-name {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #ffd700;
+.character-info-bar::before {
+  content: '';
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 30px;
+  background: #d4af37;
+  border: 4px solid #4a4a4a;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
-.character-class {
-  font-size: 1.2rem;
-  color: #87ceeb;
-}
-
-.character-level {
-  font-size: 1.2rem;
-  color: #90ee90;
+.character-info-bar::after {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 30px;
+  background: #d4af37;
+  border: 4px solid #4a4a4a;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .maps-container {
   display: flex;
-  gap: 30px;
+  gap: 40px;
   margin-bottom: 40px;
   flex-wrap: wrap;
   justify-content: center;
@@ -53,109 +115,266 @@
 }
 
 .map-card {
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      #2a1a4a 0px,
+      #2a1a4a 4px,
+      #3a2a5a 4px,
+      #3a2a5a 8px
+    );
+  border: none;
+  padding: 0;
   width: 280px;
-  padding: 30px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 3px solid rgba(138, 43, 226, 0.3);
-  border-radius: 20px;
+  min-height: 420px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: center;
+  transition: all 0.1s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  box-shadow: 
+    0 0 0 4px #8b7355,
+    0 0 0 8px #4a4a4a,
+    0 0 0 12px #8b7355,
+    inset 0 0 30px rgba(0, 0, 0, 0.5),
+    0 8px 0 rgba(0, 0, 0, 0.4);
+}
+
+.map-card::before {
+  content: '';
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 30px;
+  background: #8b7355;
+  border: 4px solid #4a4a4a;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.map-card::after {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 30px;
+  background: #8b7355;
+  border: 4px solid #4a4a4a;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .map-card:hover {
-  transform: translateY(-10px);
-  border-color: rgba(138, 43, 226, 0.8);
-  box-shadow: 0 10px 40px rgba(138, 43, 226, 0.4);
+  transform: translateY(-4px);
+  box-shadow: 
+    0 0 0 4px #d4af37,
+    0 0 0 8px #ffd700,
+    0 0 0 12px #d4af37,
+    inset 0 0 30px rgba(0, 0, 0, 0.5),
+    0 12px 0 rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(255, 215, 0, 0.5);
 }
 
 .map-card.selected {
-  border-color: #ffd700;
-  background: rgba(255, 215, 0, 0.1);
-  box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+  box-shadow: 
+    0 0 0 4px #ffd700,
+    0 0 0 8px #ff4500,
+    0 0 0 12px #ffd700,
+    inset 0 0 30px rgba(255, 69, 0, 0.3),
+    0 8px 0 rgba(0, 0, 0, 0.4),
+    0 0 40px rgba(255, 215, 0, 0.8);
+  animation: selectedPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes selectedPulse {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.2);
+  }
 }
 
 .map-icon {
   font-size: 5rem;
-  margin-bottom: 20px;
-  filter: drop-shadow(0 0 10px rgba(138, 43, 226, 0.6));
+  margin: 40px 0 25px 0;
+  filter: drop-shadow(4px 4px 0 #000);
+  text-shadow: 
+    4px 4px 0 #000,
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000,
+    2px 2px 0 #000;
 }
 
 .map-name {
-  font-size: 1.8rem;
-  margin-bottom: 15px;
-  color: #fff;
+  color: #ffd700;
+  font-size: 1rem;
+  margin: 0 0 20px 0;
+  text-align: center;
+  width: 100%;
+  padding: 0 15px;
+  text-shadow: 
+    3px 3px 0 #8b4513,
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
+  letter-spacing: 1px;
+  line-height: 1.6;
 }
 
 .map-description {
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 20px;
-  line-height: 1.5;
+  color: #e0e0e0;
+  font-size: 0.6rem;
+  margin: 0 0 25px 0;
+  padding: 0 20px;
+  text-align: center;
+  width: 100%;
+  line-height: 1.7;
+  text-shadow: 2px 2px 0 #000;
+  flex-grow: 1;
 }
 
 .map-difficulty {
-  margin-top: 15px;
+  width: 100%;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  border-top: 4px solid #8b7355;
+  display: flex;
+  justify-content: center;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+  margin-top: auto;
 }
 
 .difficulty-badge {
-  padding: 8px 20px;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: bold;
+  padding: 10px 20px;
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+  text-shadow: 2px 2px 0 #000;
+  border: 3px solid;
+  box-shadow: 
+    inset 0 0 10px rgba(0, 0, 0, 0.5),
+    0 3px 0 rgba(0, 0, 0, 0.5);
 }
 
 .difficulty-badge.Easy {
-  background: rgba(144, 238, 144, 0.3);
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      #2d5016,
+      #2d5016 10px,
+      #3d6026 10px,
+      #3d6026 20px
+    );
   color: #90ee90;
-  border: 2px solid #90ee90;
+  border-color: #4a7a2a;
 }
 
 .difficulty-badge.Medium {
-  background: rgba(255, 215, 0, 0.3);
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      #5a4a00,
+      #5a4a00 10px,
+      #6a5a10 10px,
+      #6a5a10 20px
+    );
   color: #ffd700;
-  border: 2px solid #ffd700;
+  border-color: #8a7a30;
 }
 
 .difficulty-badge.Hard {
-  background: rgba(255, 69, 0, 0.3);
-  color: #ff4500;
-  border: 2px solid #ff4500;
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      #5a1a00,
+      #5a1a00 10px,
+      #6a2a10 10px,
+      #6a2a10 20px
+    );
+  color: #ff6b6b;
+  border-color: #8a3a20;
 }
 
 .map-actions {
   display: flex;
   gap: 20px;
+  margin-top: 20px;
 }
 
 .confirm-button {
-  padding: 15px 50px;
-  font-size: 1.3rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: 
+    linear-gradient(180deg, #ff4500 0%, #cc3700 50%, #992900 100%);
+  color: #fff;
   border: none;
-  border-radius: 50px;
+  padding: 20px 50px;
+  font-size: 0.85rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: bold;
-  box-shadow: 0 5px 20px rgba(138, 43, 226, 0.4);
+  font-family: 'Press Start 2P', cursive;
+  position: relative;
+  box-shadow: 
+    0 0 0 4px #992900,
+    0 0 0 8px #ffd700,
+    0 0 0 12px #992900,
+    0 8px 0 rgba(0, 0, 0, 0.5),
+    inset 0 3px 0 rgba(255, 255, 255, 0.3),
+    0 0 30px rgba(255, 69, 0, 0.6);
+  text-shadow: 
+    3px 3px 0 #000,
+    0 0 10px #ffd700;
+  transition: all 0.1s;
+  letter-spacing: 2px;
+  line-height: 1.5;
+  animation: buttonGlow 2s ease-in-out infinite;
+}
+
+@keyframes buttonGlow {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.3);
+  }
 }
 
 .confirm-button:hover:not(:disabled) {
-  transform: scale(1.05);
-  box-shadow: 0 8px 30px rgba(138, 43, 226, 0.6);
+  background: 
+    linear-gradient(180deg, #ff5722 0%, #dd4411 50%, #aa3311 100%);
+  transform: translateY(-3px);
+  box-shadow: 
+    0 0 0 4px #aa3311,
+    0 0 0 8px #ffd700,
+    0 0 0 12px #aa3311,
+    0 11px 0 rgba(0, 0, 0, 0.5),
+    inset 0 3px 0 rgba(255, 255, 255, 0.4),
+    0 0 40px rgba(255, 69, 0, 0.8);
+}
+
+.confirm-button:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 
+    0 0 0 4px #992900,
+    0 0 0 8px #ffd700,
+    0 0 0 12px #992900,
+    0 3px 0 rgba(0, 0, 0, 0.5),
+    inset 0 3px 0 rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(255, 69, 0, 0.6);
 }
 
 .confirm-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-@keyframes glow {
-  from {
-    text-shadow: 0 0 20px rgba(138, 43, 226, 0.8);
-  }
-  to {
-    text-shadow: 0 0 30px rgba(138, 43, 226, 1), 0 0 40px rgba(138, 43, 226, 0.8);
-  }
+  filter: grayscale(0.5);
+  animation: none;
+  background: 
+    linear-gradient(180deg, #6a6a6a 0%, #4a4a4a 50%, #2a2a2a 100%);
+  box-shadow: 
+    0 0 0 4px #2a2a2a,
+    0 0 0 8px #8b7355,
+    0 6px 0 rgba(0, 0, 0, 0.5),
+    inset 0 2px 0 rgba(255, 255, 255, 0.2);
 }

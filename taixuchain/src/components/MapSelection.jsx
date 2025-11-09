@@ -41,18 +41,58 @@ function MapSelection({ character, onMapSelected }) {
 
   return (
     <div className="map-selection">
-      <h1 className="map-title">Choose Your Adventure Map</h1>
+      <h1 className="map-title">Choose Your Adventure</h1>
       
       <div className="character-info-bar">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '10px' }}>
-            <AnimatedCharacter character={character} scale={1.2} />
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '30px',
+          justifyContent: 'center'
+        }}>
+          <div style={{ 
+            background: 
+              `repeating-linear-gradient(
+                45deg,
+                rgba(0, 0, 0, 0.3) 0px,
+                rgba(0, 0, 0, 0.3) 10px,
+                rgba(0, 0, 0, 0.4) 10px,
+                rgba(0, 0, 0, 0.4) 20px
+              )`,
+            padding: '15px',
+            border: '4px solid #4a4a4a',
+            boxShadow: 'inset 0 0 20px rgba(0, 0, 0, 0.8)'
+          }}>
+            <AnimatedCharacter character={character} scale={1.5} />
           </div>
-          <div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>⚔️ {character.name}</div>
-            <div style={{ fontSize: '1rem', opacity: 0.8 }}>{character.class} • Level {character.level || 1}</div>
+          <div style={{ textAlign: 'left' }}>
+            <div style={{ 
+              fontSize: '1.2rem', 
+              color: '#ffd700',
+              textShadow: '3px 3px 0 #8b4513, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000',
+              marginBottom: '12px',
+              letterSpacing: '2px'
+            }}>
+              ⚔️ {character.name}
+            </div>
+            <div style={{ 
+              fontSize: '0.7rem', 
+              color: '#e0e0e0',
+              textShadow: '2px 2px 0 #000',
+              marginBottom: '8px',
+              letterSpacing: '1px'
+            }}>
+              {character.class} • Lv.{character.level || 1}
+            </div>
             {character.playerObjectId && (
-              <div style={{ fontSize: '0.7rem', opacity: 0.5, marginTop: '5px' }}>
+              <div style={{ 
+                fontSize: '0.5rem', 
+                color: '#8b7355',
+                textShadow: '1px 1px 0 #000',
+                marginTop: '8px',
+                letterSpacing: '0.5px',
+                fontFamily: 'monospace'
+              }}>
                 ID: {character.playerObjectId.slice(0, 8)}...{character.playerObjectId.slice(-6)}
               </div>
             )}
