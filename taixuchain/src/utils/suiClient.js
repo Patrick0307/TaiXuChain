@@ -100,3 +100,33 @@ export async function getPlayerInfo(playerObjectId) {
     throw error
   }
 }
+
+/**
+ * 查询钱包地址是否已有角色
+ * @param {string} walletAddress - 钱包地址
+ * @returns {Promise<object|null>} 玩家角色信息或 null
+ */
+export async function checkExistingPlayer(walletAddress) {
+  try {
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
+    
+    const response = await fetch(`${BACKEND_URL}/api/player/${walletAddress}`)
+    
+    if (!response.ok) {
+      throw new Error('Failed to check existing player')
+    }
+
+    const data = await response.json()
+    
+    if (data.exists && data.player) {
+      console.log('✅ Existing player found:', data.player)
+      return data.player
+    }
+    
+    console.log('ℹ️ No existing player found for this wallet')
+    return null
+  } catch (error) {
+    console.error('❌ Error checking existing player:', error)
+    throw error
+  }
+}

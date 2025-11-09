@@ -6,6 +6,7 @@ import CharacterNaming from './components/CharacterNaming'
 import MapSelection from './components/MapSelection'
 import CharacterWithWeapon from './components/CharacterWithWeapon'
 import UIDDisplay from './components/UIDDisplay'
+import { checkExistingPlayer } from './utils/suiClient'
 
 function App() {
   const [walletAddress, setWalletAddress] = useState(null)
@@ -14,10 +15,51 @@ function App() {
   const [customizedCharacter, setCustomizedCharacter] = useState(null)
   const [finalCharacter, setFinalCharacter] = useState(null)
   const [selectedMap, setSelectedMap] = useState(null)
+  const [isCheckingPlayer, setIsCheckingPlayer] = useState(false)
 
-  const handleWalletConnected = (address) => {
+  const handleWalletConnected = async (address) => {
     setWalletAddress(address)
-    setGameStage('selection')
+    setIsCheckingPlayer(true)
+    
+    try {
+      // 检查钱包是否已有角色
+      const existingPlayer = await checkExistingPlayer(address)
+      
+      if (existingPlayer) {
+        // 已有角色，直接加载角色信息并跳到地图选择
+        console.log('🎮 Loading existing character...')
+        
+        // 将后端返回的数据转换为前端格式
+        const classMap = {
+          1: { id: 'mage', name: 'Mage' },
+          2: { id: 'warrior', name: 'Warrior' },
+          3: { id: 'archer', name: 'Archer' }
+        }
+        
+        const characterData = {
+          id: classMap[existingPlayer.class].id,
+          name: existingPlayer.name,
+          class: classMap[existingPlayer.class].name,
+          level: existingPlayer.level,
+          exp: existingPlayer.exp,
+          playerObjectId: existingPlayer.objectId,
+          customization: existingPlayer.customization
+        }
+        
+        setFinalCharacter(characterData)
+        setGameStage('mapSelection')
+      } else {
+        // 没有角色，进入角色创建流程
+        console.log('ℹ️ No existing character, starting character creation...')
+        setGameStage('selection')
+      }
+    } catch (error) {
+      console.error('Error checking existing player:', error)
+      // 出错时也进入角色创建流程
+      setGameStage('selection')
+    } finally {
+      setIsCheckingPlayer(false)
+    }
   }
 
   const handleCharacterSelected = (classData) => {
@@ -53,15 +95,32 @@ function App() {
 
   return (
     <>
-      {gameStage === 'story' && (
+      {isCheckingPlayer && (
+        <div style={{ 
+          width: '100%', 
+          height: '100vh', 
+          display: 'flex', 
+          flexDirection: 'column',
+          alignItems: 'center', 
+          justifyContent: 'center',
+          background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
+          color: 'white',
+          gap: '20px'
+        }}>
+          <div style={{ fontSize: '1.5rem' }}>🔍 Checking for existing character...</div>
+          <div style={{ fontSize: '1rem', opacity: 0.7 }}>Please wait...</div>
+        </div>
+      )}
+      
+      {!isCheckingPlayer && gameStage === 'story' && (
         <BackgroundStory onWalletConnected={handleWalletConnected} />
       )}
       
-      {gameStage === 'selection' && (
+      {!isCheckingPlayer && gameStage === 'selection' && (
         <CharacterSelection onCharacterSelected={handleCharacterSelected} />
       )}
       
-      {gameStage === 'customization' && selectedClass && (
+      {!isCheckingPlayer && gameStage === 'customization' && selectedClass && (
         <CharacterCustomization 
           characterClass={selectedClass}
           onCustomizationComplete={handleCustomizationComplete}
@@ -69,7 +128,7 @@ function App() {
         />
       )}
       
-      {gameStage === 'naming' && customizedCharacter && (
+      {!isCheckingPlayer && gameStage === 'naming' && customizedCharacter && (
         <CharacterNaming 
           character={customizedCharacter}
           onNamingComplete={handleNamingComplete}
@@ -77,14 +136,14 @@ function App() {
         />
       )}
       
-      {gameStage === 'mapSelection' && finalCharacter && (
+      {!isCheckingPlayer && gameStage === 'mapSelection' && finalCharacter && (
         <MapSelection 
           character={finalCharacter}
           onMapSelected={handleMapSelected}
         />
       )}
       
-      {gameStage === 'game' && finalCharacter && selectedMap && (
+      {!isCheckingPlayer && gameStage === 'game' && finalCharacter && selectedMap && (
         <div style={{ 
           width: '100%', 
           height: '100vh', 

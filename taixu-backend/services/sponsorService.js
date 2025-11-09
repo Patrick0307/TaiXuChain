@@ -131,6 +131,62 @@ export async function sponsorCreatePlayer(playerAddress, name, classId, customiz
 }
 
 /**
+ * 查询玩家是否已有角色
+ * @param {string} playerAddress - 玩家钱包地址
+ * @returns {Promise<object|null>} 玩家角色信息或 null
+ */
+export async function getPlayerByAddress(playerAddress) {
+  try {
+    console.log(`[Query] Checking if player exists: ${playerAddress}`);
+    
+    // 查询该地址拥有的所有对象
+    const objects = await suiClient.getOwnedObjects({
+      owner: playerAddress,
+      options: {
+        showType: true,
+        showContent: true,
+      },
+    });
+    
+    // 查找 Player 类型的对象
+    const playerObject = objects.data.find(obj => 
+      obj.data?.type?.includes(`${PACKAGE_ID}::player::Player`)
+    );
+    
+    if (!playerObject) {
+      console.log(`[Query] No player found for ${playerAddress}`);
+      return null;
+    }
+    
+    console.log(`[Query] Player found!`, playerObject.data.objectId);
+    
+    // 返回玩家信息
+    const content = playerObject.data.content.fields;
+    return {
+      objectId: playerObject.data.objectId,
+      name: content.name,
+      class: parseInt(content.class),
+      level: parseInt(content.level),
+      exp: parseInt(content.exp),
+      exp_to_next_level: parseInt(content.exp_to_next_level),
+      owner: content.owner,
+      customization: {
+        gender: content.gender,
+        skinColor: content.skin_color,
+        hairStyle: content.hair_style,
+        hairColor: content.hair_color,
+        clothesStyle: content.clothes_style,
+        clothesColor: content.clothes_color,
+        shoesColor: content.shoes_color,
+      },
+    };
+  } catch (error) {
+    console.error('[Query] Error checking player:', error);
+    throw error;
+  }
+}
+
+/**
  * 获取赞助钱包余额
  */
 export async function getSponsorBalance() {

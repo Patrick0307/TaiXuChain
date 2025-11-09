@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { sponsorCreatePlayer } from './services/sponsorService.js';
+import { sponsorCreatePlayer, getPlayerByAddress } from './services/sponsorService.js';
 
 dotenv.config();
 
@@ -15,6 +15,41 @@ app.use(express.json());
 // 健康检查
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Taixu Backend is running' });
+});
+
+// 查询玩家是否已有角色
+app.get('/api/player/:address', async (req, res) => {
+  try {
+    const { address } = req.params;
+
+    if (!address) {
+      return res.status(400).json({ 
+        error: 'Missing player address' 
+      });
+    }
+
+    console.log(`[Query] Checking player for address: ${address}`);
+
+    const player = await getPlayerByAddress(address);
+
+    if (!player) {
+      return res.json({ 
+        exists: false,
+        player: null
+      });
+    }
+
+    res.json({ 
+      exists: true,
+      player
+    });
+  } catch (error) {
+    console.error('[Query] Error:', error);
+    res.status(500).json({ 
+      error: error.message,
+      details: error.toString()
+    });
+  }
 });
 
 // 赞助创建角色交易

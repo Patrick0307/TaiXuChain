@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import '../css/MapSelection.css'
+import AnimatedCharacter from './AnimatedCharacter'
 
 function MapSelection({ character, onMapSelected }) {
   const [selectedMap, setSelectedMap] = useState(null)
@@ -43,9 +44,20 @@ function MapSelection({ character, onMapSelected }) {
       <h1 className="map-title">Choose Your Adventure Map</h1>
       
       <div className="character-info-bar">
-        <span className="character-name">⚔️ {character.name}</span>
-        <span className="character-class">{character.className}</span>
-        <span className="character-level">Lv.1</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '10px' }}>
+            <AnimatedCharacter character={character} scale={1.2} />
+          </div>
+          <div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>⚔️ {character.name}</div>
+            <div style={{ fontSize: '1rem', opacity: 0.8 }}>{character.class} • Level {character.level || 1}</div>
+            {character.playerObjectId && (
+              <div style={{ fontSize: '0.7rem', opacity: 0.5, marginTop: '5px' }}>
+                ID: {character.playerObjectId.slice(0, 8)}...{character.playerObjectId.slice(-6)}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="maps-container">
