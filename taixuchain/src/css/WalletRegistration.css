@@ -1,113 +1,267 @@
+/* 复古 MMORPG 马赛克风格 */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
 .wallet-registration-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.15) 0px,
+      transparent 1px,
+      transparent 2px,
+      rgba(0, 0, 0, 0.15) 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.15) 0px,
+      transparent 1px,
+      transparent 2px,
+      rgba(0, 0, 0, 0.15) 3px
+    ),
+    linear-gradient(180deg, #0a0e27 0%, #1a1a3e 100%);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
 }
 
 .wallet-registration-box {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  padding: 40px;
-  border-radius: 20px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  background: 
+    linear-gradient(135deg, transparent 10px, #2a1a4a 10px),
+    linear-gradient(225deg, transparent 10px, #2a1a4a 10px),
+    linear-gradient(315deg, transparent 10px, #2a1a4a 10px),
+    linear-gradient(45deg, transparent 10px, #2a1a4a 10px);
+  background-position: top left, top right, bottom right, bottom left;
+  background-size: 51% 51%;
+  background-repeat: no-repeat;
+  padding: 50px 40px;
+  box-shadow: 
+    0 0 0 4px #8b7355,
+    0 0 0 8px #d4af37,
+    0 0 0 12px #8b7355,
+    inset 0 0 30px rgba(0, 0, 0, 0.5),
+    0 8px 0 rgba(0, 0, 0, 0.4);
   text-align: center;
-  max-width: 500px;
+  max-width: 600px;
   width: 90%;
-  border: 2px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  font-family: 'Press Start 2P', cursive;
+}
+
+/* 马赛克装饰角 */
+.wallet-registration-box::before,
+.wallet-registration-box::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: #d4af37;
+  box-shadow: 
+    0 0 0 4px #8b7355,
+    inset 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+.wallet-registration-box::before {
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.wallet-registration-box::after {
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
 }
 
 .wallet-registration-box h2 {
-  color: #fff;
-  font-size: 2rem;
-  margin-bottom: 15px;
+  color: #ffd700;
+  font-size: 1.5rem;
+  margin-bottom: 25px;
+  text-shadow: 
+    3px 3px 0 #8b4513,
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
+  letter-spacing: 2px;
+  line-height: 1.8;
 }
 
 .wallet-registration-box p {
-  color: #ccc;
-  font-size: 1.1rem;
+  color: #e0e0e0;
+  font-size: 0.75rem;
   margin-bottom: 30px;
+  line-height: 1.8;
+  text-shadow: 2px 2px 0 #000;
 }
 
 .connect-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: 
+    linear-gradient(180deg, #4a90e2 0%, #2e5c8a 50%, #1a3a5a 100%);
+  color: #fff;
   border: none;
-  padding: 15px 40px;
-  font-size: 1.1rem;
-  border-radius: 10px;
+  padding: 18px 35px;
+  font-size: 0.85rem;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  font-weight: 600;
+  font-family: 'Press Start 2P', cursive;
+  position: relative;
+  box-shadow: 
+    0 0 0 3px #1a3a5a,
+    0 0 0 6px #d4af37,
+    0 6px 0 #1a1a3e,
+    inset 0 2px 0 rgba(255, 255, 255, 0.3);
+  text-shadow: 2px 2px 0 #000;
+  transition: all 0.1s;
+  letter-spacing: 1px;
 }
 
 .connect-button:hover:not(:disabled) {
+  background: 
+    linear-gradient(180deg, #5aa0f2 0%, #3e6c9a 50%, #2a4a6a 100%);
   transform: translateY(-2px);
-  box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 
+    0 0 0 3px #2a4a6a,
+    0 0 0 6px #ffd700,
+    0 8px 0 #1a1a3e,
+    inset 0 2px 0 rgba(255, 255, 255, 0.4);
+}
+
+.connect-button:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 
+    0 0 0 3px #1a3a5a,
+    0 0 0 6px #d4af37,
+    0 2px 0 #1a1a3e,
+    inset 0 2px 0 rgba(0, 0, 0, 0.3);
 }
 
 .connect-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  filter: grayscale(0.5);
 }
 
 .error-message {
-  margin-top: 20px;
-  padding: 15px;
-  background-color: rgba(255, 0, 0, 0.1);
-  border: 1px solid rgba(255, 0, 0, 0.3);
-  border-radius: 8px;
+  margin-top: 25px;
+  padding: 20px;
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      #4a0000,
+      #4a0000 10px,
+      #3a0000 10px,
+      #3a0000 20px
+    );
+  border: 4px solid #8b0000;
+  box-shadow: 
+    inset 0 0 20px rgba(0, 0, 0, 0.5),
+    0 4px 0 rgba(0, 0, 0, 0.3);
   color: #ff6b6b;
+  font-size: 0.65rem;
+  line-height: 1.6;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.error-message p {
+  color: #ff6b6b;
+  font-size: 0.65rem;
+  margin-bottom: 15px;
 }
 
 .install-link {
   display: inline-block;
-  margin-top: 10px;
-  color: #667eea;
+  margin-top: 15px;
+  padding: 12px 20px;
+  background: #8b0000;
+  color: #ffd700;
   text-decoration: none;
-  font-weight: 600;
+  font-size: 0.6rem;
+  border: 3px solid #ff6b6b;
+  box-shadow: 0 4px 0 #4a0000;
+  transition: all 0.1s;
+  text-shadow: 1px 1px 0 #000;
 }
 
 .install-link:hover {
-  text-decoration: underline;
+  background: #a00000;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #4a0000;
+}
+
+.install-link:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #4a0000;
 }
 
 .success-message {
-  color: #4caf50;
-  font-size: 1.2rem;
+  color: #7fff00;
+  font-size: 0.85rem;
+  text-shadow: 
+    2px 2px 0 #000,
+    0 0 10px #7fff00;
+  line-height: 2;
+}
+
+.success-message p {
+  color: #7fff00;
+  margin-bottom: 20px;
 }
 
 .wallet-address {
-  font-family: monospace;
-  font-size: 0.9rem;
-  color: #aaa;
-  margin-top: 10px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.6rem;
+  color: #d4af37;
+  margin-top: 15px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px solid #8b7355;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+  text-shadow: 1px 1px 0 #000;
 }
 
 .waiting-message {
-  margin-top: 15px;
-  color: #999;
-  font-size: 0.9rem;
-  font-style: italic;
-}
-.loading-message {
-  margin-top: 15px;
-  color: #667eea;
-  font-size: 1rem;
-  font-weight: 500;
-  animation: pulse 1.5s ease-in-out infinite;
+  margin-top: 20px;
+  color: #87ceeb;
+  font-size: 0.65rem;
+  line-height: 1.8;
+  text-shadow: 1px 1px 0 #000;
+  animation: blink 1.5s step-start infinite;
 }
 
-@keyframes pulse {
-  0%, 100% {
+.loading-message {
+  margin-top: 20px;
+  color: #ffd700;
+  font-size: 0.7rem;
+  text-shadow: 
+    2px 2px 0 #000,
+    0 0 10px #ffd700;
+  animation: pixelPulse 1s steps(2) infinite;
+  line-height: 1.8;
+}
+
+@keyframes blink {
+  0%, 49% {
     opacity: 1;
   }
+  50%, 100% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes pixelPulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
   50% {
-    opacity: 0.5;
+    transform: scale(1.05);
+    filter: brightness(1.3);
   }
 }
