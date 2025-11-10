@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "server.js"
+    }
+  ],
+  "env": {
+    "SPONSOR_PRIVATE_KEY": "@sponsor_private_key",
+    "SUI_RPC_URL": "@sui_rpc_url",
+    "PACKAGE_ID": "@package_id",
+    "REGISTRY_ID": "@registry_id"
+  }
+}
