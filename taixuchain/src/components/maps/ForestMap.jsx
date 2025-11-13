@@ -14,6 +14,7 @@ function ForestMap({ character, onExit }) {
   const [direction, setDirection] = useState('down') // 角色朝向
   const [isMoving, setIsMoving] = useState(false) // 是否在移动
   const [walkFrame, setWalkFrame] = useState(0) // 行走动画帧
+  const [collisionObjects, setCollisionObjects] = useState([]) // 碰撞区域
   const animationFrameRef = useRef(null)
   const walkAnimationRef = useRef(null)
 
@@ -22,6 +23,22 @@ function ForestMap({ character, onExit }) {
   const MOVE_SPEED = 3  // 固定速度
   const MAP_SCALE = 2.5  // 放大地图2.5倍
 
+  // 碰撞检测函数 - 检查角色是否与碰撞区域重叠
+  const checkCollision = (x, y, width, height) => {
+    for (const obj of collisionObjects) {
+      // AABB (Axis-Aligned Bounding Box) 碰撞检测
+      if (
+        x < obj.x + obj.width &&
+        x + width > obj.x &&
+        y < obj.y + obj.height &&
+        y + height > obj.y
+      ) {
+        return true // 发生碰撞
+      }
+    }
+    return false // 没有碰撞
+  }
+
   // 加载地图数据和所有瓦片图片
   useEffect(() => {
     fetch('/maps/forest.tmj')
@@ -29,6 +46,30 @@ function ForestMap({ character, onExit }) {
       .then(data => {
         console.log('Map loaded:', data)
         setMapData(data)
+        
+        // 提取碰撞对象
+        const collisionLayer = data.layers.find(layer => layer.name === 'collision')
+        if (collisionLayer && collisionLayer.objects) {
+          const collisions = collisionLayer.objects
+            .filter(obj => {
+              // 检查对象是否有 collision 属性且为 true
+              const hasCollision = obj.properties?.some(
+                prop => prop.name === 'Value' && prop.value === true
+              )
+              return hasCollision
+            })
+            .map(obj => ({
+              x: obj.x,
+              y: obj.y,
+              width: obj.width,
+              height: obj.height
+            }))
+          
+          console.log(`Found ${collisions.length} collision objects`)
+          setCollisionObjects(collisions)
+        } else {
+          console.warn('No collision layer found in map')
+        }
         
         // 从所有tileset中提取瓦片图片
         const loadedImages = {}
@@ -141,23 +182,27 @@ function ForestMap({ character, onExit }) {
 
         const speed = MOVE_SPEED * deltaTime
 
+        // 尝试移动
+        let attemptX = newX
+        let attemptY = newY
+
         if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
-          newX -= speed
+          attemptX -= speed
           newDirection = 'left'
           moving = true
         }
         if (keys['ArrowRight'] || keys['d'] || keys['D']) {
-          newX += speed
+          attemptX += speed
           newDirection = 'right'
           moving = true
         }
         if (keys['ArrowUp'] || keys['w'] || keys['W']) {
-          newY -= speed
+          attemptY -= speed
           newDirection = 'up'
           moving = true
         }
         if (keys['ArrowDown'] || keys['s'] || keys['S']) {
-          newY += speed
+          attemptY += speed
           newDirection = 'down'
           moving = true
         }
@@ -165,8 +210,24 @@ function ForestMap({ character, onExit }) {
         // 边界检查
         const maxX = mapData.width * TILE_SIZE - PLAYER_SIZE
         const maxY = mapData.height * TILE_SIZE - PLAYER_SIZE
-        newX = Math.max(0, Math.min(newX, maxX))
-        newY = Math.max(0, Math.min(newY, maxY))
+        attemptX = Math.max(0, Math.min(attemptX, maxX))
+        attemptY = Math.max(0, Math.min(attemptY, maxY))
+
+        // 碰撞检测 - 只有在没有碰撞时才更新位置
+        if (!checkCollision(attemptX, attemptY, PLAYER_SIZE, PLAYER_SIZE)) {
+          newX = attemptX
+          newY = attemptY
+        } else {
+          // 如果发生碰撞，尝试滑动（只在一个轴上移动）
+          // 尝试只在X轴移动
+          if (!checkCollision(attemptX, prev.y, PLAYER_SIZE, PLAYER_SIZE)) {
+            newX = attemptX
+          }
+          // 尝试只在Y轴移动
+          if (!checkCollision(prev.x, attemptY, PLAYER_SIZE, PLAYER_SIZE)) {
+            newY = attemptY
+          }
+        }
 
         return { x: newX, y: newY }
       })
@@ -189,7 +250,7 @@ function ForestMap({ character, onExit }) {
         cancelAnimationFrame(moveAnimationId)
       }
     }
-  }, [keys, mapData, direction])
+  }, [keys, mapData, direction, collisionObjects])
 
   // 行走动画
   useEffect(() => {
