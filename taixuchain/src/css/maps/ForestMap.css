@@ -1,0 +1,129 @@
+.forest-map-container {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  background: #000;
+}
+
+.forest-map-canvas {
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  -ms-interpolation-mode: nearest-neighbor;
+}
+
+.forest-map-loading {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  color: white;
+  gap: 20px;
+}
+
+.loading-text {
+  font-size: 1.5rem;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.game-ui {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.character-info {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 15px 20px;
+  border-radius: 10px;
+  border: 2px solid #FFD700;
+  color: white;
+  font-family: 'Courier New', monospace;
+  pointer-events: auto;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin: 5px 0;
+  font-size: 0.9rem;
+}
+
+.info-label {
+  color: #FFD700;
+  font-weight: bold;
+}
+
+.info-value {
+  color: #FFF;
+}
+
+.controls-hint {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 15px 20px;
+  border-radius: 10px;
+  border: 2px solid #4169E1;
+  color: white;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.exit-map-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 12px 24px;
+  background: rgba(220, 20, 60, 0.9);
+  color: white;
+  border: 2px solid #FFF;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  pointer-events: auto;
+}
+
+.exit-map-button:hover {
+  background: rgba(220, 20, 60, 1);
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(220, 20, 60, 0.5);
+}
+
+.exit-button {
+  padding: 12px 24px;
+  background: #4169E1;
+  color: white;
+  border: 2px solid #FFF;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.exit-button:hover {
+  background: #5179F1;
+  transform: scale(1.05);
+}

@@ -6,6 +6,7 @@ import CharacterNaming from './components/CharacterNaming'
 import MapSelection from './components/MapSelection'
 import CharacterWithWeapon from './components/CharacterWithWeapon'
 import UIDDisplay from './components/UIDDisplay'
+import ForestMap from './components/maps/ForestMap'
 import { checkExistingPlayer } from './utils/suiClient'
 
 function App() {
@@ -84,6 +85,11 @@ function App() {
     console.log('Selected map:', mapId)
   }
 
+  const handleExitMap = () => {
+    setSelectedMap(null)
+    setGameStage('mapSelection')
+  }
+
   const handleBackToSelection = () => {
     setSelectedClass(null)
     setGameStage('selection')
@@ -144,66 +150,45 @@ function App() {
       )}
       
       {!isCheckingPlayer && gameStage === 'game' && finalCharacter && selectedMap && (
-        <div style={{ 
-          width: '100%', 
-          height: '100vh', 
-          display: 'flex', 
-          flexDirection: 'column',
-          alignItems: 'center', 
-          justifyContent: 'center',
-          background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
-          color: 'white',
-          gap: '30px'
-        }}>
-          <h1>Welcome, {finalCharacter.name}!</h1>
-          <h2>Map: {selectedMap}</h2>
-          
-          {finalCharacter.playerObjectId && (
+        <>
+          {selectedMap === 'forest' && (
+            <ForestMap character={finalCharacter} onExit={handleExitMap} />
+          )}
+          {selectedMap !== 'forest' && (
             <div style={{ 
-              background: 'rgba(0,0,0,0.3)', 
-              padding: '20px', 
-              borderRadius: '10px',
-              marginBottom: '20px'
+              width: '100%', 
+              height: '100vh', 
+              display: 'flex', 
+              flexDirection: 'column',
+              alignItems: 'center', 
+              justifyContent: 'center',
+              background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
+              color: 'white',
+              gap: '30px'
             }}>
-              <p style={{ fontSize: '0.9rem', opacity: 0.8 }}>
-                ✅ Character registered on blockchain
+              <h1>Welcome, {finalCharacter.name}!</h1>
+              <h2>Map: {selectedMap}</h2>
+              <p style={{ fontSize: '1rem', opacity: 0.7 }}>
+                🚧 This map is under construction...
               </p>
-              <p style={{ fontSize: '0.8rem', opacity: 0.6, wordBreak: 'break-all' }}>
-                Player ID: {finalCharacter.playerObjectId}
-              </p>
-              {finalCharacter.txDigest && (
-                <p style={{ fontSize: '0.8rem', opacity: 0.6, wordBreak: 'break-all' }}>
-                  Transaction Hash: {finalCharacter.txDigest}
-                </p>
-              )}
+              <button 
+                onClick={handleExitMap}
+                style={{
+                  padding: '12px 24px',
+                  background: '#4169E1',
+                  color: 'white',
+                  border: '2px solid #FFF',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  fontWeight: 'bold',
+                  cursor: 'pointer'
+                }}
+              >
+                ← Back to Map Selection
+              </button>
             </div>
           )}
-          
-          {/* Example: Character with weapon in game */}
-          <div style={{ display: 'flex', gap: '40px', alignItems: 'center' }}>
-            <div style={{ textAlign: 'center' }}>
-              <CharacterWithWeapon 
-                character={finalCharacter} 
-                weaponId={null}
-                size="medium"
-              />
-              <p style={{ fontSize: '1rem', marginTop: '10px' }}>No Weapon</p>
-            </div>
-            
-            <div style={{ textAlign: 'center' }}>
-              <CharacterWithWeapon 
-                character={finalCharacter} 
-                weaponId="sword_01"
-                size="medium"
-              />
-              <p style={{ fontSize: '1rem', marginTop: '10px' }}>With Sword</p>
-            </div>
-          </div>
-          
-          <p style={{ fontSize: '1rem', opacity: 0.7, marginTop: '20px' }}>
-            💡 Game in progress...
-          </p>
-        </div>
+        </>
       )}
       
       <UIDDisplay walletAddress={walletAddress} />
