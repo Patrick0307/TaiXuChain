@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import PixelCharacter from '../PixelCharacter'
+import MapUI from './MapUI'
+import MapCharacter from './MapCharacter'
 import '../../css/maps/ForestMap.css'
 
 function ForestMap({ character, onExit }) {
   const canvasRef = useRef(null)
-  const characterRef = useRef(null)
   const [mapData, setMapData] = useState(null)
   const [playerPos, setPlayerPos] = useState({ x: 800, y: 800 })
   const [keys, setKeys] = useState({})
@@ -534,109 +534,21 @@ function ForestMap({ character, onExit }) {
       }} />
       
       {/* 角色层 - 叠加在Canvas上 */}
-      <div 
-        style={{
-          position: 'absolute',
-          left: `${characterScreenPos.x + scaledWalkOffset.x}px`,
-          top: `${characterScreenPos.y + scaledWalkOffset.y}px`,
-          width: `${scaledPlayerSize}px`,
-          height: `${scaledPlayerSize}px`,
-          transform: direction === 'left' ? 'scaleX(-1)' : 'none',
-          transformOrigin: 'center',
-          pointerEvents: 'none',
-          zIndex: 100,
-          imageRendering: 'pixelated',
-          willChange: 'transform'
-        }}
-      >
-        <PixelCharacter 
-          classId={character.id}
-          gender={character.customization?.gender}
-          customization={character.customization}
-          scale={MAP_SCALE * 0.3125}
-        />
-        
-        {/* 角色名字 */}
-        <div style={{
-          position: 'absolute',
-          top: `${-12 * MAP_SCALE}px`,
-          left: '50%',
-          transform: `translateX(-50%) ${direction === 'left' ? 'scaleX(-1)' : ''}`,
-          background: 'rgba(0, 0, 0, 0.8)',
-          color: '#FFD700',
-          padding: `${1 * MAP_SCALE}px ${4 * MAP_SCALE}px`,
-          borderRadius: `${2 * MAP_SCALE}px`,
-          fontSize: `${8 * MAP_SCALE}px`,
-          fontWeight: 'bold',
-          whiteSpace: 'nowrap',
-          textShadow: '1px 1px 1px #000',
-          border: '1px solid rgba(255, 215, 0, 0.3)'
-        }}>
-          {character.name}
-        </div>
-        
-        {/* 等级徽章 */}
-        <div style={{
-          position: 'absolute',
-          top: `${1 * MAP_SCALE}px`,
-          right: `${1 * MAP_SCALE}px`,
-          width: `${10 * MAP_SCALE}px`,
-          height: `${10 * MAP_SCALE}px`,
-          background: '#FFD700',
-          border: `${1 * MAP_SCALE}px solid #000`,
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: `${6 * MAP_SCALE}px`,
-          fontWeight: 'bold',
-          color: '#000',
-          transform: direction === 'left' ? 'scaleX(-1)' : 'none',
-          boxShadow: '0 1px 2px rgba(0,0,0,0.5)'
-        }}>
-          {character.level || 1}
-        </div>
-        
-        {/* 阴影 */}
-        <div style={{
-          position: 'absolute',
-          bottom: `${1 * MAP_SCALE}px`,
-          left: '50%',
-          transform: `translateX(-50%) ${direction === 'left' ? 'scaleX(-1)' : ''}`,
-          width: `${scaledPlayerSize * 0.8}px`,
-          height: `${scaledPlayerSize * 0.25}px`,
-          background: 'radial-gradient(ellipse, rgba(0,0,0,0.5) 0%, transparent 70%)',
-          borderRadius: '50%'
-        }} />
-      </div>
+      <MapCharacter 
+        character={character}
+        screenPosition={characterScreenPos}
+        walkOffset={scaledWalkOffset}
+        direction={direction}
+        playerSize={scaledPlayerSize}
+        mapScale={MAP_SCALE}
+      />
       
-      <div className="game-ui">
-        <div className="character-info">
-          <div className="info-item">
-            <span className="info-label">⚔️ {character.name}</span>
-          </div>
-          <div className="info-item">
-            <span className="info-label">{character.class}</span>
-            <span className="info-value">Lv.{character.level || 1}</span>
-          </div>
-          <div className="info-item">
-            <span className="info-label">Position:</span>
-            <span className="info-value">
-              ({Math.floor(playerPos.x / TILE_SIZE)}, {Math.floor(playerPos.y / TILE_SIZE)})
-            </span>
-          </div>
-        </div>
-
-        <div className="controls-hint">
-          <div>🎮 Controls:</div>
-          <div>WASD or Arrow Keys to move</div>
-          <div>ESC to exit</div>
-        </div>
-
-        <button onClick={onExit} className="exit-map-button">
-          ← Exit Map
-        </button>
-      </div>
+      <MapUI 
+        character={character}
+        playerPos={playerPos}
+        tileSize={TILE_SIZE}
+        onExit={onExit}
+      />
     </div>
   )
 }

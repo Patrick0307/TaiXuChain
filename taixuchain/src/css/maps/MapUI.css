@@ -1,0 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+.game-ui {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  font-family: 'Press Start 2P', cursive;
+}
+
+/* 顶部栏 - 完全平行 */
+.top-bar {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  background: rgba(0, 0, 0, 0.75);
+  padding: 8px 15px;
+  border: 3px solid #8b7355;
+  box-shadow: 
+    0 0 0 1px #000,
+    inset 0 0 20px rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+}
+
+.character-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.info-item {
+  color: #ffd700;
+  font-size: 0.55rem;
+  text-shadow: 1px 1px 0 #000;
+  white-space: nowrap;
+}
+
+.info-separator {
+  color: #8b7355;
+  font-size: 0.55rem;
+  text-shadow: 1px 1px 0 #000;
+}
+
+/* 底部控制提示 */
+.controls-hint {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.75);
+  padding: 6px 12px;
+  border: 3px solid #8b7355;
+  box-shadow: 
+    0 0 0 1px #000,
+    inset 0 0 15px rgba(0, 0, 0, 0.5);
+  color: #ffd700;
+  font-size: 0.5rem;
+  text-shadow: 1px 1px 0 #000;
+  white-space: nowrap;
+}
+
+/* 退出按钮 - 在顶部栏内 */
+.exit-map-button {
+  padding: 8px 15px;
+  background: rgba(220, 20, 60, 0.9);
+  color: #fff;
+  border: 2px solid #8b7355;
+  font-size: 0.55rem;
+  cursor: pointer;
+  font-family: 'Press Start 2P', cursive;
+  box-shadow: 
+    0 0 0 1px #000,
+    inset 0 2px 0 rgba(255, 255, 255, 0.3);
+  text-shadow: 1px 1px 0 #000;
+  transition: all 0.1s;
+  white-space: nowrap;
+}
+
+.exit-map-button:hover {
+  background: rgba(238, 34, 68, 1);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 0 0 1px #000,
+    0 3px 0 rgba(0, 0, 0, 0.5),
+    inset 0 2px 0 rgba(255, 255, 255, 0.4);
+}
+
+.exit-map-button:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 0 0 1px #000,
+    inset 0 2px 0 rgba(0, 0, 0, 0.3);
+}
