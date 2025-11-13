@@ -31,48 +31,109 @@ function MapCharacter({
         scale={mapScale * 0.3125}
       />
       
-      {/* 角色名字和等级 */}
+      {/* 角色名字和等级 - 马赛克风格 */}
       <div style={{
         position: 'absolute',
-        top: `${-15 * mapScale}px`,
+        top: `${-18 * mapScale}px`,
         left: '50%',
         transform: `translateX(-50%) ${direction === 'left' ? 'scaleX(-1)' : ''}`,
         display: 'flex',
         alignItems: 'center',
-        gap: `${2 * mapScale}px`,
-        whiteSpace: 'nowrap'
+        gap: `${4 * mapScale}px`,
+        whiteSpace: 'nowrap',
+        imageRendering: 'pixelated'
       }}>
-        {/* 等级圆形徽章 */}
+        {/* 等级马赛克徽章 */}
         <div style={{
-          width: `${12 * mapScale}px`,
-          height: `${12 * mapScale}px`,
-          background: '#FFD700',
-          border: `${1 * mapScale}px solid #000`,
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: `${7 * mapScale}px`,
-          fontWeight: 'bold',
-          color: '#000',
-          boxShadow: '0 1px 2px rgba(0,0,0,0.5)',
+          position: 'relative',
+          width: `${14 * mapScale}px`,
+          height: `${14 * mapScale}px`,
           flexShrink: 0
         }}>
-          {character.level || 1}
+          {/* 外层像素边框 */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: '#000',
+            clipPath: 'polygon(0 2px, 2px 2px, 2px 0, calc(100% - 2px) 0, calc(100% - 2px) 2px, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 2px calc(100% - 2px), 0 calc(100% - 2px))',
+            imageRendering: 'pixelated'
+          }} />
+          {/* 金色背景 */}
+          <div style={{
+            position: 'absolute',
+            inset: `${2 * mapScale}px`,
+            background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+            imageRendering: 'pixelated'
+          }} />
+          {/* 高光效果 */}
+          <div style={{
+            position: 'absolute',
+            top: `${3 * mapScale}px`,
+            left: `${3 * mapScale}px`,
+            width: `${4 * mapScale}px`,
+            height: `${4 * mapScale}px`,
+            background: 'rgba(255, 255, 255, 0.5)',
+            imageRendering: 'pixelated'
+          }} />
+          {/* 等级数字 */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: `${8 * mapScale}px`,
+            fontWeight: 'bold',
+            color: '#000',
+            textShadow: '1px 1px 0 rgba(255,255,255,0.3)',
+            fontFamily: 'monospace',
+            imageRendering: 'pixelated'
+          }}>
+            {character.level || 1}
+          </div>
         </div>
         
-        {/* 名字 */}
+        {/* 名字马赛克框 */}
         <div style={{
-          background: 'rgba(0, 0, 0, 0.8)',
-          color: '#FFD700',
-          padding: `${2 * mapScale}px ${4 * mapScale}px`,
-          borderRadius: `${2 * mapScale}px`,
-          fontSize: `${8 * mapScale}px`,
-          fontWeight: 'bold',
-          textShadow: '1px 1px 1px #000',
-          border: '1px solid rgba(255, 215, 0, 0.3)'
+          position: 'relative',
+          imageRendering: 'pixelated'
         }}>
-          {character.name}
+          {/* 外层黑色像素边框 */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: '#000',
+            clipPath: 'polygon(0 2px, 2px 2px, 2px 0, calc(100% - 2px) 0, calc(100% - 2px) 2px, 100% 2px, 100% calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%, 2px calc(100% - 2px), 0 calc(100% - 2px))'
+          }} />
+          {/* 深色背景 */}
+          <div style={{
+            position: 'absolute',
+            inset: `${2 * mapScale}px`,
+            background: 'linear-gradient(180deg, #1a1a2e 0%, #0f0f1e 100%)',
+            imageRendering: 'pixelated'
+          }} />
+          {/* 金色内边框 */}
+          <div style={{
+            position: 'absolute',
+            inset: `${2 * mapScale}px`,
+            border: `${1 * mapScale}px solid #FFD700`,
+            boxShadow: `inset 0 0 ${2 * mapScale}px rgba(255, 215, 0, 0.3)`,
+            imageRendering: 'pixelated'
+          }} />
+          {/* 名字文本 */}
+          <div style={{
+            position: 'relative',
+            color: '#FFD700',
+            padding: `${3 * mapScale}px ${6 * mapScale}px`,
+            fontSize: `${8 * mapScale}px`,
+            fontWeight: 'bold',
+            textShadow: `${1 * mapScale}px ${1 * mapScale}px 0 #000, ${-1 * mapScale}px ${-1 * mapScale}px 0 rgba(255,215,0,0.3)`,
+            fontFamily: 'monospace',
+            letterSpacing: `${1 * mapScale}px`,
+            imageRendering: 'pixelated'
+          }}>
+            {character.name}
+          </div>
         </div>
       </div>
       
