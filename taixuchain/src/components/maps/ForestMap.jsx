@@ -7,7 +7,7 @@ function ForestMap({ character, onExit }) {
   const canvasRef = useRef(null)
   const [mapData, setMapData] = useState(null)
   const [playerPos, setPlayerPos] = useState({ x: 800, y: 800 })
-  const [keys, setKeys] = useState({})
+  const keysRef = useRef({}) // 改用 ref 存储键盘状态
   const [isLoading, setIsLoading] = useState(true)
   const [tileImages, setTileImages] = useState({})
   const [loadingProgress, setLoadingProgress] = useState(0)
@@ -17,10 +17,13 @@ function ForestMap({ character, onExit }) {
   const [collisionObjects, setCollisionObjects] = useState([]) // 碰撞区域
   const animationFrameRef = useRef(null)
   const walkAnimationRef = useRef(null)
+  const playerPosRef = useRef({ x: 800, y: 800 }) // 用 ref 存储实时位置
+  const directionRef = useRef('down') // 用 ref 存储实时朝向
+  const isMovingRef = useRef(false) // 用 ref 存储实时移动状态
 
   const TILE_SIZE = 32
   const PLAYER_SIZE = 10  // 非常小的角色
-  const MOVE_SPEED = 3  // 固定速度
+  const MOVE_SPEED = 1.5  // 固定速度（降低移动速度）
   const MAP_SCALE = 2.5  // 放大地图2.5倍
 
   // 碰撞检测函数 - 检查角色是否与碰撞区域重叠
@@ -139,18 +142,20 @@ function ForestMap({ character, onExit }) {
       })
   }, [])
 
-  // 键盘控制
+  // 键盘控制 - 优化版，避免重复触发
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         onExit()
         return
       }
-      setKeys(prev => ({ ...prev, [e.key]: true }))
+      // 防止按键重复触发
+      if (e.repeat) return
+      keysRef.current[e.key] = true
     }
 
     const handleKeyUp = (e) => {
-      setKeys(prev => ({ ...prev, [e.key]: false }))
+      keysRef.current[e.key] = false
     }
 
     window.addEventListener('keydown', handleKeyDown)
@@ -173,72 +178,81 @@ function ForestMap({ character, onExit }) {
       const deltaTime = (currentTime - lastTime) / 16.67 // 标准化到60fps
       lastTime = currentTime
 
+      const keys = keysRef.current
       let moving = false
-      let newDirection = direction
+      let newDirection = directionRef.current
 
-      setPlayerPos(prev => {
-        let newX = prev.x
-        let newY = prev.y
+      let newX = playerPosRef.current.x
+      let newY = playerPosRef.current.y
 
-        const speed = MOVE_SPEED * deltaTime
+      const speed = MOVE_SPEED * deltaTime
 
-        // 尝试移动
-        let attemptX = newX
-        let attemptY = newY
+      // 尝试移动
+      let attemptX = newX
+      let attemptY = newY
 
-        if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
-          attemptX -= speed
-          newDirection = 'left'
-          moving = true
-        }
-        if (keys['ArrowRight'] || keys['d'] || keys['D']) {
-          attemptX += speed
-          newDirection = 'right'
-          moving = true
-        }
-        if (keys['ArrowUp'] || keys['w'] || keys['W']) {
-          attemptY -= speed
-          newDirection = 'up'
-          moving = true
-        }
-        if (keys['ArrowDown'] || keys['s'] || keys['S']) {
-          attemptY += speed
-          newDirection = 'down'
-          moving = true
-        }
-
-        // 边界检查
-        const maxX = mapData.width * TILE_SIZE - PLAYER_SIZE
-        const maxY = mapData.height * TILE_SIZE - PLAYER_SIZE
-        attemptX = Math.max(0, Math.min(attemptX, maxX))
-        attemptY = Math.max(0, Math.min(attemptY, maxY))
-
-        // 碰撞检测 - 只有在没有碰撞时才更新位置
-        if (!checkCollision(attemptX, attemptY, PLAYER_SIZE, PLAYER_SIZE)) {
-          newX = attemptX
-          newY = attemptY
-        } else {
-          // 如果发生碰撞，尝试滑动（只在一个轴上移动）
-          // 尝试只在X轴移动
-          if (!checkCollision(attemptX, prev.y, PLAYER_SIZE, PLAYER_SIZE)) {
-            newX = attemptX
-          }
-          // 尝试只在Y轴移动
-          if (!checkCollision(prev.x, attemptY, PLAYER_SIZE, PLAYER_SIZE)) {
-            newY = attemptY
-          }
-        }
-
-        return { x: newX, y: newY }
-      })
-
-      // 更新朝向
-      if (newDirection !== direction) {
-        setDirection(newDirection)
+      if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
+        attemptX -= speed
+        newDirection = 'left'
+        moving = true
+      }
+      if (keys['ArrowRight'] || keys['d'] || keys['D']) {
+        attemptX += speed
+        newDirection = 'right'
+        moving = true
+      }
+      if (keys['ArrowUp'] || keys['w'] || keys['W']) {
+        attemptY -= speed
+        newDirection = 'up'
+        moving = true
+      }
+      if (keys['ArrowDown'] || keys['s'] || keys['S']) {
+        attemptY += speed
+        newDirection = 'down'
+        moving = true
       }
 
-      // 更新移动状态
-      setIsMoving(moving)
+      // 边界检查
+      const maxX = mapData.width * TILE_SIZE - PLAYER_SIZE
+      const maxY = mapData.height * TILE_SIZE - PLAYER_SIZE
+      attemptX = Math.max(0, Math.min(attemptX, maxX))
+      attemptY = Math.max(0, Math.min(attemptY, maxY))
+
+      // 碰撞检测 - 只有在没有碰撞时才更新位置
+      if (!checkCollision(attemptX, attemptY, PLAYER_SIZE, PLAYER_SIZE)) {
+        newX = attemptX
+        newY = attemptY
+      } else {
+        // 如果发生碰撞，尝试滑动（只在一个轴上移动）
+        // 尝试只在X轴移动
+        if (!checkCollision(attemptX, playerPosRef.current.y, PLAYER_SIZE, PLAYER_SIZE)) {
+          newX = attemptX
+        }
+        // 尝试只在Y轴移动
+        if (!checkCollision(playerPosRef.current.x, attemptY, PLAYER_SIZE, PLAYER_SIZE)) {
+          newY = attemptY
+        }
+      }
+
+      // 更新 ref 和 state（每帧都更新以保持流畅）
+      const posChanged = newX !== playerPosRef.current.x || newY !== playerPosRef.current.y
+      const dirChanged = newDirection !== directionRef.current
+      const movingChanged = moving !== isMovingRef.current
+
+      playerPosRef.current = { x: newX, y: newY }
+      directionRef.current = newDirection
+      isMovingRef.current = moving
+
+      // 只在实际变化时更新 state
+      if (posChanged) {
+        setPlayerPos({ x: newX, y: newY })
+      }
+      if (dirChanged) {
+        setDirection(newDirection)
+      }
+      if (movingChanged) {
+        setIsMoving(moving)
+      }
 
       moveAnimationId = requestAnimationFrame(moveLoop)
     }
@@ -250,7 +264,7 @@ function ForestMap({ character, onExit }) {
         cancelAnimationFrame(moveAnimationId)
       }
     }
-  }, [keys, mapData, direction, collisionObjects])
+  }, [mapData, collisionObjects])
 
   // 行走动画
   useEffect(() => {
@@ -272,7 +286,7 @@ function ForestMap({ character, onExit }) {
     }
   }, [isMoving])
 
-  // 渲染地图（智能相机跟随）
+  // 渲染地图（智能相机跟随）- 优化版，使用 ref 避免重新创建
   useEffect(() => {
     if (!mapData || !canvasRef.current || isLoading) return
 
@@ -289,11 +303,14 @@ function ForestMap({ character, onExit }) {
     const render = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
+      // 使用 ref 中的位置，避免依赖 state
+      const currentPos = playerPosRef.current
+
       // 计算地图实际大小（放大后）
       const scaledMapWidth = mapData.width * TILE_SIZE * MAP_SCALE
       const scaledMapHeight = mapData.height * TILE_SIZE * MAP_SCALE
-      const scaledPlayerX = playerPos.x * MAP_SCALE
-      const scaledPlayerY = playerPos.y * MAP_SCALE
+      const scaledPlayerX = currentPos.x * MAP_SCALE
+      const scaledPlayerY = currentPos.y * MAP_SCALE
 
       // 智能相机：尝试让角色居中，但不显示地图外区域
       let cameraX = scaledPlayerX - canvas.width / 2 + (PLAYER_SIZE * MAP_SCALE) / 2
@@ -332,7 +349,7 @@ function ForestMap({ character, onExit }) {
       }
       window.removeEventListener('resize', handleResize)
     }
-  }, [mapData, playerPos, isLoading, tileImages])
+  }, [mapData, isLoading, tileImages])
 
   const renderTileLayer = (ctx, layer, cameraX, cameraY) => {
     if (!layer.data) return
