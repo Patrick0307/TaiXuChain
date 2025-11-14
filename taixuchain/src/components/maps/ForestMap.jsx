@@ -6,18 +6,20 @@ import '../../css/maps/ForestMap.css'
 function ForestMap({ character, onExit }) {
   const canvasRef = useRef(null)
   const [mapData, setMapData] = useState(null)
-  const [playerPos, setPlayerPos] = useState({ x: 800, y: 800 })
+  const [playerPos, setPlayerPos] = useState(null) // 初始为null，等待地图加载后计算
   const keysRef = useRef({}) // 改用 ref 存储键盘状态
   const [isLoading, setIsLoading] = useState(true)
   const [tileImages, setTileImages] = useState({})
   const [loadingProgress, setLoadingProgress] = useState(0)
+  const [showTeleportEffect, setShowTeleportEffect] = useState(false) // 传送特效
+  const [teleportProgress, setTeleportProgress] = useState(0) // 传送进度 0-1
   const [direction, setDirection] = useState('down') // 角色朝向
   const [isMoving, setIsMoving] = useState(false) // 是否在移动
   const [walkFrame, setWalkFrame] = useState(0) // 行走动画帧
   const [collisionObjects, setCollisionObjects] = useState([]) // 碰撞区域
   const animationFrameRef = useRef(null)
   const walkAnimationRef = useRef(null)
-  const playerPosRef = useRef({ x: 800, y: 800 }) // 用 ref 存储实时位置
+  const playerPosRef = useRef(null) // 用 ref 存储实时位置，初始为null
   const directionRef = useRef('down') // 用 ref 存储实时朝向
   const isMovingRef = useRef(false) // 用 ref 存储实时移动状态
 
@@ -49,6 +51,19 @@ function ForestMap({ character, onExit }) {
       .then(data => {
         console.log('Map loaded:', data)
         setMapData(data)
+        
+        // 计算地图中心位置并设置角色初始位置
+        const centerX = (data.width * TILE_SIZE) / 2
+        const centerY = (data.height * TILE_SIZE) / 2
+        console.log(`Setting player to map center: (${centerX}, ${centerY})`)
+        
+        // 立即设置 ref，确保第一帧就有正确位置
+        const initialPos = { x: centerX, y: centerY }
+        playerPosRef.current = initialPos
+        setPlayerPos(initialPos)
+        
+        // 启动传送特效
+        setShowTeleportEffect(true)
         
         // 提取碰撞对象
         const collisionLayer = data.layers.find(layer => layer.name === 'collision')
@@ -169,7 +184,7 @@ function ForestMap({ character, onExit }) {
 
   // 移动角色和行走动画（使用RAF确保流畅）
   useEffect(() => {
-    if (!mapData) return
+    if (!mapData || !playerPosRef.current) return // 等待地图和初始位置都加载完成
 
     let lastTime = performance.now()
     let moveAnimationId
@@ -286,9 +301,35 @@ function ForestMap({ character, onExit }) {
     }
   }, [isMoving])
 
+  // 传送特效动画
+  useEffect(() => {
+    if (!showTeleportEffect) return
+
+    const duration = 1500 // 1.5秒传送动画
+    const startTime = Date.now()
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      
+      setTeleportProgress(progress)
+
+      if (progress < 1) {
+        requestAnimationFrame(animate)
+      } else {
+        // 动画结束，隐藏特效
+        setTimeout(() => {
+          setShowTeleportEffect(false)
+        }, 200)
+      }
+    }
+
+    requestAnimationFrame(animate)
+  }, [showTeleportEffect])
+
   // 渲染地图（智能相机跟随）- 优化版，使用 ref 避免重新创建
   useEffect(() => {
-    if (!mapData || !canvasRef.current || isLoading) return
+    if (!mapData || !canvasRef.current || isLoading || !playerPosRef.current) return
 
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
@@ -305,6 +346,7 @@ function ForestMap({ character, onExit }) {
 
       // 使用 ref 中的位置，避免依赖 state
       const currentPos = playerPosRef.current
+      if (!currentPos) return // 额外的安全检查
 
       // 计算地图实际大小（放大后）
       const scaledMapWidth = mapData.width * TILE_SIZE * MAP_SCALE
@@ -494,13 +536,13 @@ function ForestMap({ character, onExit }) {
 
   // 计算角色在屏幕上的位置（优化版）
   const getCharacterScreenPosition = () => {
-    if (!canvasRef.current || !mapData) return { x: 0, y: 0 }
+    if (!canvasRef.current || !mapData || !playerPosRef.current) return { x: 0, y: 0 }
     
     const canvas = canvasRef.current
     const scaledMapWidth = mapData.width * TILE_SIZE * MAP_SCALE
     const scaledMapHeight = mapData.height * TILE_SIZE * MAP_SCALE
-    const scaledPlayerX = Math.round(playerPos.x * MAP_SCALE)
-    const scaledPlayerY = Math.round(playerPos.y * MAP_SCALE)
+    const scaledPlayerX = Math.round(playerPosRef.current.x * MAP_SCALE)
+    const scaledPlayerY = Math.round(playerPosRef.current.y * MAP_SCALE)
     const scaledPlayerSize = PLAYER_SIZE * MAP_SCALE
 
     // 计算理想相机位置（角色居中）
@@ -523,6 +565,30 @@ function ForestMap({ character, onExit }) {
       x: Math.round(scaledPlayerX - cameraX),
       y: Math.round(scaledPlayerY - cameraY)
     }
+  }
+
+  // 如果角色位置还未初始化，显示加载中（但不阻止canvas渲染）
+  if (!playerPos) {
+    // 返回容器但不显示角色，让canvas先渲染
+    return (
+      <div className="forest-map-container" style={{ 
+        width: '100vw', 
+        height: '100vh', 
+        overflow: 'hidden',
+        position: 'relative',
+        background: '#000'
+      }}>
+        <canvas ref={canvasRef} className="forest-map-canvas" style={{
+          display: 'block',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          imageRendering: 'pixelated',
+          imageRendering: '-moz-crisp-edges',
+          imageRendering: 'crisp-edges'
+        }} />
+      </div>
+    )
   }
 
   const characterScreenPos = getCharacterScreenPosition()
@@ -550,15 +616,186 @@ function ForestMap({ character, onExit }) {
         imageRendering: 'crisp-edges'
       }} />
       
-      {/* 角色层 - 叠加在Canvas上 */}
-      <MapCharacter 
-        character={character}
-        screenPosition={characterScreenPos}
-        walkOffset={scaledWalkOffset}
-        direction={direction}
-        playerSize={scaledPlayerSize}
-        mapScale={MAP_SCALE}
-      />
+      {/* 炫酷传送门特效 */}
+      {showTeleportEffect && (
+        <div style={{
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          pointerEvents: 'none',
+          zIndex: 1000,
+          width: '300px',
+          height: '300px'
+        }}>
+          {/* 外层旋转能量环 - 顺时针 */}
+          <div style={{
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            width: `${200 * (teleportProgress < 0.5 ? teleportProgress * 2 : 2 - teleportProgress * 2)}px`,
+            height: `${200 * (teleportProgress < 0.5 ? teleportProgress * 2 : 2 - teleportProgress * 2)}px`,
+            transform: `translate(-50%, -50%) rotate(${teleportProgress * 720}deg)`,
+            borderRadius: '50%',
+            border: '3px solid transparent',
+            borderTopColor: 'rgba(0, 255, 255, 0.8)',
+            borderRightColor: 'rgba(100, 200, 255, 0.6)',
+            boxShadow: '0 0 30px rgba(0, 255, 255, 0.6), inset 0 0 30px rgba(0, 255, 255, 0.3)',
+            opacity: teleportProgress < 0.5 ? teleportProgress * 2 : 2 - teleportProgress * 2
+          }} />
+          
+          {/* 中层旋转能量环 - 逆时针 */}
+          <div style={{
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            width: `${150 * (teleportProgress < 0.5 ? teleportProgress * 2 : 2 - teleportProgress * 2)}px`,
+            height: `${150 * (teleportProgress < 0.5 ? teleportProgress * 2 : 2 - teleportProgress * 2)}px`,
+            transform: `translate(-50%, -50%) rotate(${-teleportProgress * 900}deg)`,
+            borderRadius: '50%',
+            border: '2px solid transparent',
+            borderLeftColor: 'rgba(255, 0, 255, 0.8)',
+            borderBottomColor: 'rgba(200, 100, 255, 0.6)',
+            boxShadow: '0 0 25px rgba(255, 0, 255, 0.5), inset 0 0 25px rgba(255, 0, 255, 0.3)',
+            opacity: teleportProgress < 0.5 ? teleportProgress * 2 : 2 - teleportProgress * 2
+          }} />
+          
+          {/* 内层快速旋转环 */}
+          <div style={{
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            width: `${100 * (teleportProgress < 0.5 ? teleportProgress * 2 : 2 - teleportProgress * 2)}px`,
+            height: `${100 * (teleportProgress < 0.5 ? teleportProgress * 2 : 2 - teleportProgress * 2)}px`,
+            transform: `translate(-50%, -50%) rotate(${teleportProgress * 1440}deg)`,
+            borderRadius: '50%',
+            border: '2px solid transparent',
+            borderTopColor: 'rgba(255, 255, 0, 0.9)',
+            borderRightColor: 'rgba(255, 200, 0, 0.7)',
+            boxShadow: '0 0 20px rgba(255, 255, 0, 0.7)',
+            opacity: teleportProgress < 0.5 ? teleportProgress * 2 : 2 - teleportProgress * 2
+          }} />
+          
+          {/* 能量闪电效果 - 多条 */}
+          {[...Array(12)].map((_, i) => {
+            const angle = (i * 30 + teleportProgress * 360) % 360
+            const length = 60 + Math.sin(teleportProgress * Math.PI * 4 + i) * 20
+            return (
+              <div key={`lightning-${i}`} style={{
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                width: '2px',
+                height: `${length}px`,
+                background: `linear-gradient(to bottom, 
+                  rgba(100, 200, 255, ${0.9 * (teleportProgress < 0.5 ? teleportProgress * 2 : 2 - teleportProgress * 2)}) 0%, 
+                  transparent 100%)`,
+                transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(-50%)`,
+                boxShadow: `0 0 8px rgba(100, 200, 255, 0.8)`,
+                opacity: Math.sin(teleportProgress * Math.PI * 2 + i * 0.5) * 0.5 + 0.5
+              }} />
+            )
+          })}
+          
+          {/* 螺旋粒子流 */}
+          {[...Array(20)].map((_, i) => {
+            const spiralProgress = (teleportProgress + i * 0.05) % 1
+            const radius = 80 * (1 - spiralProgress)
+            const angle = spiralProgress * 720 + i * 18
+            const x = Math.cos(angle * Math.PI / 180) * radius
+            const y = Math.sin(angle * Math.PI / 180) * radius
+            return (
+              <div key={`particle-${i}`} style={{
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                background: `rgba(${100 + spiralProgress * 155}, ${200 - spiralProgress * 100}, 255, ${1 - spiralProgress})`,
+                transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
+                boxShadow: `0 0 10px rgba(100, 200, 255, ${1 - spiralProgress})`,
+                opacity: 1 - spiralProgress
+              }} />
+            )
+          })}
+          
+          {/* 中心传送门核心 */}
+          <div style={{
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            width: `${80 * (teleportProgress < 0.5 ? teleportProgress * 2 : 2 - teleportProgress * 2)}px`,
+            height: `${80 * (teleportProgress < 0.5 ? teleportProgress * 2 : 2 - teleportProgress * 2)}px`,
+            transform: 'translate(-50%, -50%)',
+            borderRadius: '50%',
+            background: `radial-gradient(circle, 
+              rgba(255, 255, 255, ${0.9 * (teleportProgress < 0.5 ? teleportProgress * 2 : 2 - teleportProgress * 2)}) 0%, 
+              rgba(150, 220, 255, ${0.6 * (teleportProgress < 0.5 ? teleportProgress * 2 : 2 - teleportProgress * 2)}) 30%, 
+              rgba(100, 150, 255, ${0.3 * (teleportProgress < 0.5 ? teleportProgress * 2 : 2 - teleportProgress * 2)}) 60%, 
+              transparent 100%)`,
+            boxShadow: `
+              0 0 40px rgba(150, 220, 255, ${0.8 * (teleportProgress < 0.5 ? teleportProgress * 2 : 2 - teleportProgress * 2)}),
+              0 0 80px rgba(100, 200, 255, ${0.6 * (teleportProgress < 0.5 ? teleportProgress * 2 : 2 - teleportProgress * 2)}),
+              inset 0 0 40px rgba(255, 255, 255, ${0.4 * (teleportProgress < 0.5 ? teleportProgress * 2 : 2 - teleportProgress * 2)})
+            `
+          }} />
+          
+          {/* 外围能量波纹 */}
+          {[...Array(3)].map((_, i) => {
+            const waveProgress = (teleportProgress * 2 + i * 0.33) % 1
+            return (
+              <div key={`wave-${i}`} style={{
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                width: `${250 * waveProgress}px`,
+                height: `${250 * waveProgress}px`,
+                transform: 'translate(-50%, -50%)',
+                borderRadius: '50%',
+                border: `${3 * (1 - waveProgress)}px solid rgba(100, 200, 255, ${(1 - waveProgress) * 0.6})`,
+                opacity: 1 - waveProgress
+              }} />
+            )
+          })}
+          
+          {/* 六芒星魔法阵 */}
+          <div style={{
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            width: '180px',
+            height: '180px',
+            transform: `translate(-50%, -50%) rotate(${teleportProgress * 360}deg)`,
+            opacity: teleportProgress < 0.5 ? teleportProgress * 2 : 2 - teleportProgress * 2
+          }}>
+            {[...Array(6)].map((_, i) => (
+              <div key={`star-${i}`} style={{
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                width: '2px',
+                height: '90px',
+                background: 'linear-gradient(to bottom, rgba(255, 200, 100, 0.6) 0%, transparent 100%)',
+                transform: `translate(-50%, -50%) rotate(${i * 60}deg)`,
+                boxShadow: '0 0 5px rgba(255, 200, 100, 0.8)'
+              }} />
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {/* 角色层 - 叠加在Canvas上，传送特效结束后才显示 */}
+      {!showTeleportEffect && (
+        <MapCharacter 
+          character={character}
+          screenPosition={characterScreenPos}
+          walkOffset={scaledWalkOffset}
+          direction={direction}
+          playerSize={scaledPlayerSize}
+          mapScale={MAP_SCALE}
+        />
+      )}
       
       <MapUI 
         character={character}
