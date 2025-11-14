@@ -206,25 +206,43 @@ function ForestMap({ character, onExit }) {
       let attemptX = newX
       let attemptY = newY
 
-      if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
+      // 检测按键状态
+      const isLeft = keys['ArrowLeft'] || keys['a'] || keys['A']
+      const isRight = keys['ArrowRight'] || keys['d'] || keys['D']
+      const isUp = keys['ArrowUp'] || keys['w'] || keys['W']
+      const isDown = keys['ArrowDown'] || keys['s'] || keys['S']
+
+      // 移动处理
+      if (isLeft) {
         attemptX -= speed
-        newDirection = 'left'
         moving = true
       }
-      if (keys['ArrowRight'] || keys['d'] || keys['D']) {
+      if (isRight) {
         attemptX += speed
-        newDirection = 'right'
         moving = true
       }
-      if (keys['ArrowUp'] || keys['w'] || keys['W']) {
+      if (isUp) {
         attemptY -= speed
-        newDirection = 'up'
         moving = true
       }
-      if (keys['ArrowDown'] || keys['s'] || keys['S']) {
+      if (isDown) {
         attemptY += speed
-        newDirection = 'down'
         moving = true
+      }
+
+      // 朝向判断 - 对角线移动时优先显示水平方向
+      if (isLeft && (isUp || isDown)) {
+        newDirection = 'left'  // 左上或左下时，脸朝左
+      } else if (isRight && (isUp || isDown)) {
+        newDirection = 'right'  // 右上或右下时，脸朝右
+      } else if (isLeft) {
+        newDirection = 'left'
+      } else if (isRight) {
+        newDirection = 'right'
+      } else if (isUp) {
+        newDirection = 'up'
+      } else if (isDown) {
+        newDirection = 'down'
       }
 
       // 边界检查
