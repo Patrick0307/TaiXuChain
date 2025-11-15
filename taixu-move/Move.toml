@@ -2,7 +2,7 @@
 name = "LingStone"
 version = "0.0.1"
 edition = "2024.beta"
-published-at = "0xc5128ab446ccd272f15db6d21f718ff4c2811019ade9dd00a77c6c2cf4c35bb4"
+published-at = "0xd76413d54375a484fc09392862d79c9f7504d715eddbf33989c8536bb0fb746a"
 
 [dependencies]
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet" }

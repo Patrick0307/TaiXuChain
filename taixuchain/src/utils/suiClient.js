@@ -4,9 +4,11 @@ import { Transaction } from '@mysten/sui/transactions'
 // 初始化 Sui 客户端 - 使用 OneChain Testnet
 export const suiClient = new SuiClient({ url: 'https://rpc-testnet.onelabs.cc:443' })
 
-// 从环境变量或配置文件读取
-export const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID || '0xc5128ab446ccd272f15db6d21f718ff4c2811019ade9dd00a77c6c2cf4c35bb4'
-export const REGISTRY_ID = import.meta.env.VITE_REGISTRY_ID || '0x227dda9102298b94a3365245bfd8c56cac0e9886dfd720c01a044c586e841efa'
+// 从环境变量或配置文件读取 (V5 - 2025-11-15)
+export const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID || '0xd76413d54375a484fc09392862d79c9f7504d715eddbf33989c8536bb0fb746a'
+export const REGISTRY_ID = import.meta.env.VITE_REGISTRY_ID || '0xb4dcbe07dfe3abe24adcbe56be5103a6402938637d1db27d8353e6f035e5170a'
+export const MARKETPLACE_ID = import.meta.env.VITE_MARKETPLACE_ID || '0x1afd075d58fb6e73695f8b4b5bd5b9d6bf8124f57eaaa3ace145ecf3e893a4e9'
+export const WEAPON_MINT_CAP = import.meta.env.VITE_WEAPON_MINT_CAP || '0x38d61a3c4ba62739f2c40c5769adaef3770b4ee8e6a2abe284cb0724452afc92'
 
 // 职业映射
 export const CLASS_MAP = {

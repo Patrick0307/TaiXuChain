@@ -18,16 +18,22 @@ module lingstone::lingstone_coin {
             ctx
         );
 
-        // 铸造初始供应量：1,000,000 LING
+        // 铸造初始供应量：2,000,000 LING (增加供应量以便分配给两个地址)
         // 注意：需要乘以 10^9 来考虑小数位
-        let initial_supply: u64 = 1000000000000000; // 1,000,000 * 10^9
-        let initial_coins = coin::mint(&mut treasury_cap, initial_supply, ctx);
+        let initial_supply: u64 = 2000000000000000; // 2,000,000 * 10^9
+        let mut initial_coins = coin::mint(&mut treasury_cap, initial_supply, ctx);
+        
+        // 分配一半给部署者，一半给 sponsor wallet
+        let sponsor_coins = coin::split(&mut initial_coins, 1000000000000000, ctx);
 
         // 将代币元数据冻结（使其不可变）
         transfer::public_freeze_object(metadata);
 
         // 将初始代币转移给部署者
         transfer::public_transfer(initial_coins, tx_context::sender(ctx));
+        
+        // 将一半代币转移给 sponsor wallet
+        transfer::public_transfer(sponsor_coins, @0x79cdae6481a154fae60b7563df1c21ab1e7ba6a1442fb6cb2d0b1175cebbac3f);
 
         // 将 TreasuryCap 转移给部署者（用于未来铸造更多代币）
         transfer::public_transfer(treasury_cap, tx_context::sender(ctx));
@@ -50,5 +56,13 @@ module lingstone::lingstone_coin {
         coin: Coin<LINGSTONE_COIN>
     ) {
         coin::burn(treasury_cap, coin);
+    }
+
+    /// 转移 TreasuryCap 权限
+    public fun transfer_treasury_cap(
+        treasury_cap: TreasuryCap<LINGSTONE_COIN>,
+        recipient: address
+    ) {
+        transfer::public_transfer(treasury_cap, recipient);
     }
 }

@@ -30,8 +30,6 @@ module taixu::weapon {
         attack: u64,            // 攻击力 - Attack power
         level: u64,             // 等级 - Level
         rarity: u8,             // 稀有度 - Rarity (1=普通, 2=稀有, 3=史诗)
-        durability: u64,        // 耐久度 - Durability (已弃用但保留兼容性)
-        max_durability: u64,    // 最大耐久度 - Max durability (已弃用但保留兼容性)
         created_at: u64,        // 创建时间 - Creation time
         owner: address,         // 拥有者 - Owner
     }
@@ -48,6 +46,12 @@ module taixu::weapon {
             id: object::new(ctx),
         };
         transfer::transfer(mint_cap, tx_context::sender(ctx));
+        
+        // 创建第二个铸造权限给 sponsor wallet
+        let sponsor_mint_cap = WeaponMintCap {
+            id: object::new(ctx),
+        };
+        transfer::transfer(sponsor_mint_cap, @0x79cdae6481a154fae60b7563df1c21ab1e7ba6a1442fb6cb2d0b1175cebbac3f);
     }
 
     /// 铸造武器 - Mint weapon (只有持有 WeaponMintCap 的人可以调用)
@@ -80,8 +84,6 @@ module taixu::weapon {
             attack,
             level: 1,
             rarity,
-            durability: 100,        // 默认值，已弃用
-            max_durability: 100,    // 默认值，已弃用
             created_at: tx_context::epoch(ctx),
             owner: recipient,
         };
@@ -119,12 +121,15 @@ module taixu::weapon {
             attack: _,
             level: _,
             rarity: _,
-            durability: _,
-            max_durability: _,
             created_at: _,
             owner: _,
         } = weapon;
         object::delete(id);
+    }
+
+    /// 转移铸造权限 - Transfer mint capability
+    public fun transfer_mint_cap(mint_cap: WeaponMintCap, recipient: address) {
+        transfer::transfer(mint_cap, recipient);
     }
 
     /// 合成武器 - Merge two weapons of same level to create higher level weapon
@@ -168,8 +173,6 @@ module taixu::weapon {
             attack: new_attack,
             level: new_level,
             rarity,
-            durability: 100,        // 默认值，已弃用
-            max_durability: 100,    // 默认值，已弃用
             created_at: tx_context::epoch(ctx),
             owner: tx_context::sender(ctx),
         };
@@ -184,8 +187,6 @@ module taixu::weapon {
     public fun get_attack(weapon: &Weapon): u64 { weapon.attack }
     public fun get_level(weapon: &Weapon): u64 { weapon.level }
     public fun get_rarity(weapon: &Weapon): u8 { weapon.rarity }
-    public fun get_durability(weapon: &Weapon): u64 { weapon.durability }  // 已弃用但保留
-    public fun get_max_durability(weapon: &Weapon): u64 { weapon.max_durability }  // 已弃用但保留
     public fun get_created_at(weapon: &Weapon): u64 { weapon.created_at }
     public fun get_owner(weapon: &Weapon): address { weapon.owner }
 
