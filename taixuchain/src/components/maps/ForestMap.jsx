@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import MapUI from './MapUI'
 import MapCharacter from './MapCharacter'
+import { checkPlayerWeapon, mintWeaponForPlayer } from '../../utils/suiClient'
 import '../../css/maps/ForestMap.css'
 
 function ForestMap({ character, onExit }) {
+  const [playerWeapon, setPlayerWeapon] = useState(null)
+  const [isCheckingWeapon, setIsCheckingWeapon] = useState(true)
   const canvasRef = useRef(null)
   const [mapData, setMapData] = useState(null)
   const [playerPos, setPlayerPos] = useState(null) // 初始为null，等待地图加载后计算
@@ -27,6 +30,120 @@ function ForestMap({ character, onExit }) {
   const PLAYER_SIZE = 10  // 非常小的角色
   const MOVE_SPEED = 1.5  // 固定速度（降低移动速度）
   const MAP_SCALE = 2.5  // 放大地图2.5倍
+
+  // 检查并赠送武器
+  useEffect(() => {
+    const checkAndGiveWeapon = async () => {
+      try {
+        setIsCheckingWeapon(true)
+        
+        // 获取玩家钱包地址
+        // 优先使用 window.currentWalletAddress（实际的玩家钱包）
+        const walletAddress = window.currentWalletAddress || character.owner
+        
+        console.log('Character object:', character)
+        console.log('window.currentWalletAddress:', window.currentWalletAddress)
+        console.log('Using wallet address:', walletAddress)
+        
+        if (!walletAddress) {
+          console.warn('No wallet address found')
+          setIsCheckingWeapon(false)
+          return
+        }
+
+        console.log('🔍 Checking if player has weapon...')
+        const weapon = await checkPlayerWeapon(walletAddress)
+        
+        // 职业到武器类型的映射
+        const classToWeaponType = {
+          'mage': 3,    // Staff
+          'warrior': 1, // Sword
+          'archer': 2   // Bow
+        }
+        
+        const expectedWeaponType = classToWeaponType[character.id.toLowerCase()]
+        
+        if (weapon) {
+          console.log('✅ Player already has weapon:', weapon.name, `(type: ${weapon.weaponType})`)
+          
+          // 检查武器类型是否匹配职业
+          if (weapon.weaponType === expectedWeaponType) {
+            console.log('✅ Weapon type matches character class')
+            setPlayerWeapon(weapon)
+          } else {
+            console.log(`⚠️ Weapon type mismatch! Expected type ${expectedWeaponType} for ${character.id}, but has type ${weapon.weaponType}`)
+            console.log('🎁 Minting correct weapon for this class...')
+            
+            // 继续铸造正确的武器
+            await mintCorrectWeapon()
+          }
+        } else {
+          await mintCorrectWeapon()
+        }
+        
+        async function mintCorrectWeapon() {
+          console.log('🎁 No weapon found, minting starter weapon...')
+          
+          // 职业名称到 ID 的映射
+          const classNameToId = {
+            'mage': 1,
+            'warrior': 2,
+            'archer': 3
+          }
+          
+          // 获取职业 ID（支持字符串和数字）
+          let classId = character.id
+          console.log(`Original character.id: "${character.id}", type: ${typeof character.id}`)
+          
+          if (typeof classId === 'string') {
+            const lowerCaseId = classId.toLowerCase()
+            console.log(`Lowercase: "${lowerCaseId}"`)
+            classId = classNameToId[lowerCaseId]
+            console.log(`Mapped classId: ${classId}`)
+            
+            if (!classId) {
+              console.error(`Unknown class name: "${character.id}", using default warrior (2)`)
+              classId = 2
+            }
+          }
+          
+          console.log(`Final - Character class: ${character.id}, classId: ${classId}`)
+          
+          // 根据职业铸造武器
+          await mintWeaponForPlayer(walletAddress, classId)
+          
+          // 等待区块链确认（2秒）
+          console.log('⏳ Waiting for blockchain confirmation...')
+          await new Promise(resolve => setTimeout(resolve, 2000))
+          
+          // 重新查询武器（最多重试3次）
+          let newWeapon = null
+          for (let i = 0; i < 3; i++) {
+            newWeapon = await checkPlayerWeapon(walletAddress)
+            if (newWeapon) {
+              console.log('✅ Starter weapon received:', newWeapon.name)
+              setPlayerWeapon(newWeapon)
+              break
+            }
+            if (i < 2) {
+              console.log(`⏳ Weapon not found yet, retrying... (${i + 1}/3)`)
+              await new Promise(resolve => setTimeout(resolve, 1500))
+            }
+          }
+          
+          if (!newWeapon) {
+            console.warn('⚠️ Weapon minted but not found in query. Please refresh the page.')
+          }
+        }
+      } catch (error) {
+        console.error('❌ Error checking/giving weapon:', error)
+      } finally {
+        setIsCheckingWeapon(false)
+      }
+    }
+
+    checkAndGiveWeapon()
+  }, [character])
 
   // 碰撞检测函数 - 检查角色是否与碰撞区域重叠
   const checkCollision = (x, y, width, height) => {
@@ -812,6 +929,7 @@ function ForestMap({ character, onExit }) {
           direction={direction}
           playerSize={scaledPlayerSize}
           mapScale={MAP_SCALE}
+          weapon={playerWeapon}
         />
       )}
       

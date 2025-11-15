@@ -132,3 +132,72 @@ export async function checkExistingPlayer(walletAddress) {
     throw error
   }
 }
+
+/**
+ * 查询玩家武器
+ * @param {string} walletAddress - 钱包地址
+ * @returns {Promise<object|null>} 武器信息或 null
+ */
+export async function checkPlayerWeapon(walletAddress) {
+  try {
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
+    
+    const response = await fetch(`${BACKEND_URL}/api/weapon/${walletAddress}`)
+    
+    if (!response.ok) {
+      throw new Error('Failed to check player weapon')
+    }
+
+    const data = await response.json()
+    
+    if (data.exists && data.weapon) {
+      console.log('✅ Player weapon found:', data.weapon)
+      return data.weapon
+    }
+    
+    console.log('ℹ️ No weapon found for this player')
+    return null
+  } catch (error) {
+    console.error('❌ Error checking player weapon:', error)
+    throw error
+  }
+}
+
+/**
+ * 赞助铸造武器（根据职业自动选择）
+ * @param {string} walletAddress - 钱包地址
+ * @param {number} classId - 职业 ID
+ * @returns {Promise<object>} 交易结果
+ */
+export async function mintWeaponForPlayer(walletAddress, classId) {
+  try {
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
+    
+    console.log('🗡️ Minting weapon with SPONSORED transaction...')
+    console.log('💰 Gas will be paid by game sponsor!')
+    
+    const response = await fetch(`${BACKEND_URL}/api/sponsor/mint-weapon`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        playerAddress: walletAddress,
+        classId,
+      }),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.error || 'Failed to mint weapon')
+    }
+
+    const data = await response.json()
+    console.log('✅ Weapon minted successfully!')
+    
+    return data.result
+  } catch (error) {
+    console.error('❌ Error minting weapon:', error)
+    throw error
+  }
+}

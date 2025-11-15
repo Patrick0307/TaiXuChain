@@ -34,8 +34,30 @@ try {
   process.exit(1);
 }
 
+// 武器部署钱包（拥有 WeaponMintCap）
+let weaponDeployKeypair;
+try {
+  const privateKeyHex = process.env.WEAPON_DEPLOY_PRIVATE_KEY;
+  if (!privateKeyHex) {
+    throw new Error('WEAPON_DEPLOY_PRIVATE_KEY not set in .env file');
+  }
+  
+  const cleanKey = privateKeyHex.startsWith('0x') 
+    ? privateKeyHex.slice(2) 
+    : privateKeyHex;
+  
+  weaponDeployKeypair = Ed25519Keypair.fromSecretKey(fromHex(cleanKey));
+  const weaponDeployAddress = weaponDeployKeypair.getPublicKey().toSuiAddress();
+  console.log(`✅ Weapon deploy wallet loaded: ${weaponDeployAddress}`);
+} catch (error) {
+  console.error('❌ Failed to load weapon deploy wallet:', error.message);
+  console.error('Please set WEAPON_DEPLOY_PRIVATE_KEY in .env file');
+  process.exit(1);
+}
+
 const PACKAGE_ID = process.env.PACKAGE_ID;
 const REGISTRY_ID = process.env.REGISTRY_ID;
+const WEAPON_MINT_CAP = process.env.WEAPON_MINT_CAP;
 
 /**
  * 赞助创建角色交易（完全赞助模式）
@@ -203,6 +225,162 @@ export async function getSponsorBalance() {
     };
   } catch (error) {
     console.error('Failed to get sponsor balance:', error);
+    throw error;
+  }
+}
+
+/**
+ * 查询玩家的武器
+ * @param {string} playerAddress - 玩家钱包地址
+ * @returns {Promise<object|null>} 武器信息或 null
+ */
+export async function getPlayerWeapon(playerAddress) {
+  try {
+    console.log(`[Query] Checking weapons for: ${playerAddress}`);
+    console.log(`[Query] Looking for weapon type: ${PACKAGE_ID}::weapon::Weapon`);
+    
+    // 查询该地址拥有的所有对象
+    const objects = await suiClient.getOwnedObjects({
+      owner: playerAddress,
+      options: {
+        showType: true,
+        showContent: true,
+      },
+    });
+    
+    console.log(`[Query] Total objects found: ${objects.data.length}`);
+    
+    // 打印所有对象类型以便调试
+    objects.data.forEach((obj, index) => {
+      console.log(`[Query] Object ${index}: ${obj.data?.type || 'no type'}`);
+    });
+    
+    // 查找 Weapon 类型的对象（排除 WeaponMintCap）
+    const weaponObject = objects.data.find(obj => {
+      const objType = obj.data?.type;
+      const isWeapon = objType && objType.includes('::weapon::Weapon') && !objType.includes('WeaponMintCap');
+      console.log(`[Query] Checking object ${obj.data?.objectId}: ${objType} -> isWeapon: ${isWeapon}`);
+      return isWeapon;
+    });
+    
+    if (!weaponObject) {
+      console.log(`[Query] No weapon found for ${playerAddress}`);
+      return null;
+    }
+    
+    console.log(`[Query] Weapon found!`, weaponObject.data.objectId);
+    console.log(`[Query] Weapon content:`, JSON.stringify(weaponObject.data.content, null, 2));
+    
+    // 返回武器信息
+    const content = weaponObject.data.content.fields;
+    
+    // 检查 content 是否存在
+    if (!content) {
+      console.error(`[Query] Weapon content is missing!`);
+      return null;
+    }
+    
+    return {
+      objectId: weaponObject.data.objectId,
+      name: content.name,
+      weaponType: parseInt(content.weapon_type),
+      attack: parseInt(content.attack),
+      level: parseInt(content.level),
+      rarity: parseInt(content.rarity),
+      owner: content.owner,
+    };
+  } catch (error) {
+    console.error('[Query] Error checking weapon:', error);
+    console.error('[Query] Error details:', error.message);
+    throw error;
+  }
+}
+
+/**
+ * 赞助铸造武器（根据职业自动选择武器类型）
+ * @param {string} playerAddress - 玩家钱包地址
+ * @param {number} classId - 职业 ID (1=Mage, 2=Warrior, 3=Archer)
+ */
+export async function sponsorMintWeapon(playerAddress, classId) {
+  try {
+    const weaponDeployAddress = weaponDeployKeypair.getPublicKey().toSuiAddress();
+    
+    // 根据职业确定武器类型
+    // 1=Mage -> Staff(3), 2=Warrior -> Sword(1), 3=Archer -> Bow(2)
+    const weaponTypeMap = {
+      1: 3, // Mage -> Staff
+      2: 1, // Warrior -> Sword
+      3: 2, // Archer -> Bow
+    };
+    
+    const weaponType = weaponTypeMap[classId];
+    if (!weaponType) {
+      throw new Error(`Invalid class ID: ${classId}`);
+    }
+    
+    const rarity = 1; // 普通品质
+    
+    console.log(`[Sponsor] Minting weapon for ${playerAddress}`);
+    console.log(`  Class: ${classId}, Weapon Type: ${weaponType}, Rarity: ${rarity}`);
+    console.log(`  Using weapon deploy wallet: ${weaponDeployAddress}`);
+    
+    // 获取 gas coins（使用武器部署钱包）
+    const allCoins = await suiClient.getAllCoins({
+      owner: weaponDeployAddress,
+    });
+    
+    let gasCoins = allCoins.data.filter(coin => 
+      coin.coinType === '0x2::sui::SUI' || 
+      coin.coinType === '0x2::oct::OCT' ||
+      coin.coinType.endsWith('::sui::SUI') ||
+      coin.coinType.endsWith('::oct::OCT')
+    );
+    
+    if (!gasCoins || gasCoins.length === 0) {
+      throw new Error('Weapon deploy wallet has no gas coins');
+    }
+    
+    console.log(`[Sponsor] Found ${gasCoins.length} gas coins`);
+    
+    // 创建交易（使用武器部署钱包作为 sender）
+    const tx = new Transaction();
+    tx.setSender(weaponDeployAddress);
+    
+    tx.setGasPayment(gasCoins.slice(0, 5).map(coin => ({
+      objectId: coin.coinObjectId,
+      version: coin.version,
+      digest: coin.digest,
+    })));
+    
+    // 调用 mint_weapon 函数
+    tx.moveCall({
+      target: `${PACKAGE_ID}::weapon::mint_weapon`,
+      arguments: [
+        tx.object(WEAPON_MINT_CAP),
+        tx.pure.u8(weaponType),
+        tx.pure.u8(rarity),
+        tx.pure.address(playerAddress),
+      ],
+    });
+    
+    console.log(`[Sponsor] Signing and executing weapon mint transaction...`);
+    
+    const result = await suiClient.signAndExecuteTransaction({
+      transaction: tx,
+      signer: weaponDeployKeypair,
+      options: {
+        showEffects: true,
+        showEvents: true,
+        showObjectChanges: true,
+      },
+    });
+    
+    console.log(`[Sponsor] ✅ Weapon minted successfully!`);
+    console.log(`  Digest: ${result.digest}`);
+    
+    return result;
+  } catch (error) {
+    console.error('[Sponsor] ❌ Weapon mint failed:', error);
     throw error;
   }
 }

@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { sponsorCreatePlayer, getPlayerByAddress } from './services/sponsorService.js';
+import { sponsorCreatePlayer, getPlayerByAddress, getPlayerWeapon, sponsorMintWeapon } from './services/sponsorService.js';
 
 dotenv.config();
 
@@ -74,6 +74,70 @@ app.post('/api/sponsor/create-player', async (req, res) => {
       success: true, 
       result,
       message: 'Player created successfully with sponsored gas'
+    });
+  } catch (error) {
+    console.error('[Sponsor] Error:', error);
+    res.status(500).json({ 
+      error: error.message,
+      details: error.toString()
+    });
+  }
+});
+
+// 查询玩家武器
+app.get('/api/weapon/:address', async (req, res) => {
+  try {
+    const { address } = req.params;
+
+    if (!address) {
+      return res.status(400).json({ 
+        error: 'Missing player address' 
+      });
+    }
+
+    console.log(`[Query] Checking weapon for address: ${address}`);
+
+    const weapon = await getPlayerWeapon(address);
+
+    if (!weapon) {
+      return res.json({ 
+        exists: false,
+        weapon: null
+      });
+    }
+
+    res.json({ 
+      exists: true,
+      weapon
+    });
+  } catch (error) {
+    console.error('[Query] Error:', error);
+    res.status(500).json({ 
+      error: error.message,
+      details: error.toString()
+    });
+  }
+});
+
+// 赞助铸造武器
+app.post('/api/sponsor/mint-weapon', async (req, res) => {
+  try {
+    const { playerAddress, classId } = req.body;
+
+    if (!playerAddress || !classId) {
+      return res.status(400).json({ 
+        error: 'Missing required fields: playerAddress, classId' 
+      });
+    }
+
+    console.log(`[Sponsor] Minting weapon for ${playerAddress}, class: ${classId}`);
+
+    const result = await sponsorMintWeapon(playerAddress, classId);
+
+    res.json({ 
+      success: true, 
+      result,
+      message: 'Weapon minted successfully with sponsored gas'
     });
   } catch (error) {
     console.error('[Sponsor] Error:', error);

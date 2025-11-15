@@ -1,13 +1,35 @@
 import PixelCharacter from '../PixelCharacter'
 
+// 武器名称到文件名的映射
+const WEAPON_IMAGE_MAP = {
+  // 剑 (Warrior)
+  'Iron Sword': '/weapons/swords/Iron Sword.png',
+  'Azure Edge Sword': '/weapons/swords/Azure Edge Sword.png',
+  'Dragon Roar Sword': '/weapons/swords/Dragon Roar Sword.png',
+  
+  // 弓 (Archer)
+  'Hunter Bow': '/weapons/bows/Hunter Bow.png',
+  'Swift Wind Bow': '/weapons/bows/Swift Wind Bow.png',
+  'Cloud Piercer Bow': '/weapons/bows/Cloud Piercer Bow.png',
+  
+  // 法杖 (Mage)
+  'Wooden Staff': '/weapons/staves/Wooden  Stave.png',
+  'Starlight Staff': '/weapons/staves/Starlight Stave.png',
+  'Primordial Staff': '/weapons/staves/Primordial Stave.png',
+}
+
 function MapCharacter({ 
   character, 
   screenPosition, 
   walkOffset, 
   direction, 
   playerSize, 
-  mapScale 
+  mapScale,
+  weapon 
 }) {
+  // 获取武器图片路径
+  const weaponImagePath = weapon ? WEAPON_IMAGE_MAP[weapon.name] : null
+  
   return (
     <div 
       style={{
@@ -30,6 +52,25 @@ function MapCharacter({
         customization={character.customization}
         scale={mapScale * 0.3125}
       />
+      
+      {/* 武器显示 */}
+      {weaponImagePath && (
+        <img 
+          src={weaponImagePath}
+          alt={weapon.name}
+          style={{
+            position: 'absolute',
+            width: `${playerSize * 1.2}px`,
+            height: `${playerSize * 1.2}px`,
+            left: direction === 'left' ? '60%' : '40%',
+            top: '50%',
+            transform: `translate(-50%, -50%) ${direction === 'left' ? 'scaleX(-1)' : ''}`,
+            imageRendering: 'pixelated',
+            pointerEvents: 'none',
+            zIndex: direction === 'left' ? -1 : 1,
+          }}
+        />
+      )}
       
       {/* 角色名字和等级 - 马赛克风格 */}
       <div style={{
