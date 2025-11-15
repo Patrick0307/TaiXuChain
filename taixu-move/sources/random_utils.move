@@ -38,17 +38,54 @@ module taixu::random_utils {
         // 随机武器类型 (1-3)
         let weapon_type = (random::generate_u8(&mut generator) % 3) + 1;
         
-        // 随机稀有度 (1-3)，概率：凡品60%，灵品30%，玄品10%
+        // 随机稀有度 (1-3)，概率：普通80%，稀有15%，史诗5%
         let rarity_roll = random::generate_u8(&mut generator) % 100;
-        let rarity = if (rarity_roll < 60) {
-            1  // 凡品 - Common (60%)
-        } else if (rarity_roll < 90) {
-            2  // 灵品 - Spirit (30%)
+        let rarity = if (rarity_roll < 80) {
+            1  // 普通 - Common (80%)
+        } else if (rarity_roll < 95) {
+            2  // 稀有 - Rare (15%)
         } else {
-            3  // 玄品 - Mystic (10%)
+            3  // 史诗 - Epic (5%)
         };
 
         // 铸造武器
+        weapon::mint_weapon(mint_cap, weapon_type, rarity, player, ctx);
+
+        // 发出事件
+        sui::event::emit(ChestOpenedEvent {
+            player,
+            weapon_type,
+            rarity,
+            timestamp: tx_context::epoch(ctx),
+        });
+    }
+
+    /// 打怪掉落武器 - Monster drop weapon
+    /// 打怪时有几率掉落武器，概率：普通80%，稀有15%，史诗5%
+    public fun monster_drop_weapon(
+        mint_cap: &WeaponMintCap,
+        r: &Random,
+        ctx: &mut TxContext
+    ) {
+        let player = tx_context::sender(ctx);
+        
+        // 生成随机数生成器
+        let mut generator = random::new_generator(r, ctx);
+        
+        // 随机武器类型 (1-3): 1=剑, 2=弓, 3=法杖
+        let weapon_type = (random::generate_u8(&mut generator) % 3) + 1;
+        
+        // 随机稀有度，概率：普通80%，稀有15%，史诗5%
+        let rarity_roll = random::generate_u8(&mut generator) % 100;
+        let rarity = if (rarity_roll < 80) {
+            1  // 普通品质 - Common (80%)
+        } else if (rarity_roll < 95) {
+            2  // 稀有品质 - Rare (15%)
+        } else {
+            3  // 史诗品质 - Epic (5%)
+        };
+
+        // 铸造武器并发送给玩家
         weapon::mint_weapon(mint_cap, weapon_type, rarity, player, ctx);
 
         // 发出事件

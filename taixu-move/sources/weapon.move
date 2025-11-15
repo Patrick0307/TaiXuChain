@@ -5,30 +5,33 @@ module taixu::weapon {
     use std::string::{Self, String};
 
     /// 武器类型常量 - Weapon Type Constants
-    const WEAPON_TYPE_BOW: u8 = 1;      // 弓箭 - Bow
-    const WEAPON_TYPE_SWORD: u8 = 2;    // 剑 - Sword
-    const WEAPON_TYPE_ORB: u8 = 3;      // 灵珠 - Spirit Orb
+    const WEAPON_TYPE_SWORD: u8 = 1;    // 剑 (武者) - Sword (Warrior)
+    const WEAPON_TYPE_BOW: u8 = 2;      // 弓 (弓箭手) - Bow (Archer)
+    const WEAPON_TYPE_STAFF: u8 = 3;    // 法杖 (术士) - Staff (Mage)
 
     /// 稀有度常量 - Rarity Constants
-    const RARITY_COMMON: u8 = 1;        // 白色凡品 - White Common
-    const RARITY_SPIRIT: u8 = 2;        // 青色灵品 - Cyan Spirit
-    const RARITY_MYSTIC: u8 = 3;        // 蓝色玄品 - Blue Mystic
+    const RARITY_COMMON: u8 = 1;        // 普通品质 - Common
+    const RARITY_RARE: u8 = 2;          // 稀有品质 - Rare
+    const RARITY_EPIC: u8 = 3;          // 史诗品质 - Epic
 
     /// 错误码 - Error Codes
     const EInvalidWeaponType: u64 = 0;
     const EInvalidRarity: u64 = 1;
     const EMaxLevel: u64 = 2;
+    const EWeaponLevelMismatch: u64 = 3;  // 武器等级不匹配
+    const EWeaponTypeMismatch: u64 = 4;   // 武器类型不匹配
+    const ERarityMismatch: u64 = 5;       // 稀有度不匹配
 
     /// 武器结构 - Weapon Structure
     public struct Weapon has key, store {
         id: UID,
         name: String,           // 武器名称 - Weapon name
-        weapon_type: u8,        // 武器类型 - Weapon type (1=弓, 2=剑, 3=灵珠)
+        weapon_type: u8,        // 武器类型 - Weapon type (1=剑, 2=弓, 3=法杖)
         attack: u64,            // 攻击力 - Attack power
         level: u64,             // 等级 - Level
-        rarity: u8,             // 稀有度 - Rarity (1=凡品, 2=灵品, 3=玄品)
-        durability: u64,        // 耐久度 - Durability (0-100)
-        max_durability: u64,    // 最大耐久度 - Max durability
+        rarity: u8,             // 稀有度 - Rarity (1=普通, 2=稀有, 3=史诗)
+        durability: u64,        // 耐久度 - Durability (已弃用但保留兼容性)
+        max_durability: u64,    // 最大耐久度 - Max durability (已弃用但保留兼容性)
         created_at: u64,        // 创建时间 - Creation time
         owner: address,         // 拥有者 - Owner
     }
@@ -57,19 +60,18 @@ module taixu::weapon {
     ) {
         // 验证武器类型 - Validate weapon type
         assert!(
-            weapon_type >= WEAPON_TYPE_BOW && weapon_type <= WEAPON_TYPE_ORB,
+            weapon_type >= WEAPON_TYPE_SWORD && weapon_type <= WEAPON_TYPE_STAFF,
             EInvalidWeaponType
         );
 
         // 验证稀有度 - Validate rarity
         assert!(
-            rarity >= RARITY_COMMON && rarity <= RARITY_MYSTIC,
+            rarity >= RARITY_COMMON && rarity <= RARITY_EPIC,
             EInvalidRarity
         );
 
         // 根据武器类型和稀有度获取武器名称和属性
         let (name, attack) = get_weapon_stats(weapon_type, rarity);
-        let max_durability = calculate_max_durability(rarity);
 
         let weapon = Weapon {
             id: object::new(ctx),
@@ -78,8 +80,8 @@ module taixu::weapon {
             attack,
             level: 1,
             rarity,
-            durability: max_durability,
-            max_durability,
+            durability: 100,        // 默认值，已弃用
+            max_durability: 100,    // 默认值，已弃用
             created_at: tx_context::epoch(ctx),
             owner: recipient,
         };
@@ -96,20 +98,6 @@ module taixu::weapon {
         
         // 每升一级，攻击力增加 5 - +5 attack per level
         weapon.attack = weapon.attack + (levels * 5);
-    }
-
-    /// 修理武器 - Repair weapon
-    public fun repair_weapon(weapon: &mut Weapon) {
-        weapon.durability = weapon.max_durability;
-    }
-
-    /// 使用武器（减少耐久度）- Use weapon (reduce durability)
-    public fun use_weapon(weapon: &mut Weapon, damage: u64) {
-        if (weapon.durability >= damage) {
-            weapon.durability = weapon.durability - damage;
-        } else {
-            weapon.durability = 0;
-        };
     }
 
     /// 强化武器（增加攻击力）- Enhance weapon (increase attack)
@@ -139,6 +127,56 @@ module taixu::weapon {
         object::delete(id);
     }
 
+    /// 合成武器 - Merge two weapons of same level to create higher level weapon
+    /// 两个相同等级、类型、稀有度的武器合成为等级+1的武器
+    public fun merge_weapons(
+        weapon1: Weapon,
+        weapon2: Weapon,
+        ctx: &mut TxContext
+    ): Weapon {
+        // 验证两个武器等级相同
+        assert!(weapon1.level == weapon2.level, EWeaponLevelMismatch);
+        
+        // 验证两个武器类型相同
+        assert!(weapon1.weapon_type == weapon2.weapon_type, EWeaponTypeMismatch);
+        
+        // 验证两个武器稀有度相同
+        assert!(weapon1.rarity == weapon2.rarity, ERarityMismatch);
+        
+        // 验证不超过最大等级
+        assert!(weapon1.level < 100, EMaxLevel);
+
+        let new_level = weapon1.level + 1;
+        let weapon_type = weapon1.weapon_type;
+        let rarity = weapon1.rarity;
+        
+        // 获取武器基础属性
+        let (name, base_attack) = get_weapon_stats(weapon_type, rarity);
+        
+        // 计算新武器攻击力：基础攻击力 + (等级-1) * 5
+        let new_attack = base_attack + ((new_level - 1) * 5);
+
+        // 销毁两个旧武器
+        burn_weapon(weapon1);
+        burn_weapon(weapon2);
+
+        // 创建新武器
+        let new_weapon = Weapon {
+            id: object::new(ctx),
+            name,
+            weapon_type,
+            attack: new_attack,
+            level: new_level,
+            rarity,
+            durability: 100,        // 默认值，已弃用
+            max_durability: 100,    // 默认值，已弃用
+            created_at: tx_context::epoch(ctx),
+            owner: tx_context::sender(ctx),
+        };
+
+        new_weapon
+    }
+
     // ========== 查询函数 - Query Functions ==========
 
     public fun get_name(weapon: &Weapon): String { weapon.name }
@@ -146,58 +184,43 @@ module taixu::weapon {
     public fun get_attack(weapon: &Weapon): u64 { weapon.attack }
     public fun get_level(weapon: &Weapon): u64 { weapon.level }
     public fun get_rarity(weapon: &Weapon): u8 { weapon.rarity }
-    public fun get_durability(weapon: &Weapon): u64 { weapon.durability }
-    public fun get_max_durability(weapon: &Weapon): u64 { weapon.max_durability }
+    public fun get_durability(weapon: &Weapon): u64 { weapon.durability }  // 已弃用但保留
+    public fun get_max_durability(weapon: &Weapon): u64 { weapon.max_durability }  // 已弃用但保留
+    public fun get_created_at(weapon: &Weapon): u64 { weapon.created_at }
     public fun get_owner(weapon: &Weapon): address { weapon.owner }
-    
-    /// 检查武器是否可用 - Check if weapon is usable
-    public fun is_usable(weapon: &Weapon): bool {
-        weapon.durability > 0
-    }
 
     // ========== 辅助函数 - Helper Functions ==========
 
     /// 根据武器类型和稀有度获取武器名称和攻击力
     /// Get weapon name and attack based on type and rarity
     fun get_weapon_stats(weapon_type: u8, rarity: u8): (String, u64) {
-        if (weapon_type == WEAPON_TYPE_BOW) {
-            // 弓箭 - Bow
+        if (weapon_type == WEAPON_TYPE_SWORD) {
+            // 剑 (武者) - Sword (Warrior)
             if (rarity == RARITY_COMMON) {
-                (string::utf8(b"Wooden Feather Bow"), 15)  // 木羽弓
-            } else if (rarity == RARITY_SPIRIT) {
-                (string::utf8(b"Spirit Wind Bow"), 30)     // 灵风弓
+                (string::utf8(b"Iron Sword"), 20)          // 铁剑
+            } else if (rarity == RARITY_RARE) {
+                (string::utf8(b"Azure Edge Sword"), 40)    // 青锋剑
             } else {
-                (string::utf8(b"Mystic Moon Bow"), 50)     // 玄月弓
+                (string::utf8(b"Dragon Roar Sword"), 70)   // 龙吟剑
             }
-        } else if (weapon_type == WEAPON_TYPE_SWORD) {
-            // 剑 - Sword
+        } else if (weapon_type == WEAPON_TYPE_BOW) {
+            // 弓 (弓箭手) - Bow (Archer)
             if (rarity == RARITY_COMMON) {
-                (string::utf8(b"Iron Mystic Sword"), 18)   // 铁玄剑
-            } else if (rarity == RARITY_SPIRIT) {
-                (string::utf8(b"Cyan Spirit Sword"), 35)   // 青灵剑
+                (string::utf8(b"Hunter Bow"), 18)          // 猎弓
+            } else if (rarity == RARITY_RARE) {
+                (string::utf8(b"Swift Wind Bow"), 38)      // 疾风弓
             } else {
-                (string::utf8(b"Mystic Dark Sword"), 55)   // 玄冥剑
+                (string::utf8(b"Cloud Piercer Bow"), 65)   // 破云弓
             }
         } else {
-            // 灵珠 - Spirit Orb
+            // 法杖 (术士) - Staff (Mage)
             if (rarity == RARITY_COMMON) {
-                (string::utf8(b"Spirit Sand Orb"), 20)     // 灵砂珠
-            } else if (rarity == RARITY_SPIRIT) {
-                (string::utf8(b"Cyan Radiance Orb"), 38)   // 青曜珠
+                (string::utf8(b"Wooden Staff"), 22)        // 木杖
+            } else if (rarity == RARITY_RARE) {
+                (string::utf8(b"Starlight Staff"), 42)     // 星辰杖
             } else {
-                (string::utf8(b"Mystic Light Orb"), 60)    // 玄光珠
+                (string::utf8(b"Primordial Staff"), 75)    // 混元杖
             }
-        }
-    }
-
-    /// 根据稀有度计算最大耐久度 - Calculate max durability based on rarity
-    fun calculate_max_durability(rarity: u8): u64 {
-        if (rarity == RARITY_COMMON) {
-            60  // 凡品 - Common
-        } else if (rarity == RARITY_SPIRIT) {
-            80  // 灵品 - Spirit
-        } else {
-            100 // 玄品 - Mystic
         }
     }
 

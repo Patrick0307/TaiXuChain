@@ -5,8 +5,8 @@ import { Transaction } from '@mysten/sui/transactions'
 export const suiClient = new SuiClient({ url: 'https://rpc-testnet.onelabs.cc:443' })
 
 // 从环境变量或配置文件读取
-export const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID || '0x1b1e81216c4c889065ee9f4f239b48c04284eb187bc448c11cf46359df16e9bf'
-export const REGISTRY_ID = import.meta.env.VITE_REGISTRY_ID || '0x92f963482bb3319bf254e57c7050336e04cb91040f75e1ba98d19f5a1eb40f79'
+export const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID || '0xc5128ab446ccd272f15db6d21f718ff4c2811019ade9dd00a77c6c2cf4c35bb4'
+export const REGISTRY_ID = import.meta.env.VITE_REGISTRY_ID || '0x227dda9102298b94a3365245bfd8c56cac0e9886dfd720c01a044c586e841efa'
 
 // 职业映射
 export const CLASS_MAP = {
