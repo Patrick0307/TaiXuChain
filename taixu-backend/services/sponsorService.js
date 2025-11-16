@@ -191,6 +191,9 @@ export async function getPlayerByAddress(playerAddress) {
       level: parseInt(content.level),
       exp: parseInt(content.exp),
       exp_to_next_level: parseInt(content.exp_to_next_level),
+      hp: parseInt(content.hp || 0),
+      max_hp: parseInt(content.max_hp || 0),
+      attack: parseInt(content.attack || 0),
       owner: content.owner,
       customization: {
         gender: content.gender,

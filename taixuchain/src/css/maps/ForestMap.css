@@ -52,3 +52,14 @@
   background: #5179F1;
   transform: scale(1.05);
 }
+
+@keyframes damageFloat {
+  0% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-40px);
+  }
+}

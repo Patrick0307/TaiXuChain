@@ -99,3 +99,124 @@
     0 0 0 1px #000,
     inset 0 2px 0 rgba(0, 0, 0, 0.3);
 }
+
+/* 玩家状态栏 */
+.player-status {
+  position: absolute;
+  top: 70px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.85);
+  padding: 12px 15px;
+  border: 3px solid #8b7355;
+  box-shadow: 
+    0 0 0 1px #000,
+    inset 0 0 20px rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+  min-width: 280px;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.status-row:last-child {
+  margin-bottom: 0;
+}
+
+.status-label {
+  color: #ffd700;
+  font-size: 0.5rem;
+  text-shadow: 1px 1px 0 #000;
+  min-width: 50px;
+}
+
+.status-bar {
+  position: relative;
+  flex: 1;
+  height: 18px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 2px solid #4a4a4a;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.status-bar-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.hp-fill {
+  background: linear-gradient(90deg, #ff0000, #ff6666);
+  box-shadow: 
+    inset 0 2px 4px rgba(255, 255, 255, 0.3),
+    0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+.status-text {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 0.45rem;
+  text-shadow: 
+    1px 1px 0 #000,
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000;
+  z-index: 1;
+}
+
+.attack-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.attack-value {
+  color: #ff6347;
+  font-size: 0.6rem;
+  text-shadow: 
+    1px 1px 0 #000,
+    0 0 10px rgba(255, 99, 71, 0.8);
+  font-weight: bold;
+}
+
+.attack-breakdown {
+  color: #aaa;
+  font-size: 0.4rem;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.weapon-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #4a4a4a;
+}
+
+.weapon-icon {
+  font-size: 0.6rem;
+}
+
+.weapon-name {
+  color: #87ceeb;
+  font-size: 0.45rem;
+  text-shadow: 1px 1px 0 #000;
+  flex: 1;
+}
+
+.weapon-level {
+  color: #ffd700;
+  font-size: 0.4rem;
+  text-shadow: 1px 1px 0 #000;
+}

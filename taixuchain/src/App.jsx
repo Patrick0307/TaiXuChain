@@ -37,12 +37,36 @@ function App() {
           3: { id: 'archer', name: 'Archer' }
         }
         
+        // 计算默认属性（如果是旧角色没有这些字段）
+        const classId = existingPlayer.class
+        const level = existingPlayer.level
+        
+        // 职业成长系数（与合约保持一致）
+        const getDefaultStats = (classId, level) => {
+          const statsMap = {
+            1: { hpPerLevel: 350, atkPerLevel: 40 },  // Mage
+            2: { hpPerLevel: 500, atkPerLevel: 30 },  // Warrior
+            3: { hpPerLevel: 400, atkPerLevel: 35 },  // Archer
+          }
+          const stats = statsMap[classId] || statsMap[1]
+          return {
+            hp: stats.hpPerLevel * level,
+            max_hp: stats.hpPerLevel * level,
+            attack: stats.atkPerLevel * level
+          }
+        }
+        
+        const defaultStats = getDefaultStats(classId, level)
+        
         const characterData = {
           id: classMap[existingPlayer.class].id,
           name: existingPlayer.name,
           class: classMap[existingPlayer.class].name,
           level: existingPlayer.level,
           exp: existingPlayer.exp,
+          hp: existingPlayer.hp || defaultStats.hp,
+          max_hp: existingPlayer.max_hp || defaultStats.max_hp,
+          attack: existingPlayer.attack || defaultStats.attack,
           playerObjectId: existingPlayer.objectId,
           customization: existingPlayer.customization
         }

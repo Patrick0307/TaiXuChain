@@ -22,18 +22,23 @@ function ForestMap({ character, onExit }) {
   const [walkFrame, setWalkFrame] = useState(0) // 行走动画帧
   const [collisionObjects, setCollisionObjects] = useState([]) // 碰撞区域
   const [monsters, setMonsters] = useState([]) // 怪物列表
+  const [playerAttackTrigger, setPlayerAttackTrigger] = useState(0) // 玩家攻击触发器
+  const [playerCurrentHp, setPlayerCurrentHp] = useState(character.hp) // 玩家当前生命值
   const animationFrameRef = useRef(null)
   const walkAnimationRef = useRef(null)
   const playerPosRef = useRef(null) // 用 ref 存储实时位置，初始为null
   const directionRef = useRef('down') // 用 ref 存储实时朝向
   const isMovingRef = useRef(false) // 用 ref 存储实时移动状态
   const monsterIdCounter = useRef(0) // 怪物ID计数器
+  const lastPlayerAttackTime = useRef(0) // 上次玩家攻击时间
 
   const TILE_SIZE = 32
   const PLAYER_SIZE = 10  // 非常小的角色
   const MOVE_SPEED = 1.5  // 固定速度（降低移动速度）
   const MAP_SCALE = 2.5  // 放大地图2.5倍
   const MONSTER_SIZE = 32 // 怪物大小（像素）- 缩小到32
+  const PLAYER_ATTACK_RANGE = 60 // 玩家攻击范围（像素）
+  const PLAYER_ATTACK_INTERVAL = 1000 // 玩家攻击间隔（毫秒）
 
   // 检查并赠送武器
   useEffect(() => {
@@ -327,6 +332,47 @@ function ForestMap({ character, onExit }) {
         onExit()
         return
       }
+      
+      // 空格键攻击
+      if (e.key === ' ' || e.key === 'Spacebar') {
+        e.preventDefault() // 防止页面滚动
+        
+        // 检查攻击间隔
+        const now = Date.now()
+        if (now - lastPlayerAttackTime.current < PLAYER_ATTACK_INTERVAL) {
+          return // 攻击冷却中
+        }
+        
+        lastPlayerAttackTime.current = now
+        
+        // 计算玩家总攻击力（角色攻击力 + 武器攻击力）
+        const weaponAttack = playerWeapon ? playerWeapon.attack : 0
+        const totalAttack = character.attack + weaponAttack
+        
+        // 获取职业类型
+        const characterClass = character.id.toLowerCase()
+        
+        // 根据职业类型决定攻击方式
+        // 编码格式：攻击力 * 10000 + 职业代码 * 100 + (时间戳 % 100)
+        // 这样可以确保攻击力在前面，便于解码
+        const timestamp = now % 100 // 只取时间戳的最后两位作为唯一标识
+        
+        if (characterClass === 'warrior') {
+          // 武者：范围攻击（主目标 + 溅射）
+          const encoded = totalAttack * 10000 + 1 * 100 + timestamp
+          setPlayerAttackTrigger(encoded)
+          console.log(`⚔️ Warrior AOE attack! Damage: ${totalAttack} (Main) + ${Math.floor(totalAttack * 0.3)} (Splash)`)
+        } else {
+          // 弓箭手/术士：单体攻击
+          const classCode = characterClass === 'archer' ? 2 : 3
+          const encoded = totalAttack * 10000 + classCode * 100 + timestamp
+          setPlayerAttackTrigger(encoded)
+          console.log(`⚔️ ${characterClass === 'archer' ? 'Archer' : 'Mage'} single target attack! Damage: ${totalAttack}`)
+        }
+        
+        return
+      }
+      
       // 防止按键重复触发
       if (e.repeat) return
       keysRef.current[e.key] = true
@@ -343,7 +389,7 @@ function ForestMap({ character, onExit }) {
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [onExit])
+  }, [onExit, character, playerWeapon, PLAYER_ATTACK_INTERVAL])
 
   // 移动角色和行走动画（使用RAF确保流畅）
   useEffect(() => {
@@ -967,71 +1013,126 @@ function ForestMap({ character, onExit }) {
       )}
       
       {/* 怪物层 - 在角色之前渲染 */}
-      {!showTeleportEffect && monsters.map(monster => {
-        if (!monster.alive) return null
+      {!showTeleportEffect && (() => {
+        // 计算最近的怪物（主目标）
+        let closestMonsterId = null
+        let closestDistance = Infinity
+        const WARRIOR_SPLASH_RANGE = 50 // 武者溅射范围（像素）- 小范围
         
-        // 计算怪物在屏幕上的位置
-        const getMonsterScreenPosition = (monsterX, monsterY) => {
-          if (!canvasRef.current || !mapData) return { x: 0, y: 0 }
-          
-          const canvas = canvasRef.current
-          const scaledMapWidth = mapData.width * TILE_SIZE * MAP_SCALE
-          const scaledMapHeight = mapData.height * TILE_SIZE * MAP_SCALE
-          const scaledPlayerX = Math.round(playerPosRef.current.x * MAP_SCALE)
-          const scaledPlayerY = Math.round(playerPosRef.current.y * MAP_SCALE)
-          const scaledPlayerSize = PLAYER_SIZE * MAP_SCALE
-
-          // 计算相机位置（与角色渲染相同的逻辑）
-          let cameraX = scaledPlayerX - canvas.width / 2 + scaledPlayerSize / 2
-          let cameraY = scaledPlayerY - canvas.height / 2 + scaledPlayerSize / 2
-
-          const maxCameraX = scaledMapWidth - canvas.width
-          const maxCameraY = scaledMapHeight - canvas.height
-
-          cameraX = Math.max(0, Math.min(cameraX, maxCameraX))
-          cameraY = Math.max(0, Math.min(cameraY, maxCameraY))
-
-          if (scaledMapWidth < canvas.width) cameraX = -(canvas.width - scaledMapWidth) / 2
-          if (scaledMapHeight < canvas.height) cameraY = -(canvas.height - scaledMapHeight) / 2
-
-          // 怪物在屏幕上的位置
-          const scaledMonsterX = Math.round(monsterX * MAP_SCALE)
-          const scaledMonsterY = Math.round(monsterY * MAP_SCALE)
-          
-          return {
-            x: Math.round(scaledMonsterX - cameraX),
-            y: Math.round(scaledMonsterY - cameraY)
-          }
+        if (playerPosRef.current) {
+          monsters.forEach(monster => {
+            if (!monster.alive) return
+            
+            const dx = playerPosRef.current.x - monster.x
+            const dy = playerPosRef.current.y - monster.y
+            const distance = Math.sqrt(dx * dx + dy * dy)
+            
+            if (distance < closestDistance) {
+              closestDistance = distance
+              closestMonsterId = monster.id
+            }
+          })
         }
         
-        const monsterScreenPos = getMonsterScreenPosition(monster.x, monster.y)
-        
-        return (
-          <Monster
-            key={monster.id}
-            id={monster.id}
-            type={monster.type}
-            screenPosition={monsterScreenPos}
-            monsterSize={MONSTER_SIZE * MAP_SCALE}
-            mapScale={MAP_SCALE}
-            playerPos={playerPosRef.current} // 传递玩家位置
-            monsterWorldPos={{ x: monster.x, y: monster.y }} // 传递怪物世界位置
-            initialPos={{ x: monster.initialX, y: monster.initialY }} // 传递初始位置
-            onPositionUpdate={(monsterId, newX, newY) => {
-              // 更新怪物位置
-              setMonsters(prev => prev.map(m => 
-                m.id === monsterId ? { ...m, x: newX, y: newY } : m
-              ))
-            }}
-            onDeath={() => {
-              // 处理怪物死亡
-              setMonsters(prev => prev.map(m => 
-                m.id === monster.id ? { ...m, alive: false } : m
-              ))
-            }}
-          />
-        )
-      })}
+        return monsters.map(monster => {
+          if (!monster.alive) return null
+          
+          // 计算怪物在屏幕上的位置
+          const getMonsterScreenPosition = (monsterX, monsterY) => {
+            if (!canvasRef.current || !mapData) return { x: 0, y: 0 }
+            
+            const canvas = canvasRef.current
+            const scaledMapWidth = mapData.width * TILE_SIZE * MAP_SCALE
+            const scaledMapHeight = mapData.height * TILE_SIZE * MAP_SCALE
+            const scaledPlayerX = Math.round(playerPosRef.current.x * MAP_SCALE)
+            const scaledPlayerY = Math.round(playerPosRef.current.y * MAP_SCALE)
+            const scaledPlayerSize = PLAYER_SIZE * MAP_SCALE
+
+            // 计算相机位置（与角色渲染相同的逻辑）
+            let cameraX = scaledPlayerX - canvas.width / 2 + scaledPlayerSize / 2
+            let cameraY = scaledPlayerY - canvas.height / 2 + scaledPlayerSize / 2
+
+            const maxCameraX = scaledMapWidth - canvas.width
+            const maxCameraY = scaledMapHeight - canvas.height
+
+            cameraX = Math.max(0, Math.min(cameraX, maxCameraX))
+            cameraY = Math.max(0, Math.min(cameraY, maxCameraY))
+
+            if (scaledMapWidth < canvas.width) cameraX = -(canvas.width - scaledMapWidth) / 2
+            if (scaledMapHeight < canvas.height) cameraY = -(canvas.height - scaledMapHeight) / 2
+
+            // 怪物在屏幕上的位置
+            const scaledMonsterX = Math.round(monsterX * MAP_SCALE)
+            const scaledMonsterY = Math.round(monsterY * MAP_SCALE)
+            
+            return {
+              x: Math.round(scaledMonsterX - cameraX),
+              y: Math.round(scaledMonsterY - cameraY)
+            }
+          }
+          
+          const monsterScreenPos = getMonsterScreenPosition(monster.x, monster.y)
+          
+          // 判断是否是主目标
+          const isMainTarget = monster.id === closestMonsterId
+          
+          // 对于武者的溅射攻击，检查是否在溅射范围内
+          let isInSplashRange = false
+          if (!isMainTarget && closestMonsterId !== null && playerPosRef.current) {
+            // 找到主目标怪物
+            const mainMonster = monsters.find(m => m.id === closestMonsterId)
+            if (mainMonster) {
+              // 计算当前怪物与主目标的距离
+              const dx = monster.x - mainMonster.x
+              const dy = monster.y - mainMonster.y
+              const distanceToMain = Math.sqrt(dx * dx + dy * dy)
+              isInSplashRange = distanceToMain <= WARRIOR_SPLASH_RANGE
+            }
+          }
+          
+          // 移除这里的调试信息，在 Monster 组件内部处理
+          
+          return (
+            <Monster
+              key={monster.id}
+              id={monster.id}
+              type={monster.type}
+              screenPosition={monsterScreenPos}
+              monsterSize={MONSTER_SIZE * MAP_SCALE}
+              mapScale={MAP_SCALE}
+              playerPos={playerPosRef.current} // 传递玩家位置
+              monsterWorldPos={{ x: monster.x, y: monster.y }} // 传递怪物世界位置
+              initialPos={{ x: monster.initialX, y: monster.initialY }} // 传递初始位置
+              playerAttackTrigger={playerAttackTrigger} // 传递玩家攻击触发器
+              isMainTarget={isMainTarget || isInSplashRange} // 主目标或在溅射范围内（武者溅射用）
+              onPositionUpdate={(monsterId, newX, newY) => {
+                // 更新怪物位置
+                setMonsters(prev => prev.map(m => 
+                  m.id === monsterId ? { ...m, x: newX, y: newY } : m
+                ))
+              }}
+              onDeath={() => {
+                // 处理怪物死亡
+                setMonsters(prev => prev.map(m => 
+                  m.id === monster.id ? { ...m, alive: false } : m
+                ))
+                console.log(`💀 Monster ${monster.id} defeated!`)
+              }}
+              onAttackPlayer={(damage) => {
+                // 怪物攻击玩家
+                const newHp = Math.max(0, playerCurrentHp - damage)
+                setPlayerCurrentHp(newHp)
+                console.log(`🩸 Player hit! Damage: ${damage}, HP: ${newHp}/${character.max_hp}`)
+                
+                if (newHp <= 0) {
+                  console.log('💀 Player defeated!')
+                  // TODO: 处理玩家死亡
+                }
+              }}
+            />
+          )
+        })
+      })()}
       
       {/* 角色层 - 叠加在Canvas上，传送特效结束后才显示 */}
       {!showTeleportEffect && (
@@ -1051,6 +1152,8 @@ function ForestMap({ character, onExit }) {
         playerPos={playerPos}
         tileSize={TILE_SIZE}
         onExit={onExit}
+        playerCurrentHp={playerCurrentHp}
+        playerWeapon={playerWeapon}
       />
     </div>
   )

@@ -10,16 +10,24 @@ function Monster({
   monsterWorldPos, // 怪物在世界中的位置
   initialPos, // 怪物初始位置（刷新点）
   onPositionUpdate, // 位置更新回调
-  onDeath
+  onDeath,
+  onAttackPlayer, // 攻击玩家回调
+  playerAttackTrigger, // 玩家攻击触发器（时间戳）
+  isMainTarget // 是否是主目标（最近的怪物）
 }) {
   const [isAttacking, setIsAttacking] = useState(false)
   const [attackFrame, setAttackFrame] = useState(0)
   const [isDead, setIsDead] = useState(false)
+  const [currentHp, setCurrentHp] = useState(150) // 怪物当前生命值
+  const [maxHp] = useState(150) // 怪物最大生命值
   const [showHealthBar, setShowHealthBar] = useState(false) // 是否显示血条
   const [isActivated, setIsActivated] = useState(false) // 野怪是否被激活过
+  const [showDamage, setShowDamage] = useState(null) // 显示伤害数字
   const attackIntervalRef = useRef(null)
   const healthBarTimerRef = useRef(null)
   const returnTimerRef = useRef(null) // 回归延迟计时器
+  const lastAttackTimeRef = useRef(0) // 上次攻击玩家的时间
+  const lastPlayerAttackRef = useRef(0) // 上次被玩家攻击的时间
 
   // 攻击动画帧数（根据实际图片数量）
   const ATTACK_FRAMES = 12 // Minotaur_02_Attacking_000 到 011
@@ -30,6 +38,8 @@ function Monster({
   const RETURN_SPEED = 1.2 // 回归速度（比追击快，确保能快速回到原位）
   const RETURN_THRESHOLD = 5 // 回归阈值（距离初始位置小于这个值就停止）
   const RETURN_DELAY = 3000 // 回归延迟（毫秒）- 玩家离开3秒后才开始回归
+  const MONSTER_ATTACK = 12 // 怪物攻击力
+  const MONSTER_ATTACK_INTERVAL = 1500 // 怪物攻击间隔（毫秒）
 
   // 开始攻击时播放攻击动画
   useEffect(() => {
@@ -146,6 +156,16 @@ function Monster({
             setIsAttacking(true)
             setShowHealthBar(true) // 显示血条
             
+            // 检查是否可以攻击玩家（攻击间隔）
+            const now = Date.now()
+            if (now - lastAttackTimeRef.current >= MONSTER_ATTACK_INTERVAL) {
+              lastAttackTimeRef.current = now
+              // 通知父组件怪物攻击了玩家
+              if (onAttackPlayer) {
+                onAttackPlayer(MONSTER_ATTACK)
+              }
+            }
+            
             // 攻击持续1秒
             setTimeout(() => {
               setIsAttacking(false)
@@ -198,7 +218,85 @@ function Monster({
         clearTimeout(returnTimerRef.current)
       }
     }
-  }, [isDead, isAttacking, isActivated, id, DETECT_RANGE, ATTACK_RANGE, MAX_CHASE_DISTANCE, MOVE_SPEED, RETURN_SPEED, RETURN_THRESHOLD, RETURN_DELAY])
+  }, [isDead, isAttacking, isActivated, id, DETECT_RANGE, ATTACK_RANGE, MAX_CHASE_DISTANCE, MOVE_SPEED, RETURN_SPEED, RETURN_THRESHOLD, RETURN_DELAY, MONSTER_ATTACK_INTERVAL, onAttackPlayer])
+
+  // 处理玩家攻击怪物
+  useEffect(() => {
+    if (!playerAttackTrigger || isDead) return
+    
+    // 检查是否是新的攻击（避免重复处理）
+    if (playerAttackTrigger === lastPlayerAttackRef.current) return
+    lastPlayerAttackRef.current = playerAttackTrigger
+    
+    // 检查玩家是否在攻击范围内
+    if (!playerPos || !monsterWorldPos) return
+    
+    const dx = playerPos.x - monsterWorldPos.x
+    const dy = playerPos.y - monsterWorldPos.y
+    const distance = Math.sqrt(dx * dx + dy * dy)
+    
+    // 解码攻击信息
+    // 编码格式：攻击力 * 10000 + 职业代码 * 100 + 时间戳
+    const totalAttack = Math.floor(playerAttackTrigger / 10000) // 总攻击力
+    const classCode = Math.floor((playerAttackTrigger % 10000) / 100) // 职业代码：1=武者, 2=弓箭手, 3=术士
+    
+    // 根据职业判断攻击类型
+    const isWarrior = classCode === 1
+    const attackRange = ATTACK_RANGE + 20 // 攻击范围 60px
+    
+    // 只为主目标或溅射范围内的怪物输出调试信息
+    if (isMainTarget) {
+      console.log(`🎯 [Monster ${id}] Main Target - Distance: ${distance.toFixed(1)}px, HP: ${currentHp}/${maxHp}, Class: ${classCode === 1 ? 'Warrior' : classCode === 2 ? 'Archer' : 'Mage'}`)
+    }
+    
+    if (distance <= attackRange) {
+      let damage = 0
+      
+      if (isWarrior) {
+        // 武者：范围攻击
+        damage = isMainTarget ? totalAttack : Math.floor(totalAttack * 0.3)
+        if (isMainTarget || damage > 0) {
+          console.log(`⚔️ [Monster ${id}] Warrior ${isMainTarget ? 'MAIN' : 'SPLASH'} attack: ${damage} damage`)
+        }
+      } else {
+        // 弓箭手/术士：单体攻击
+        if (!isMainTarget) {
+          return // 不是主目标，不受伤（不输出日志，减少噪音）
+        }
+        damage = totalAttack
+        console.log(`🏹 [Monster ${id}] Single target attack: ${damage} damage`)
+      }
+      
+      // 扣血
+      const newHp = Math.max(0, currentHp - damage)
+      console.log(`💔 [Monster ${id}] HP: ${currentHp} → ${newHp} (-${damage})`)
+      setCurrentHp(newHp)
+      
+      // 显示伤害数字
+      setShowDamage(damage)
+      setTimeout(() => setShowDamage(null), 800)
+      
+      // 显示血条
+      setShowHealthBar(true)
+      
+      // 激活怪物
+      if (!isActivated) {
+        setIsActivated(true)
+      }
+      
+      // 检查是否死亡
+      if (newHp <= 0) {
+        console.log(`💀 [Monster ${id}] DIED! (HP reached 0)`)
+        setIsDead(true)
+        if (onDeath) {
+          onDeath()
+        }
+      }
+    } else if (isMainTarget) {
+      // 只为主目标输出超出范围的信息
+      console.log(`📏 [Monster ${id}] Out of range: ${distance.toFixed(1)}px > ${attackRange}px`)
+    }
+  }, [playerAttackTrigger, isDead, playerPos, monsterWorldPos, currentHp, maxHp, isActivated, isMainTarget, ATTACK_RANGE, onDeath, id])
 
   // 血条显示逻辑：攻击时显示，攻击结束后3秒隐藏
   useEffect(() => {
@@ -279,11 +377,30 @@ function Monster({
           opacity: showHealthBar ? 1 : 0
         }}>
           <div style={{
-            width: '100%',
+            width: `${(currentHp / maxHp) * 100}%`,
             height: '100%',
             background: 'linear-gradient(90deg, #ff0000, #ff6666)',
             transition: 'width 0.3s ease'
           }} />
+        </div>
+      )}
+      
+      {/* 伤害数字 */}
+      {showDamage && (
+        <div style={{
+          position: 'absolute',
+          top: '-30px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          color: '#ff0000',
+          fontSize: '20px',
+          fontWeight: 'bold',
+          textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+          animation: 'damageFloat 0.8s ease-out',
+          pointerEvents: 'none',
+          zIndex: 100
+        }}>
+          -{showDamage}
         </div>
       )}
     </div>
