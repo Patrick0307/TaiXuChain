@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import MapUI from './MapUI'
 import MapCharacter from './MapCharacter'
+import Monster from './Monster'
 import { checkPlayerWeapon, mintWeaponForPlayer } from '../../utils/suiClient'
 import '../../css/maps/ForestMap.css'
 
@@ -20,16 +21,19 @@ function ForestMap({ character, onExit }) {
   const [isMoving, setIsMoving] = useState(false) // 是否在移动
   const [walkFrame, setWalkFrame] = useState(0) // 行走动画帧
   const [collisionObjects, setCollisionObjects] = useState([]) // 碰撞区域
+  const [monsters, setMonsters] = useState([]) // 怪物列表
   const animationFrameRef = useRef(null)
   const walkAnimationRef = useRef(null)
   const playerPosRef = useRef(null) // 用 ref 存储实时位置，初始为null
   const directionRef = useRef('down') // 用 ref 存储实时朝向
   const isMovingRef = useRef(false) // 用 ref 存储实时移动状态
+  const monsterIdCounter = useRef(0) // 怪物ID计数器
 
   const TILE_SIZE = 32
   const PLAYER_SIZE = 10  // 非常小的角色
   const MOVE_SPEED = 1.5  // 固定速度（降低移动速度）
   const MAP_SCALE = 2.5  // 放大地图2.5倍
+  const MONSTER_SIZE = 32 // 怪物大小（像素）- 缩小到32
 
   // 检查并赠送武器
   useEffect(() => {
@@ -204,6 +208,43 @@ function ForestMap({ character, onExit }) {
           setCollisionObjects(collisions)
         } else {
           console.warn('No collision layer found in map')
+        }
+
+        // 提取怪物刷新点
+        const spawnsLayer = data.layers.find(layer => layer.name === 'spawns')
+        if (spawnsLayer && spawnsLayer.objects) {
+          const spawnPoints = spawnsLayer.objects.filter(obj => obj.name === 'Spawns')
+          console.log(`Found ${spawnPoints.length} spawn points`)
+          
+          // 在每个刷新点生成2个怪物（1个CowMonster1，1个CowMonster2）
+          const initialMonsters = []
+          spawnPoints.forEach((spawn, spawnIndex) => {
+            // 获取刷新点的Count属性（默认为2）
+            const countProp = spawn.properties?.find(p => p.name === 'Count')
+            const count = countProp ? countProp.value : 2
+            
+            // 生成指定数量的怪物
+            for (let i = 0; i < count; i++) {
+              const monsterType = i === 0 ? 'CowMonster1' : 'CowMonster2'
+              // 在刷新点周围随机偏移位置，避免重叠（增大偏移范围）
+              const offsetX = (Math.random() - 0.2) * 80
+              const offsetY = (Math.random() - 1.2) * 80
+              
+              initialMonsters.push({
+                id: monsterIdCounter.current++,
+                type: monsterType,
+                x: spawn.x + offsetX,
+                y: spawn.y + offsetY,
+                spawnPoint: spawnIndex,
+                alive: true
+              })
+            }
+          })
+          
+          console.log(`Spawned ${initialMonsters.length} monsters`)
+          setMonsters(initialMonsters)
+        } else {
+          console.warn('No spawns layer found in map')
         }
         
         // 从所有tileset中提取瓦片图片
@@ -919,6 +960,66 @@ function ForestMap({ character, onExit }) {
           </div>
         </div>
       )}
+      
+      {/* 怪物层 - 在角色之前渲染 */}
+      {!showTeleportEffect && monsters.map(monster => {
+        if (!monster.alive) return null
+        
+        // 计算怪物在屏幕上的位置
+        const getMonsterScreenPosition = (monsterX, monsterY) => {
+          if (!canvasRef.current || !mapData) return { x: 0, y: 0 }
+          
+          const canvas = canvasRef.current
+          const scaledMapWidth = mapData.width * TILE_SIZE * MAP_SCALE
+          const scaledMapHeight = mapData.height * TILE_SIZE * MAP_SCALE
+          const scaledPlayerX = Math.round(playerPosRef.current.x * MAP_SCALE)
+          const scaledPlayerY = Math.round(playerPosRef.current.y * MAP_SCALE)
+          const scaledPlayerSize = PLAYER_SIZE * MAP_SCALE
+
+          // 计算相机位置（与角色渲染相同的逻辑）
+          let cameraX = scaledPlayerX - canvas.width / 2 + scaledPlayerSize / 2
+          let cameraY = scaledPlayerY - canvas.height / 2 + scaledPlayerSize / 2
+
+          const maxCameraX = scaledMapWidth - canvas.width
+          const maxCameraY = scaledMapHeight - canvas.height
+
+          cameraX = Math.max(0, Math.min(cameraX, maxCameraX))
+          cameraY = Math.max(0, Math.min(cameraY, maxCameraY))
+
+          if (scaledMapWidth < canvas.width) cameraX = -(canvas.width - scaledMapWidth) / 2
+          if (scaledMapHeight < canvas.height) cameraY = -(canvas.height - scaledMapHeight) / 2
+
+          // 怪物在屏幕上的位置
+          const scaledMonsterX = Math.round(monsterX * MAP_SCALE)
+          const scaledMonsterY = Math.round(monsterY * MAP_SCALE)
+          
+          return {
+            x: Math.round(scaledMonsterX - cameraX),
+            y: Math.round(scaledMonsterY - cameraY)
+          }
+        }
+        
+        const monsterScreenPos = getMonsterScreenPosition(monster.x, monster.y)
+        
+        return (
+          <Monster
+            key={monster.id}
+            id={monster.id}
+            type={monster.type}
+            screenPosition={monsterScreenPos}
+            monsterSize={MONSTER_SIZE * MAP_SCALE}
+            mapScale={MAP_SCALE}
+            playerPos={playerPosRef.current} // 传递玩家位置
+            monsterWorldPos={{ x: monster.x, y: monster.y }} // 传递怪物世界位置
+            onDeath={() => {
+              // 处理怪物死亡
+              setMonsters(prev => prev.map(m => 
+                m.id === monster.id ? { ...m, alive: false } : m
+              ))
+            }}
+          />
+        )
+      })}
       
       {/* 角色层 - 叠加在Canvas上，传送特效结束后才显示 */}
       {!showTeleportEffect && (
