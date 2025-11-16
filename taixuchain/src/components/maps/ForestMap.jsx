@@ -230,11 +230,16 @@ function ForestMap({ character, onExit }) {
               const offsetX = (Math.random() - 0.2) * 80
               const offsetY = (Math.random() - 1.2) * 80
               
+              const initialX = spawn.x + offsetX
+              const initialY = spawn.y + offsetY
+              
               initialMonsters.push({
                 id: monsterIdCounter.current++,
                 type: monsterType,
-                x: spawn.x + offsetX,
-                y: spawn.y + offsetY,
+                x: initialX,
+                y: initialY,
+                initialX: initialX, // 保存初始位置
+                initialY: initialY, // 保存初始位置
                 spawnPoint: spawnIndex,
                 alive: true
               })
@@ -1011,6 +1016,13 @@ function ForestMap({ character, onExit }) {
             mapScale={MAP_SCALE}
             playerPos={playerPosRef.current} // 传递玩家位置
             monsterWorldPos={{ x: monster.x, y: monster.y }} // 传递怪物世界位置
+            initialPos={{ x: monster.initialX, y: monster.initialY }} // 传递初始位置
+            onPositionUpdate={(monsterId, newX, newY) => {
+              // 更新怪物位置
+              setMonsters(prev => prev.map(m => 
+                m.id === monsterId ? { ...m, x: newX, y: newY } : m
+              ))
+            }}
             onDeath={() => {
               // 处理怪物死亡
               setMonsters(prev => prev.map(m => 
