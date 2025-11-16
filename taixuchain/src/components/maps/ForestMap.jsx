@@ -1090,8 +1090,6 @@ function ForestMap({ character, onExit }) {
             }
           }
           
-          // 移除这里的调试信息，在 Monster 组件内部处理
-          
           return (
             <Monster
               key={monster.id}
@@ -1104,7 +1102,8 @@ function ForestMap({ character, onExit }) {
               monsterWorldPos={{ x: monster.x, y: monster.y }} // 传递怪物世界位置
               initialPos={{ x: monster.initialX, y: monster.initialY }} // 传递初始位置
               playerAttackTrigger={playerAttackTrigger} // 传递玩家攻击触发器
-              isMainTarget={isMainTarget || isInSplashRange} // 主目标或在溅射范围内（武者溅射用）
+              isMainTarget={isMainTarget} // 是否是主目标（最近的怪物）
+              isInSplashRange={isInSplashRange} // 是否在溅射范围内（仅武者使用）
               onPositionUpdate={(monsterId, newX, newY) => {
                 // 更新怪物位置
                 setMonsters(prev => prev.map(m => 

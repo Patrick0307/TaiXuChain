@@ -13,7 +13,8 @@ function Monster({
   onDeath,
   onAttackPlayer, // 攻击玩家回调
   playerAttackTrigger, // 玩家攻击触发器（时间戳）
-  isMainTarget // 是否是主目标（最近的怪物）
+  isMainTarget, // 是否是主目标（最近的怪物）
+  isInSplashRange // 是否在溅射范围内（仅武者使用）
 }) {
   const [isAttacking, setIsAttacking] = useState(false)
   const [attackFrame, setAttackFrame] = useState(0)
@@ -254,14 +255,23 @@ function Monster({
       
       if (isWarrior) {
         // 武者：范围攻击
-        damage = isMainTarget ? totalAttack : Math.floor(totalAttack * 0.3)
-        if (isMainTarget || damage > 0) {
-          console.log(`⚔️ [Monster ${id}] Warrior ${isMainTarget ? 'MAIN' : 'SPLASH'} attack: ${damage} damage`)
+        if (isMainTarget) {
+          // 主目标受到100%伤害
+          damage = totalAttack
+          console.log(`⚔️ [Monster ${id}] Warrior MAIN attack: ${damage} damage`)
+        } else if (isInSplashRange) {
+          // 溅射范围内的怪物受到30%伤害
+          damage = Math.floor(totalAttack * 0.3)
+          console.log(`💥 [Monster ${id}] Warrior SPLASH attack: ${damage} damage`)
+        } else {
+          // 不在范围内，不受伤
+          return
         }
       } else {
         // 弓箭手/术士：单体攻击
         if (!isMainTarget) {
-          return // 不是主目标，不受伤（不输出日志，减少噪音）
+          // 只有主目标受伤，其他怪物不受伤
+          return
         }
         damage = totalAttack
         console.log(`🏹 [Monster ${id}] Single target attack: ${damage} damage`)
@@ -296,7 +306,7 @@ function Monster({
       // 只为主目标输出超出范围的信息
       console.log(`📏 [Monster ${id}] Out of range: ${distance.toFixed(1)}px > ${attackRange}px`)
     }
-  }, [playerAttackTrigger, isDead, playerPos, monsterWorldPos, currentHp, maxHp, isActivated, isMainTarget, ATTACK_RANGE, onDeath, id])
+  }, [playerAttackTrigger, isDead, playerPos, monsterWorldPos, currentHp, maxHp, isActivated, isMainTarget, isInSplashRange, ATTACK_RANGE, onDeath, id])
 
   // 血条显示逻辑：攻击时显示，攻击结束后3秒隐藏
   useEffect(() => {
