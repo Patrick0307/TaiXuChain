@@ -9,6 +9,19 @@ module taixu::player {
     const CLASS_WARRIOR: u8 = 2;   // 武者 - Warrior
     const CLASS_ARCHER: u8 = 3;    // 射手 - Archer
 
+    /// 职业成长系数 - Class Growth Coefficients
+    // 武者 (Warrior) - 高生命，高攻击
+    const WARRIOR_HP_PER_LEVEL: u64 = 500;    // 生命值成长：500/级
+    const WARRIOR_ATK_PER_LEVEL: u64 = 30;    // 攻击力成长：30/级
+    
+    // 弓箭手 (Archer) - 中生命，中攻击
+    const ARCHER_HP_PER_LEVEL: u64 = 400;     // 生命值成长：400/级
+    const ARCHER_ATK_PER_LEVEL: u64 = 35;     // 攻击力成长：35/级
+    
+    // 术士 (Mage) - 低生命，高攻击
+    const MAGE_HP_PER_LEVEL: u64 = 350;       // 生命值成长：350/级
+    const MAGE_ATK_PER_LEVEL: u64 = 40;       // 攻击力成长：40/级
+
     /// 错误码 - Error Codes
     const EInvalidClass: u64 = 0;
     const EMaxLevel: u64 = 1;
@@ -24,6 +37,9 @@ module taixu::player {
         level: u64,             // 等级 - Level
         exp: u64,               // 当前经验值 - Current experience
         exp_to_next_level: u64, // 升级所需经验 - Experience needed for next level
+        hp: u64,                // 当前生命值 - Current HP
+        max_hp: u64,            // 最大生命值 - Max HP
+        attack: u64,            // 攻击力 - Attack power
         created_at: u64,        // 创建时间 - Creation timestamp
         owner: address,         // 拥有者 - Owner address (永久绑定)
         // 角色外观自定义 - Character Customization
@@ -76,6 +92,9 @@ module taixu::player {
     ) {
         assert!(class >= CLASS_MAGE && class <= CLASS_ARCHER, EInvalidClass);
 
+        // 根据职业计算初始属性 - Calculate initial stats based on class
+        let (initial_hp, initial_attack) = calculate_stats(class, 1);
+
         let player = Player {
             id: object::new(ctx),
             name: string::utf8(name),
@@ -83,6 +102,9 @@ module taixu::player {
             level: 1,
             exp: 0,
             exp_to_next_level: 100,  // 1级升2级需要100经验
+            hp: initial_hp,
+            max_hp: initial_hp,
+            attack: initial_attack,
             created_at: tx_context::epoch(ctx),
             owner: tx_context::sender(ctx),
             gender: string::utf8(gender),
@@ -130,6 +152,9 @@ module taixu::player {
     ) {
         assert!(class >= CLASS_MAGE && class <= CLASS_ARCHER, EInvalidClass);
 
+        // 根据职业计算初始属性 - Calculate initial stats based on class
+        let (initial_hp, initial_attack) = calculate_stats(class, 1);
+
         let player = Player {
             id: object::new(ctx),
             name: string::utf8(name),
@@ -137,6 +162,9 @@ module taixu::player {
             level: 1,
             exp: 0,
             exp_to_next_level: 100,
+            hp: initial_hp,
+            max_hp: initial_hp,
+            attack: initial_attack,
             created_at: tx_context::epoch(ctx),
             owner: recipient,  // 使用指定的接收者
             gender: string::utf8(gender),
@@ -184,6 +212,34 @@ module taixu::player {
         // 计算下一级所需经验 - Calculate exp needed for next level
         // 每级增加50经验需求 - +50 exp requirement per level
         player.exp_to_next_level = player.exp_to_next_level + 50;
+
+        // 根据新等级重新计算属性 - Recalculate stats based on new level
+        let (new_max_hp, new_attack) = calculate_stats(player.class, player.level);
+        player.max_hp = new_max_hp;
+        player.attack = new_attack;
+        player.hp = new_max_hp;  // 升级时恢复满血
+    }
+
+    /// 根据职业和等级计算属性 - Calculate stats based on class and level
+    fun calculate_stats(class: u8, level: u64): (u64, u64) {
+        let hp: u64;
+        let attack: u64;
+
+        if (class == CLASS_WARRIOR) {
+            // 武者：高生命，高攻击
+            hp = WARRIOR_HP_PER_LEVEL * level;
+            attack = WARRIOR_ATK_PER_LEVEL * level;
+        } else if (class == CLASS_ARCHER) {
+            // 弓箭手：中生命，中攻击
+            hp = ARCHER_HP_PER_LEVEL * level;
+            attack = ARCHER_ATK_PER_LEVEL * level;
+        } else {
+            // 术士：低生命，高攻击
+            hp = MAGE_HP_PER_LEVEL * level;
+            attack = MAGE_ATK_PER_LEVEL * level;
+        };
+
+        (hp, attack)
     }
 
     // ========== 查询函数 - Query Functions ==========
@@ -193,6 +249,9 @@ module taixu::player {
     public fun get_level(player: &Player): u64 { player.level }
     public fun get_exp(player: &Player): u64 { player.exp }
     public fun get_exp_to_next_level(player: &Player): u64 { player.exp_to_next_level }
+    public fun get_hp(player: &Player): u64 { player.hp }
+    public fun get_max_hp(player: &Player): u64 { player.max_hp }
+    public fun get_attack(player: &Player): u64 { player.attack }
     public fun get_created_at(player: &Player): u64 { player.created_at }
     public fun get_owner(player: &Player): address { player.owner }
     
