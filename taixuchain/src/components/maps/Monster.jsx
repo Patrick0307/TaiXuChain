@@ -76,141 +76,154 @@ function Monster({
     onPositionUpdateRef.current = onPositionUpdate
   }, [playerPos, monsterWorldPos, initialPos, onPositionUpdate])
 
-  // 检测玩家距离、移动向玩家、攻击或回归初始位置
+  // 怪物AI逻辑函数（提取出来以便复用）
+  const updateMonsterBehavior = () => {
+    if (isDead) return
+
+    const currentPlayerPos = playerPosRef.current
+    const currentMonsterPos = monsterWorldPosRef.current
+    const currentInitialPos = initialPosRef.current
+    const currentOnPositionUpdate = onPositionUpdateRef.current
+
+    if (!currentPlayerPos || !currentMonsterPos || !currentInitialPos || !currentOnPositionUpdate) return
+
+    // 计算玩家和怪物之间的距离
+    const dx = currentPlayerPos.x - currentMonsterPos.x
+    const dy = currentPlayerPos.y - currentMonsterPos.y
+    const distance = Math.sqrt(dx * dx + dy * dy)
+
+    // 计算怪物与初始位置的距离
+    const dxToHome = currentInitialPos.x - currentMonsterPos.x
+    const dyToHome = currentInitialPos.y - currentMonsterPos.y
+    const distanceToHome = Math.sqrt(dxToHome * dxToHome + dyToHome * dyToHome)
+
+    // 如果怪物离初始位置太远，强制回归（防止怪物被拉太远）
+    if (distanceToHome > MAX_CHASE_DISTANCE) {
+      // 清除回归计时器
+      if (returnTimerRef.current && returnTimerRef.current !== 'returning') {
+        clearTimeout(returnTimerRef.current)
+      }
+      // 立即开始回归
+      returnTimerRef.current = 'returning'
+      
+      // 停止攻击
+      if (isAttacking) {
+        setIsAttacking(false)
+      }
+      
+      // 快速回归
+      const dirXToHome = dxToHome / distanceToHome
+      const dirYToHome = dyToHome / distanceToHome
+      
+      const newX = currentMonsterPos.x + dirXToHome * RETURN_SPEED
+      const newY = currentMonsterPos.y + dirYToHome * RETURN_SPEED
+      
+      currentOnPositionUpdate(id, newX, newY)
+      setShowHealthBar(true) // 显示血条表示正在回归
+      
+      return // 跳过其他逻辑
+    }
+
+    // 如果玩家在检测范围内
+    if (distance < DETECT_RANGE) {
+      // 清除回归计时器（玩家回来了）
+      if (returnTimerRef.current) {
+        clearTimeout(returnTimerRef.current)
+        returnTimerRef.current = null
+      }
+      
+      // 激活野怪
+      if (!isActivated) {
+        setIsActivated(true)
+      }
+      
+      if (distance > ATTACK_RANGE) {
+        // 移动向玩家
+        const dirX = dx / distance // 归一化方向
+        const dirY = dy / distance
+        
+        const newX = currentMonsterPos.x + dirX * MOVE_SPEED
+        const newY = currentMonsterPos.y + dirY * MOVE_SPEED
+        
+        // 更新怪物位置
+        currentOnPositionUpdate(id, newX, newY)
+        
+        // 显示血条（表示怪物已激活）
+        setShowHealthBar(true)
+      } else {
+        // 在攻击范围内，开始攻击
+        if (!isAttacking) {
+          setIsAttacking(true)
+          setShowHealthBar(true) // 显示血条
+          
+          // 检查是否可以攻击玩家（攻击间隔）
+          const now = Date.now()
+          if (now - lastAttackTimeRef.current >= MONSTER_ATTACK_INTERVAL) {
+            lastAttackTimeRef.current = now
+            // 通知父组件怪物攻击了玩家
+            if (onAttackPlayer) {
+              onAttackPlayer(MONSTER_ATTACK)
+            }
+          }
+          
+          // 攻击持续1秒
+          setTimeout(() => {
+            setIsAttacking(false)
+          }, 1000)
+        }
+      }
+    } else {
+      // 玩家离开检测范围
+      if (isAttacking) {
+        setIsAttacking(false)
+      }
+      
+      // 只有被激活过的野怪才会回归
+      if (isActivated) {
+        // 如果还没有启动回归计时器，启动它
+        if (!returnTimerRef.current) {
+          returnTimerRef.current = setTimeout(() => {
+            // 5秒后开始回归
+            returnTimerRef.current = 'returning' // 标记为正在回归
+          }, RETURN_DELAY)
+        }
+        
+        // 如果已经过了延迟时间，开始回归
+        if (returnTimerRef.current === 'returning') {
+          // 如果距离初始位置较远，走回去
+          if (distanceToHome > RETURN_THRESHOLD) {
+            const dirXToHome = dxToHome / distanceToHome
+            const dirYToHome = dyToHome / distanceToHome
+            
+            const newX = currentMonsterPos.x + dirXToHome * RETURN_SPEED
+            const newY = currentMonsterPos.y + dirYToHome * RETURN_SPEED
+            
+            // 更新怪物位置
+            currentOnPositionUpdate(id, newX, newY)
+            setShowHealthBar(true) // 显示血条表示正在回归
+          } else {
+            // 已经回到初始位置，重置激活状态
+            setIsActivated(false)
+            setShowHealthBar(false) // 隐藏血条
+            returnTimerRef.current = null
+          }
+        }
+      }
+    }
+  }
+
+  // 当玩家位置改变时，立即更新怪物行为（实时响应玩家移动）
+  useEffect(() => {
+    if (isDead) return
+    updateMonsterBehavior()
+  }, [playerPos]) // 监听玩家位置变化
+
+  // 定时器循环（作为备用，确保怪物持续更新）
   useEffect(() => {
     if (isDead) return
 
     const moveAndAttackLoop = setInterval(() => {
-      const currentPlayerPos = playerPosRef.current
-      const currentMonsterPos = monsterWorldPosRef.current
-      const currentInitialPos = initialPosRef.current
-      const currentOnPositionUpdate = onPositionUpdateRef.current
-
-      if (!currentPlayerPos || !currentMonsterPos || !currentInitialPos || !currentOnPositionUpdate) return
-
-      // 计算玩家和怪物之间的距离
-      const dx = currentPlayerPos.x - currentMonsterPos.x
-      const dy = currentPlayerPos.y - currentMonsterPos.y
-      const distance = Math.sqrt(dx * dx + dy * dy)
-
-      // 计算怪物与初始位置的距离
-      const dxToHome = currentInitialPos.x - currentMonsterPos.x
-      const dyToHome = currentInitialPos.y - currentMonsterPos.y
-      const distanceToHome = Math.sqrt(dxToHome * dxToHome + dyToHome * dyToHome)
-
-      // 如果怪物离初始位置太远，强制回归（防止怪物被拉太远）
-      if (distanceToHome > MAX_CHASE_DISTANCE) {
-        // 清除回归计时器
-        if (returnTimerRef.current && returnTimerRef.current !== 'returning') {
-          clearTimeout(returnTimerRef.current)
-        }
-        // 立即开始回归
-        returnTimerRef.current = 'returning'
-        
-        // 停止攻击
-        if (isAttacking) {
-          setIsAttacking(false)
-        }
-        
-        // 快速回归
-        const dirXToHome = dxToHome / distanceToHome
-        const dirYToHome = dyToHome / distanceToHome
-        
-        const newX = currentMonsterPos.x + dirXToHome * RETURN_SPEED
-        const newY = currentMonsterPos.y + dirYToHome * RETURN_SPEED
-        
-        currentOnPositionUpdate(id, newX, newY)
-        setShowHealthBar(true) // 显示血条表示正在回归
-        
-        return // 跳过其他逻辑
-      }
-
-      // 如果玩家在检测范围内
-      if (distance < DETECT_RANGE) {
-        // 清除回归计时器（玩家回来了）
-        if (returnTimerRef.current) {
-          clearTimeout(returnTimerRef.current)
-          returnTimerRef.current = null
-        }
-        
-        // 激活野怪
-        if (!isActivated) {
-          setIsActivated(true)
-        }
-        
-        if (distance > ATTACK_RANGE) {
-          // 移动向玩家
-          const dirX = dx / distance // 归一化方向
-          const dirY = dy / distance
-          
-          const newX = currentMonsterPos.x + dirX * MOVE_SPEED
-          const newY = currentMonsterPos.y + dirY * MOVE_SPEED
-          
-          // 更新怪物位置
-          currentOnPositionUpdate(id, newX, newY)
-          
-          // 显示血条（表示怪物已激活）
-          setShowHealthBar(true)
-        } else {
-          // 在攻击范围内，开始攻击
-          if (!isAttacking) {
-            setIsAttacking(true)
-            setShowHealthBar(true) // 显示血条
-            
-            // 检查是否可以攻击玩家（攻击间隔）
-            const now = Date.now()
-            if (now - lastAttackTimeRef.current >= MONSTER_ATTACK_INTERVAL) {
-              lastAttackTimeRef.current = now
-              // 通知父组件怪物攻击了玩家
-              if (onAttackPlayer) {
-                onAttackPlayer(MONSTER_ATTACK)
-              }
-            }
-            
-            // 攻击持续1秒
-            setTimeout(() => {
-              setIsAttacking(false)
-            }, 1000)
-          }
-        }
-      } else {
-        // 玩家离开检测范围
-        if (isAttacking) {
-          setIsAttacking(false)
-        }
-        
-        // 只有被激活过的野怪才会回归
-        if (isActivated) {
-          // 如果还没有启动回归计时器，启动它
-          if (!returnTimerRef.current) {
-            returnTimerRef.current = setTimeout(() => {
-              // 5秒后开始回归
-              returnTimerRef.current = 'returning' // 标记为正在回归
-            }, RETURN_DELAY)
-          }
-          
-          // 如果已经过了延迟时间，开始回归
-          if (returnTimerRef.current === 'returning') {
-            // 如果距离初始位置较远，走回去
-            if (distanceToHome > RETURN_THRESHOLD) {
-              const dirXToHome = dxToHome / distanceToHome
-              const dirYToHome = dyToHome / distanceToHome
-              
-              const newX = currentMonsterPos.x + dirXToHome * RETURN_SPEED
-              const newY = currentMonsterPos.y + dirYToHome * RETURN_SPEED
-              
-              // 更新怪物位置
-              currentOnPositionUpdate(id, newX, newY)
-              setShowHealthBar(true) // 显示血条表示正在回归
-            } else {
-              // 已经回到初始位置，重置激活状态
-              setIsActivated(false)
-              setShowHealthBar(false) // 隐藏血条
-              returnTimerRef.current = null
-            }
-          }
-        }
-      }
+      updateMonsterBehavior()
     }, 50) // 每50ms更新一次（更流畅的移动）
 
     return () => {
@@ -219,7 +232,7 @@ function Monster({
         clearTimeout(returnTimerRef.current)
       }
     }
-  }, [isDead, isAttacking, isActivated, id, DETECT_RANGE, ATTACK_RANGE, MAX_CHASE_DISTANCE, MOVE_SPEED, RETURN_SPEED, RETURN_THRESHOLD, RETURN_DELAY, MONSTER_ATTACK_INTERVAL, onAttackPlayer])
+  }, [isDead, isAttacking, isActivated])
 
   // 处理玩家攻击怪物
   useEffect(() => {
