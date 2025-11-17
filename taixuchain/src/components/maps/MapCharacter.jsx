@@ -30,6 +30,22 @@ function MapCharacter({
   // 获取武器图片路径
   const weaponImagePath = weapon ? WEAPON_IMAGE_MAP[weapon.name] : null
   
+  // 根据职业确定攻击范围
+  const characterClass = character.id.toLowerCase()
+  let attackRange = 60 // 默认攻击范围（像素）
+  
+  if (characterClass === 'warrior') {
+    attackRange = 60 // 武者：近战范围
+  } else if (characterClass === 'archer' || characterClass === 'mage') {
+    attackRange = 60 // 弓箭手和术士：远程范围（与近战相同，因为代码中使用的是60）
+  }
+  
+  const aggroRange = 90 // 仇恨范围（吸引野怪的范围）- 缩小到90像素
+  
+  // 缩放范围以匹配地图缩放
+  const scaledAttackRange = attackRange * mapScale
+  const scaledAggroRange = aggroRange * mapScale
+  
   return (
     <div 
       style={{
@@ -175,6 +191,44 @@ function MapCharacter({
           </div>
         </div>
       </div>
+      
+      {/* 仇恨范围圈（外圈，黄色） */}
+      <div style={{
+        position: 'absolute',
+        left: '110%',
+        top: `${playerSize * 1.5}px`,
+        width: `${scaledAggroRange * 2}px`,
+        height: `${scaledAggroRange * 2}px`,
+        transform: 'translate(-50%, -50%)',
+        borderRadius: '50%',
+        border: '2px dashed rgba(255, 200, 0, 0.25)',
+        background: 'radial-gradient(circle, rgba(255, 200, 0, 0.05) 0%, transparent 70%)',
+        pointerEvents: 'none',
+        zIndex: -1
+      }} />
+      
+      {/* 攻击范围圈（内圈，根据职业显示不同颜色） */}
+      <div style={{
+        position: 'absolute',
+        left: '110%',
+        top: `${playerSize * 1.5}px`,
+        width: `${scaledAttackRange * 2}px`,
+        height: `${scaledAttackRange * 2}px`,
+        transform: 'translate(-50%, -50%)',
+        borderRadius: '50%',
+        border: `2px solid ${
+          characterClass === 'warrior' ? 'rgba(255, 50, 50, 0.3)' : // 武者：红色
+          characterClass === 'archer' ? 'rgba(50, 255, 50, 0.3)' : // 弓箭手：绿色
+          'rgba(100, 150, 255, 0.3)' // 术士：蓝色
+        }`,
+        background: `radial-gradient(circle, ${
+          characterClass === 'warrior' ? 'rgba(255, 50, 50, 0.08)' : // 武者：红色
+          characterClass === 'archer' ? 'rgba(50, 255, 50, 0.08)' : // 弓箭手：绿色
+          'rgba(100, 150, 255, 0.08)' // 术士：蓝色
+        } 0%, transparent 70%)`,
+        pointerEvents: 'none',
+        zIndex: -1
+      }} />
       
       {/* 阴影 */}
       <div style={{
