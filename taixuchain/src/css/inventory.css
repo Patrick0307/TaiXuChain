@@ -147,9 +147,12 @@
   height: 100%;
 }
 
-.weapon-icon {
-  font-size: 2rem;
-  margin-bottom: 5px;
+.weapon-icon-img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 }
 
 .weapon-level {
@@ -237,11 +240,22 @@
 }
 
 .weapon-icon-large {
-  font-size: 5rem;
   text-align: center;
   padding: 20px;
   background: rgba(0, 0, 0, 0.3);
   border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.weapon-detail-img {
+  max-width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
 }
 
 .weapon-stats {

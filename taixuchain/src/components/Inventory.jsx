@@ -89,7 +89,11 @@ function Inventory({ character, isOpen, onClose }) {
               <div className="weapon-details">
                 <h3>{selectedWeapon.name}</h3>
                 <div className="weapon-icon-large">
-                  {getWeaponIcon(selectedWeapon.weaponType)}
+                  <img 
+                    src={getWeaponImage(selectedWeapon.name, selectedWeapon.weaponType)} 
+                    alt={selectedWeapon.name}
+                    className="weapon-detail-img"
+                  />
                 </div>
                 <div className="weapon-stats">
                   <div className="stat-row">
@@ -130,14 +134,16 @@ function Inventory({ character, isOpen, onClose }) {
   )
 }
 
-// 获取武器图标
-function getWeaponIcon(weaponType) {
-  const icons = {
-    1: '⚔️', // Sword
-    2: '🏹', // Bow
-    3: '🪄'  // Staff
+// 获取武器图片路径
+function getWeaponImage(weaponName, weaponType) {
+  const typeFolder = {
+    1: 'swords',
+    2: 'bows',
+    3: 'staves'
   }
-  return icons[weaponType] || '❓'
+  
+  const folder = typeFolder[weaponType] || 'swords'
+  return `/weapons/${folder}/${weaponName}.png`
 }
 
 // 获取武器类型名称

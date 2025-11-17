@@ -8,9 +8,11 @@ function InventorySlot({ weapon, isSelected, onClick }) {
     >
       {weapon ? (
         <div className="slot-content">
-          <div className="weapon-icon">
-            {getWeaponIcon(weapon.weaponType)}
-          </div>
+          <img 
+            src={getWeaponImage(weapon.name, weapon.weaponType)} 
+            alt={weapon.name}
+            className="weapon-icon-img"
+          />
           <div className="weapon-level">Lv.{weapon.level}</div>
         </div>
       ) : (
@@ -22,14 +24,16 @@ function InventorySlot({ weapon, isSelected, onClick }) {
   )
 }
 
-// 获取武器图标
-function getWeaponIcon(weaponType) {
-  const icons = {
-    1: '⚔️', // Sword
-    2: '🏹', // Bow
-    3: '🪄'  // Staff
+// 获取武器图片路径
+function getWeaponImage(weaponName, weaponType) {
+  const typeFolder = {
+    1: 'swords',
+    2: 'bows',
+    3: 'staves'
   }
-  return icons[weaponType] || '❓'
+  
+  const folder = typeFolder[weaponType] || 'swords'
+  return `/weapons/${folder}/${weaponName}.png`
 }
 
 export default InventorySlot
