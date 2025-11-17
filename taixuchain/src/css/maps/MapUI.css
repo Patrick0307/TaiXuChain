@@ -67,6 +67,46 @@
   white-space: nowrap;
 }
 
+/* 顶部栏按钮组 */
+.top-bar-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* 背包按钮 */
+.inventory-button {
+  padding: 8px 12px;
+  background: rgba(139, 69, 19, 0.9);
+  color: #fff;
+  border: 2px solid #8b7355;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: 'Press Start 2P', cursive;
+  box-shadow: 
+    0 0 0 1px #000,
+    inset 0 2px 0 rgba(255, 255, 255, 0.3);
+  text-shadow: 1px 1px 0 #000;
+  transition: all 0.1s;
+  white-space: nowrap;
+}
+
+.inventory-button:hover {
+  background: rgba(160, 82, 45, 1);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 0 0 1px #000,
+    0 3px 0 rgba(0, 0, 0, 0.5),
+    inset 0 2px 0 rgba(255, 255, 255, 0.4);
+}
+
+.inventory-button:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 0 0 1px #000,
+    inset 0 2px 0 rgba(0, 0, 0, 0.3);
+}
+
 /* 退出按钮 - 在顶部栏内 */
 .exit-map-button {
   padding: 8px 15px;

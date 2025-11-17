@@ -2,12 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import MapUI from './MapUI'
 import MapCharacter from './MapCharacter'
 import Monster from './Monster'
+import Inventory from '../Inventory'
 import { checkPlayerWeapon, mintWeaponForPlayer } from '../../utils/suiClient'
 import '../../css/maps/ForestMap.css'
 
 function ForestMap({ character, onExit }) {
   const [playerWeapon, setPlayerWeapon] = useState(null)
   const [isCheckingWeapon, setIsCheckingWeapon] = useState(true)
+  const [isInventoryOpen, setIsInventoryOpen] = useState(false)
   const canvasRef = useRef(null)
   const [mapData, setMapData] = useState(null)
   const [playerPos, setPlayerPos] = useState(null) // 初始为null，等待地图加载后计算
@@ -329,7 +331,19 @@ function ForestMap({ character, onExit }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
+        // 如果背包打开，先关闭背包
+        if (isInventoryOpen) {
+          setIsInventoryOpen(false)
+          return
+        }
         onExit()
+        return
+      }
+      
+      // I键打开/关闭背包
+      if (e.key === 'i' || e.key === 'I') {
+        e.preventDefault()
+        setIsInventoryOpen(prev => !prev)
         return
       }
       
@@ -389,7 +403,7 @@ function ForestMap({ character, onExit }) {
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [onExit, character, playerWeapon, PLAYER_ATTACK_INTERVAL])
+  }, [onExit, character, playerWeapon, PLAYER_ATTACK_INTERVAL, isInventoryOpen])
 
   // 移动角色和行走动画（使用RAF确保流畅）
   useEffect(() => {
@@ -1153,6 +1167,14 @@ function ForestMap({ character, onExit }) {
         onExit={onExit}
         playerCurrentHp={playerCurrentHp}
         playerWeapon={playerWeapon}
+        onOpenInventory={() => setIsInventoryOpen(true)}
+      />
+      
+      {/* 背包系统 */}
+      <Inventory 
+        character={character}
+        isOpen={isInventoryOpen}
+        onClose={() => setIsInventoryOpen(false)}
       />
     </div>
   )
