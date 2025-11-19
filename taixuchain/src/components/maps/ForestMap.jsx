@@ -62,8 +62,21 @@ function ForestMap({ character, onExit }) {
           return
         }
 
-        console.log('🔍 Checking if player has weapon...')
-        const weapon = await checkPlayerWeapon(walletAddress)
+        // 职业名称到 ID 的映射
+        const classNameToId = {
+          'mage': 1,     // CLASS_MAGE = 1 (Staff)
+          'warrior': 2,  // CLASS_WARRIOR = 2 (Sword)
+          'archer': 3    // CLASS_ARCHER = 3 (Bow)
+        }
+        
+        // 获取职业 ID
+        let classId = character.id
+        if (typeof classId === 'string') {
+          classId = classNameToId[classId.toLowerCase()] || 2
+        }
+        
+        console.log(`🔍 Checking if player has weapon for class ${classId} (${character.id})...`)
+        const weapon = await checkPlayerWeapon(walletAddress, classId)
         
         // 职业到武器类型的映射
         const classToWeaponType = {
@@ -93,32 +106,7 @@ function ForestMap({ character, onExit }) {
         }
         
         async function mintCorrectWeapon() {
-          console.log('🎁 No weapon found, minting starter weapon...')
-          
-          // 职业名称到 ID 的映射
-          const classNameToId = {
-            'mage': 1,
-            'warrior': 2,
-            'archer': 3
-          }
-          
-          // 获取职业 ID（支持字符串和数字）
-          let classId = character.id
-          console.log(`Original character.id: "${character.id}", type: ${typeof character.id}`)
-          
-          if (typeof classId === 'string') {
-            const lowerCaseId = classId.toLowerCase()
-            console.log(`Lowercase: "${lowerCaseId}"`)
-            classId = classNameToId[lowerCaseId]
-            console.log(`Mapped classId: ${classId}`)
-            
-            if (!classId) {
-              console.error(`Unknown class name: "${character.id}", using default warrior (2)`)
-              classId = 2
-            }
-          }
-          
-          console.log(`Final - Character class: ${character.id}, classId: ${classId}`)
+          console.log(`🎁 Minting weapon for class ${classId} (${character.id})...`)
           
           // 根据职业铸造武器
           await mintWeaponForPlayer(walletAddress, classId)
@@ -127,10 +115,10 @@ function ForestMap({ character, onExit }) {
           console.log('⏳ Waiting for blockchain confirmation...')
           await new Promise(resolve => setTimeout(resolve, 2000))
           
-          // 重新查询武器（最多重试3次）
+          // 重新查询武器（最多重试3次），传递职业 ID 以获取匹配的武器
           let newWeapon = null
           for (let i = 0; i < 3; i++) {
-            newWeapon = await checkPlayerWeapon(walletAddress)
+            newWeapon = await checkPlayerWeapon(walletAddress, classId)
             if (newWeapon) {
               console.log('✅ Starter weapon received:', newWeapon.name)
               setPlayerWeapon(newWeapon)

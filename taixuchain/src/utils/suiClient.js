@@ -5,16 +5,16 @@ import { Transaction } from '@mysten/sui/transactions'
 export const suiClient = new SuiClient({ url: 'https://rpc-testnet.onelabs.cc:443' })
 
 // 从环境变量或配置文件读取 (V8 - 2025-11-20)
-export const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID || '0xbf08e952309ce954de4fc8b85eaa791adb2b407e2be10ebf91538f9915badb6e'
+export const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID || '0xd249f6f2ecf256b26025e2d8454482e05565b716d5c3ebb6cf5fd24d01f03c9f'
 export const REGISTRY_ID = import.meta.env.VITE_REGISTRY_ID || '0xb385cbebfde05028eb3dd95754ca2d3651d477bd438621741d393fb390776948'
 export const MARKETPLACE_ID = import.meta.env.VITE_MARKETPLACE_ID || '0x3b18f7a9fe90b85aad2e425ff42a1a27b73005d4eee08974c340c378c137e463'
 export const WEAPON_MINT_CAP = import.meta.env.VITE_WEAPON_MINT_CAP || '0xb7bd7f2b0f7f1a93a71e52a380345f930c2010997a7fccee27b70f59a66e5c95'
 
-// 职业映射
+// 职业映射（与后端和合约保持一致）
 export const CLASS_MAP = {
-  'Mage': 1,
-  'Warrior': 2,
-  'Archer': 3
+  'Warrior': 1,
+  'Archer': 2,
+  'Mage': 3
 }
 
 /**
@@ -134,15 +134,21 @@ export async function checkExistingPlayer(walletAddress) {
 }
 
 /**
- * 查询玩家武器
+ * 查询玩家武器（可选：根据职业过滤）
  * @param {string} walletAddress - 钱包地址
+ * @param {number} classId - 职业 ID (可选，用于过滤匹配职业的武器)
  * @returns {Promise<object|null>} 武器信息或 null
  */
-export async function checkPlayerWeapon(walletAddress) {
+export async function checkPlayerWeapon(walletAddress, classId = null) {
   try {
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
     
-    const response = await fetch(`${BACKEND_URL}/api/weapon/${walletAddress}`)
+    // 如果提供了 classId，添加到查询参数
+    const url = classId 
+      ? `${BACKEND_URL}/api/weapon/${walletAddress}?classId=${classId}`
+      : `${BACKEND_URL}/api/weapon/${walletAddress}`
+    
+    const response = await fetch(url)
     
     if (!response.ok) {
       throw new Error('Failed to check player weapon')
@@ -155,7 +161,7 @@ export async function checkPlayerWeapon(walletAddress) {
       return data.weapon
     }
     
-    console.log('ℹ️ No weapon found for this player')
+    console.log('ℹ️ No weapon found for this player' + (classId ? ` (class ${classId})` : ''))
     return null
   } catch (error) {
     console.error('❌ Error checking player weapon:', error)

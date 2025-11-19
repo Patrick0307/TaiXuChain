@@ -84,10 +84,11 @@ app.post('/api/sponsor/create-player', async (req, res) => {
   }
 });
 
-// 查询玩家武器
+// 查询玩家武器（可选：根据职业过滤）
 app.get('/api/weapon/:address', async (req, res) => {
   try {
     const { address } = req.params;
+    const { classId } = req.query; // 可选的职业 ID 查询参数
 
     if (!address) {
       return res.status(400).json({ 
@@ -95,9 +96,10 @@ app.get('/api/weapon/:address', async (req, res) => {
       });
     }
 
-    console.log(`[Query] Checking weapon for address: ${address}`);
+    const classIdNum = classId ? parseInt(classId) : null;
+    console.log(`[Query] Checking weapon for address: ${address}${classIdNum ? `, class: ${classIdNum}` : ''}`);
 
-    const weapon = await getPlayerWeapon(address);
+    const weapon = await getPlayerWeapon(address, classIdNum);
 
     if (!weapon) {
       return res.json({ 

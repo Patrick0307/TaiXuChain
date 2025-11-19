@@ -160,6 +160,7 @@ export async function sponsorCreatePlayer(playerAddress, name, classId, customiz
 export async function getPlayerByAddress(playerAddress) {
   try {
     console.log(`[Query] Checking if player exists: ${playerAddress}`);
+    console.log(`[Query] Looking for player type: ${PACKAGE_ID}::player::Player`);
     
     // 查询该地址拥有的所有对象
     const objects = await suiClient.getOwnedObjects({
@@ -170,15 +171,29 @@ export async function getPlayerByAddress(playerAddress) {
       },
     });
     
-    // 查找 Player 类型的对象
+    console.log(`[Query] Total objects found: ${objects.data.length}`);
+    
+    // 打印所有对象类型以便调试
+    objects.data.forEach((obj, index) => {
+      if (obj.data?.type?.includes('::player::Player')) {
+        console.log(`[Query] Found Player object ${index}: ${obj.data.type}`);
+      }
+    });
+    
+    // 查找 Player 类型的对象（支持新旧版本的 Package ID）
+    // 新版本: 0xd249f6f2ecf256b26025e2d8454482e05565b716d5c3ebb6cf5fd24d01f03c9f
+    // 旧版本: 0xbf08e952309ce954de4fc8b85eaa791adb2b407e2be10ebf91538f9915badb6e
     const playerObject = objects.data.find(obj => 
-      obj.data?.type?.includes(`${PACKAGE_ID}::player::Player`)
+      obj.data?.type?.includes('::player::Player')
     );
     
     if (!playerObject) {
       console.log(`[Query] No player found for ${playerAddress}`);
+      console.log(`[Query] Searched for type containing: ::player::Player`);
       return null;
     }
+    
+    console.log(`[Query] Player found with type: ${playerObject.data.type}`);
     
     console.log(`[Query] Player found!`, playerObject.data.objectId);
     
@@ -233,11 +248,12 @@ export async function getSponsorBalance() {
 }
 
 /**
- * 查询玩家的武器
+ * 查询玩家的武器（根据职业过滤）
  * @param {string} playerAddress - 玩家钱包地址
+ * @param {number} classId - 职业 ID (可选，用于过滤匹配职业的武器)
  * @returns {Promise<object|null>} 武器信息或 null
  */
-export async function getPlayerWeapon(playerAddress) {
+export async function getPlayerWeapon(playerAddress, classId = null) {
   try {
     console.log(`[Query] Checking weapons for: ${playerAddress}`);
     console.log(`[Query] Looking for weapon type: ${PACKAGE_ID}::weapon::Weapon`);
@@ -258,17 +274,59 @@ export async function getPlayerWeapon(playerAddress) {
       console.log(`[Query] Object ${index}: ${obj.data?.type || 'no type'}`);
     });
     
-    // 查找 Weapon 类型的对象（排除 WeaponMintCap）
-    const weaponObject = objects.data.find(obj => {
+    // 查找所有 Weapon 类型的对象（排除 WeaponMintCap）
+    const weaponObjects = objects.data.filter(obj => {
       const objType = obj.data?.type;
       const isWeapon = objType && objType.includes('::weapon::Weapon') && !objType.includes('WeaponMintCap');
       console.log(`[Query] Checking object ${obj.data?.objectId}: ${objType} -> isWeapon: ${isWeapon}`);
       return isWeapon;
     });
     
-    if (!weaponObject) {
+    if (weaponObjects.length === 0) {
       console.log(`[Query] No weapon found for ${playerAddress}`);
       return null;
+    }
+    
+    console.log(`[Query] Found ${weaponObjects.length} weapon(s) total`);
+    
+    // 如果提供了职业 ID，根据职业过滤武器
+    let filteredWeapons = weaponObjects;
+    if (classId !== null) {
+      // 职业到武器类型的映射
+      const classToWeaponType = {
+        1: 3, // Mage -> Staff
+        2: 1, // Warrior -> Sword
+        3: 2, // Archer -> Bow
+      };
+      
+      const expectedWeaponType = classToWeaponType[classId];
+      console.log(`[Query] Filtering for class ${classId}, expected weapon type: ${expectedWeaponType}`);
+      
+      filteredWeapons = weaponObjects.filter(obj => {
+        const weaponType = parseInt(obj.data?.content?.fields?.weapon_type);
+        const matches = weaponType === expectedWeaponType;
+        console.log(`[Query] Weapon ${obj.data?.objectId} type ${weaponType} ${matches ? '✅ matches' : '❌ does not match'}`);
+        return matches;
+      });
+      
+      if (filteredWeapons.length === 0) {
+        console.log(`[Query] No weapon matching class ${classId} found`);
+        return null;
+      }
+      
+      console.log(`[Query] Found ${filteredWeapons.length} weapon(s) matching class ${classId}`);
+    }
+    
+    // 返回最新的武器（version 最大的）
+    const weaponObject = filteredWeapons.reduce((latest, current) => {
+      const latestVersion = parseInt(latest.data?.version || 0);
+      const currentVersion = parseInt(current.data?.version || 0);
+      return currentVersion > latestVersion ? current : latest;
+    });
+    
+    if (filteredWeapons.length > 1) {
+      console.log(`[Query] Multiple matching weapons found, versions: ${filteredWeapons.map(w => w.data?.version).join(', ')}`);
+      console.log(`[Query] Returning weapon with version ${weaponObject.data?.version}`);
     }
     
     console.log(`[Query] Weapon found!`, weaponObject.data.objectId);
@@ -308,7 +366,7 @@ export async function sponsorMintWeapon(playerAddress, classId) {
   try {
     const weaponDeployAddress = weaponDeployKeypair.getPublicKey().toSuiAddress();
     
-    // 根据职业确定武器类型
+    // 根据职业确定武器类型（与 Move 合约中的 CLASS 常量对应）
     // 1=Mage -> Staff(3), 2=Warrior -> Sword(1), 3=Archer -> Bow(2)
     const weaponTypeMap = {
       1: 3, // Mage -> Staff
