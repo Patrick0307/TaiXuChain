@@ -19,6 +19,7 @@ function Monster({
   const [isAttacking, setIsAttacking] = useState(false)
   const [attackFrame, setAttackFrame] = useState(0)
   const [isDead, setIsDead] = useState(false)
+  const [deathAnimation, setDeathAnimation] = useState(0) // 死亡动画进度 0-1
   const [currentHp, setCurrentHp] = useState(150) // 怪物当前生命值
   const [maxHp] = useState(150) // 怪物最大生命值
   const [showHealthBar, setShowHealthBar] = useState(false) // 是否显示血条
@@ -316,10 +317,28 @@ function Monster({
       // 检查是否死亡
       if (newHp <= 0) {
         console.log(`💀 [Monster ${id}] DIED! (HP reached 0)`)
-        setIsDead(true)
-        if (onDeath) {
-          onDeath()
+        
+        // 开始死亡动画
+        const startTime = Date.now()
+        const animationDuration = 800 // 0.8秒马赛克消失动画
+        
+        const animateDeath = () => {
+          const elapsed = Date.now() - startTime
+          const progress = Math.min(elapsed / animationDuration, 1)
+          setDeathAnimation(progress)
+          
+          if (progress < 1) {
+            requestAnimationFrame(animateDeath)
+          } else {
+            // 动画结束，标记为死亡
+            setIsDead(true)
+            if (onDeath) {
+              onDeath()
+            }
+          }
         }
+        
+        requestAnimationFrame(animateDeath)
       }
     } else if (isMainTarget) {
       // 只为主目标输出超出范围的信息
@@ -350,8 +369,9 @@ function Monster({
     }
   }, [isAttacking, showHealthBar])
 
-  if (isDead) {
-    return null // 死亡后不显示
+  // 死亡后仍然渲染（用于马赛克消失动画）
+  if (isDead && deathAnimation === 0) {
+    return null // 动画未开始时不显示
   }
 
   // 根据怪物类型选择图片路径
@@ -381,7 +401,13 @@ function Monster({
           height: '100%',
           objectFit: 'contain',
           imageRendering: 'pixelated',
-          filter: isAttacking ? 'brightness(1.2) drop-shadow(0 0 10px rgba(255, 0, 0, 0.5))' : 'none',
+          filter: isAttacking 
+            ? 'brightness(1.2) drop-shadow(0 0 10px rgba(255, 0, 0, 0.5))' 
+            : deathAnimation > 0 
+              ? `brightness(${1 - deathAnimation * 0.5}) blur(${deathAnimation * 3}px)` 
+              : 'none',
+          opacity: deathAnimation > 0 ? 1 - deathAnimation : 1,
+          transform: deathAnimation > 0 ? `scale(${1 - deathAnimation * 0.3})` : 'scale(1)',
           transition: 'filter 0.1s ease'
         }}
         onError={(e) => {
@@ -389,6 +415,31 @@ function Monster({
           e.target.style.display = 'none'
         }}
       />
+      
+      {/* 马赛克消失效果 */}
+      {deathAnimation > 0 && (
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: `repeating-linear-gradient(
+            0deg,
+            rgba(255, 255, 255, ${0.3 * deathAnimation}) 0px,
+            transparent ${2 + deathAnimation * 8}px,
+            transparent ${4 + deathAnimation * 16}px
+          ),
+          repeating-linear-gradient(
+            90deg,
+            rgba(255, 255, 255, ${0.3 * deathAnimation}) 0px,
+            transparent ${2 + deathAnimation * 8}px,
+            transparent ${4 + deathAnimation * 16}px
+          )`,
+          pointerEvents: 'none',
+          mixBlendMode: 'overlay'
+        }} />
+      )}
       
       {/* 怪物血条 - 只在攻击或被攻击时显示 */}
       {showHealthBar && (

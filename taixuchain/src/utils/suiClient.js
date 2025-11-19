@@ -232,3 +232,41 @@ export async function mintWeaponForPlayer(walletAddress, classId) {
     throw error
   }
 }
+
+/**
+ * 赞助铸造随机武器（怪物掉落）
+ * @param {string} walletAddress - 钱包地址
+ * @returns {Promise<object>} 交易结果和武器信息
+ */
+export async function mintRandomWeaponForPlayer(walletAddress) {
+  try {
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
+    
+    console.log('🎲 Minting RANDOM weapon with SPONSORED transaction...')
+    console.log('💰 Gas will be paid by game sponsor!')
+    
+    const response = await fetch(`${BACKEND_URL}/api/sponsor/mint-random-weapon`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        playerAddress: walletAddress,
+      }),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.error || 'Failed to mint random weapon')
+    }
+
+    const data = await response.json()
+    console.log('✅ Random weapon minted successfully!')
+    console.log('🎲 Weapon info:', data.weaponInfo)
+    
+    return data
+  } catch (error) {
+    console.error('❌ Error minting random weapon:', error)
+    throw error
+  }
+}

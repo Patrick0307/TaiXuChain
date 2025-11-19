@@ -248,6 +248,60 @@ export async function getSponsorBalance() {
 }
 
 /**
+ * 通过 objectId 查询武器
+ * @param {string} objectId - 武器对象 ID
+ * @returns {Promise<object|null>} 武器信息或 null
+ */
+export async function getWeaponById(objectId) {
+  try {
+    console.log(`[Query] Getting weapon by ID: ${objectId}`);
+    
+    const weaponObject = await suiClient.getObject({
+      id: objectId,
+      options: {
+        showType: true,
+        showContent: true,
+      },
+    });
+    
+    if (!weaponObject.data) {
+      console.log(`[Query] Weapon not found: ${objectId}`);
+      return null;
+    }
+    
+    const objType = weaponObject.data.type;
+    if (!objType || !objType.includes('::weapon::Weapon') || objType.includes('WeaponMintCap')) {
+      console.log(`[Query] Object is not a weapon: ${objType}`);
+      return null;
+    }
+    
+    const content = weaponObject.data.content.fields;
+    if (!content) {
+      console.log(`[Query] Weapon has no content`);
+      return null;
+    }
+    
+    const weapon = {
+      objectId: weaponObject.data.objectId,
+      name: content.name,
+      weaponType: parseInt(content.weapon_type),
+      attack: parseInt(content.attack),
+      level: parseInt(content.level),
+      rarity: parseInt(content.rarity),
+      owner: content.owner,
+      createdAt: parseInt(content.created_at),
+      version: parseInt(weaponObject.data.version),
+    };
+    
+    console.log(`[Query] Weapon found:`, weapon);
+    return weapon;
+  } catch (error) {
+    console.error('[Query] Error getting weapon by ID:', error);
+    return null;
+  }
+}
+
+/**
  * 查询玩家的所有武器
  * @param {string} playerAddress - 玩家钱包地址
  * @returns {Promise<Array>} 武器列表
@@ -256,19 +310,33 @@ export async function getAllPlayerWeapons(playerAddress) {
   try {
     console.log(`[Query] Getting all weapons for: ${playerAddress}`);
     
-    // 查询该地址拥有的所有对象
-    const objects = await suiClient.getOwnedObjects({
-      owner: playerAddress,
-      options: {
-        showType: true,
-        showContent: true,
-      },
-    });
+    // 查询该地址拥有的所有对象（支持分页）
+    let allObjects = [];
+    let hasNextPage = true;
+    let cursor = null;
     
-    console.log(`[Query] Total objects found: ${objects.data.length}`);
+    while (hasNextPage) {
+      const response = await suiClient.getOwnedObjects({
+        owner: playerAddress,
+        options: {
+          showType: true,
+          showContent: true,
+        },
+        cursor,
+        limit: 50, // 每页50个对象
+      });
+      
+      allObjects = allObjects.concat(response.data);
+      hasNextPage = response.hasNextPage;
+      cursor = response.nextCursor;
+      
+      console.log(`[Query] Fetched ${response.data.length} objects, hasNextPage: ${hasNextPage}`);
+    }
+    
+    console.log(`[Query] Total objects found: ${allObjects.length}`);
     
     // 查找所有 Weapon 类型的对象（排除 WeaponMintCap）
-    const weaponObjects = objects.data.filter(obj => {
+    const weaponObjects = allObjects.filter(obj => {
       const objType = obj.data?.type;
       return objType && objType.includes('::weapon::Weapon') && !objType.includes('WeaponMintCap');
     });
@@ -504,6 +572,117 @@ export async function sponsorMintWeapon(playerAddress, classId) {
     return result;
   } catch (error) {
     console.error('[Sponsor] ❌ Weapon mint failed:', error);
+    throw error;
+  }
+}
+
+/**
+ * 赞助铸造随机武器（随机职业、武器类型、品质）
+ * @param {string} playerAddress - 玩家钱包地址
+ * @returns {Promise<object>} 交易结果和武器信息
+ */
+export async function sponsorMintRandomWeapon(playerAddress) {
+  try {
+    const weaponDeployAddress = weaponDeployKeypair.getPublicKey().toSuiAddress();
+    
+    // 随机生成武器类型 (1=剑, 2=弓, 3=法杖)
+    const weaponType = Math.floor(Math.random() * 3) + 1;
+    
+    // 随机生成品质 (1=普通 70%, 2=稀有 25%, 3=史诗 5%)
+    const rarityRoll = Math.random();
+    let rarity;
+    if (rarityRoll < 0.70) {
+      rarity = 1; // 普通 70%
+    } else if (rarityRoll < 0.95) {
+      rarity = 2; // 稀有 25%
+    } else {
+      rarity = 3; // 史诗 5%
+    }
+    
+    console.log(`[Sponsor] Minting RANDOM weapon for ${playerAddress}`);
+    console.log(`  🎲 Random Weapon Type: ${weaponType} (1=剑, 2=弓, 3=法杖)`);
+    console.log(`  🎲 Random Rarity: ${rarity} (1=普通, 2=稀有, 3=史诗)`);
+    console.log(`  Using weapon deploy wallet: ${weaponDeployAddress}`);
+    
+    // 获取 gas coins（使用武器部署钱包）
+    const allCoins = await suiClient.getAllCoins({
+      owner: weaponDeployAddress,
+    });
+    
+    let gasCoins = allCoins.data.filter(coin => 
+      coin.coinType === '0x2::sui::SUI' || 
+      coin.coinType === '0x2::oct::OCT' ||
+      coin.coinType.endsWith('::sui::SUI') ||
+      coin.coinType.endsWith('::oct::OCT')
+    );
+    
+    if (!gasCoins || gasCoins.length === 0) {
+      throw new Error('Weapon deploy wallet has no gas coins');
+    }
+    
+    console.log(`[Sponsor] Found ${gasCoins.length} gas coins`);
+    
+    // 创建交易（使用武器部署钱包作为 sender）
+    const tx = new Transaction();
+    tx.setSender(weaponDeployAddress);
+    
+    tx.setGasPayment(gasCoins.slice(0, 5).map(coin => ({
+      objectId: coin.coinObjectId,
+      version: coin.version,
+      digest: coin.digest,
+    })));
+    
+    // 调用 mint_weapon 函数
+    tx.moveCall({
+      target: `${PACKAGE_ID}::weapon::mint_weapon`,
+      arguments: [
+        tx.object(WEAPON_MINT_CAP),
+        tx.pure.u8(weaponType),
+        tx.pure.u8(rarity),
+        tx.pure.address(playerAddress),
+      ],
+    });
+    
+    console.log(`[Sponsor] Signing and executing random weapon mint transaction...`);
+    
+    const result = await suiClient.signAndExecuteTransaction({
+      transaction: tx,
+      signer: weaponDeployKeypair,
+      options: {
+        showEffects: true,
+        showEvents: true,
+        showObjectChanges: true,
+      },
+    });
+    
+    console.log(`[Sponsor] ✅ Random weapon minted successfully!`);
+    console.log(`  Digest: ${result.digest}`);
+    
+    // 提取新创建的武器 objectId
+    let weaponObjectId = null;
+    if (result.objectChanges) {
+      const createdWeapon = result.objectChanges.find(
+        change => change.type === 'created' && 
+        change.objectType && 
+        change.objectType.includes('::weapon::Weapon')
+      );
+      if (createdWeapon) {
+        weaponObjectId = createdWeapon.objectId;
+        console.log(`  Weapon Object ID: ${weaponObjectId}`);
+      }
+    }
+    
+    // 返回交易结果和武器信息
+    return {
+      result,
+      weaponInfo: {
+        weaponType,
+        rarity,
+        objectId: weaponObjectId
+      }
+    };
+  } catch (error) {
+    console.error('[Sponsor] ❌ Random weapon mint failed:', error);
     throw error;
   }
 }

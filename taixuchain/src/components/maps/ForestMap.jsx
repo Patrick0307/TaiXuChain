@@ -3,7 +3,9 @@ import MapUI from './MapUI'
 import MapCharacter from './MapCharacter'
 import Monster from './Monster'
 import Inventory from '../Inventory'
-import { checkPlayerWeapon, mintWeaponForPlayer } from '../../utils/suiClient'
+import LootBox from './LootBox'
+import WeaponReward from './WeaponReward'
+import { checkPlayerWeapon, mintWeaponForPlayer, mintRandomWeaponForPlayer, getAllPlayerWeapons } from '../../utils/suiClient'
 import '../../css/maps/ForestMap.css'
 
 function ForestMap({ character, onExit }) {
@@ -26,6 +28,9 @@ function ForestMap({ character, onExit }) {
   const [monsters, setMonsters] = useState([]) // 怪物列表
   const [playerAttackTrigger, setPlayerAttackTrigger] = useState(0) // 玩家攻击触发器
   const [playerCurrentHp, setPlayerCurrentHp] = useState(character.hp) // 玩家当前生命值
+  const [lootBoxes, setLootBoxes] = useState([]) // 宝箱列表
+  const [showWeaponReward, setShowWeaponReward] = useState(null) // 显示武器奖励弹窗
+  const lootBoxIdCounter = useRef(0) // 宝箱ID计数器
   const animationFrameRef = useRef(null)
   const walkAnimationRef = useRef(null)
   const playerPosRef = useRef(null) // 用 ref 存储实时位置，初始为null
@@ -1014,6 +1019,175 @@ function ForestMap({ character, onExit }) {
         </div>
       )}
       
+      {/* 宝箱层 - 在怪物之后渲染 */}
+      {!showTeleportEffect && lootBoxes.map(lootBox => {
+        // 计算宝箱在屏幕上的位置
+        const getLootBoxScreenPosition = (boxX, boxY) => {
+          if (!canvasRef.current || !mapData) return { x: 0, y: 0 }
+          
+          const canvas = canvasRef.current
+          const scaledMapWidth = mapData.width * TILE_SIZE * MAP_SCALE
+          const scaledMapHeight = mapData.height * TILE_SIZE * MAP_SCALE
+          const scaledPlayerX = Math.round(playerPosRef.current.x * MAP_SCALE)
+          const scaledPlayerY = Math.round(playerPosRef.current.y * MAP_SCALE)
+          const scaledPlayerSize = PLAYER_SIZE * MAP_SCALE
+
+          let cameraX = scaledPlayerX - canvas.width / 2 + scaledPlayerSize / 2
+          let cameraY = scaledPlayerY - canvas.height / 2 + scaledPlayerSize / 2
+
+          const maxCameraX = scaledMapWidth - canvas.width
+          const maxCameraY = scaledMapHeight - canvas.height
+
+          cameraX = Math.max(0, Math.min(cameraX, maxCameraX))
+          cameraY = Math.max(0, Math.min(cameraY, maxCameraY))
+
+          if (scaledMapWidth < canvas.width) cameraX = -(canvas.width - scaledMapWidth) / 2
+          if (scaledMapHeight < canvas.height) cameraY = -(canvas.height - scaledMapHeight) / 2
+
+          const scaledBoxX = Math.round(boxX * MAP_SCALE)
+          const scaledBoxY = Math.round(boxY * MAP_SCALE)
+          
+          return {
+            x: Math.round(scaledBoxX - cameraX),
+            y: Math.round(scaledBoxY - cameraY)
+          }
+        }
+        
+        const boxScreenPos = getLootBoxScreenPosition(lootBox.x, lootBox.y)
+        
+        return (
+          <LootBox
+            key={lootBox.id}
+            screenPosition={boxScreenPos}
+            boxSize={40 * MAP_SCALE}
+            onOpen={async () => {
+              console.log(`📦 Opening loot box ${lootBox.id}...`)
+              
+              try {
+                // 获取玩家钱包地址
+                const walletAddress = window.currentWalletAddress || character.owner
+                
+                // 获取开箱前的武器数量
+                const weaponsBefore = await getAllPlayerWeapons(walletAddress)
+                const countBefore = weaponsBefore.length
+                console.log(`📊 Weapons before: ${countBefore}`)
+                
+                // 调用后端API铸造随机武器
+                const { result, weaponInfo } = await mintRandomWeaponForPlayer(walletAddress)
+                
+                console.log('🎁 Random weapon minted:', weaponInfo)
+                console.log('Transaction:', result.digest)
+                
+                // 从交易结果中提取新武器的 objectId
+                let newWeaponId = weaponInfo.objectId
+                if (!newWeaponId && result.objectChanges) {
+                  const createdWeapon = result.objectChanges.find(
+                    change => change.type === 'created' && 
+                    change.objectType && 
+                    change.objectType.includes('::weapon::Weapon')
+                  )
+                  if (createdWeapon) {
+                    newWeaponId = createdWeapon.objectId
+                  }
+                }
+                
+                console.log('🆔 New weapon ID:', newWeaponId)
+                
+                if (!newWeaponId) {
+                  console.error('❌ Could not extract weapon ID from transaction')
+                  alert('无法获取武器ID，请查看背包')
+                  return
+                }
+                
+                // 等待区块链确认
+                await new Promise(resolve => setTimeout(resolve, 2000))
+                
+                // 直接通过 objectId 查询新武器
+                let newWeapon = null
+                let retries = 0
+                const maxRetries = 5
+                
+                while (!newWeapon && retries < maxRetries) {
+                  try {
+                    // 直接查询特定的武器对象
+                    const weaponObject = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'}/api/weapon-by-id/${newWeaponId}`)
+                    
+                    if (weaponObject.ok) {
+                      const data = await weaponObject.json()
+                      if (data.weapon) {
+                        newWeapon = data.weapon
+                        console.log('✅ New weapon found by ID:', newWeapon)
+                        break
+                      }
+                    }
+                  } catch (err) {
+                    console.warn('Query by ID failed, trying list query...')
+                  }
+                  
+                  // 备用方案：从列表中查找
+                  const weaponsAfter = await getAllPlayerWeapons(walletAddress)
+                  console.log(`📊 Weapons after (attempt ${retries + 1}): ${weaponsAfter.length}`)
+                  
+                  newWeapon = weaponsAfter.find(w => w.objectId === newWeaponId)
+                  
+                  if (newWeapon) {
+                    console.log('✅ New weapon found in list:', newWeapon)
+                    break
+                  }
+                  
+                  retries++
+                  if (retries < maxRetries) {
+                    console.log(`⏳ Weapon not found yet, retrying... (${retries}/${maxRetries})`)
+                    await new Promise(resolve => setTimeout(resolve, 1500))
+                  }
+                }
+                
+                if (newWeapon) {
+                  // 显示武器奖励弹窗
+                  setShowWeaponReward(newWeapon)
+                } else {
+                  // 即使查询不到，也根据交易信息构造武器对象显示
+                  console.warn('⚠️ Weapon minted but not found in query, showing from transaction info')
+                  
+                  // 根据武器类型和品质构造武器信息
+                  const weaponNames = {
+                    1: { 1: 'Iron Sword', 2: 'Azure Edge Sword', 3: 'Dragon Roar Sword' },
+                    2: { 1: 'Hunter Bow', 2: 'Swift Wind Bow', 3: 'Cloud Piercer Bow' },
+                    3: { 1: 'Wooden Staff', 2: 'Starlight Staff', 3: 'Primordial Staff' }
+                  }
+                  
+                  const weaponAttacks = {
+                    1: { 1: 20, 2: 40, 3: 70 },
+                    2: { 1: 18, 2: 38, 3: 65 },
+                    3: { 1: 22, 2: 42, 3: 75 }
+                  }
+                  
+                  const constructedWeapon = {
+                    objectId: newWeaponId,
+                    name: weaponNames[weaponInfo.weaponType]?.[weaponInfo.rarity] || 'Unknown Weapon',
+                    weaponType: weaponInfo.weaponType,
+                    attack: weaponAttacks[weaponInfo.weaponType]?.[weaponInfo.rarity] || 20,
+                    level: 1,
+                    rarity: weaponInfo.rarity,
+                    owner: walletAddress
+                  }
+                  
+                  setShowWeaponReward(constructedWeapon)
+                }
+              } catch (error) {
+                console.error('❌ Failed to open loot box:', error)
+                alert('开箱失败，请稍后重试')
+              }
+            }}
+            onClose={() => {
+              // 移除宝箱
+              setLootBoxes(prev => prev.filter(box => box.id !== lootBox.id))
+              console.log(`📦 Loot box ${lootBox.id} removed`)
+            }}
+          />
+        )
+      })}
+      
       {/* 怪物层 - 在角色之前渲染 */}
       {!showTeleportEffect && (() => {
         // 计算最近的怪物（主目标）
@@ -1118,6 +1292,16 @@ function ForestMap({ character, onExit }) {
                   m.id === monster.id ? { ...m, alive: false } : m
                 ))
                 console.log(`💀 Monster ${monster.id} defeated!`)
+                
+                // 在怪物位置生成宝箱
+                const newLootBox = {
+                  id: lootBoxIdCounter.current++,
+                  x: monster.x,
+                  y: monster.y,
+                  monsterId: monster.id
+                }
+                setLootBoxes(prev => [...prev, newLootBox])
+                console.log(`📦 Loot box spawned at (${monster.x}, ${monster.y})`)
               }}
               onAttackPlayer={(damage) => {
                 // 怪物攻击玩家
@@ -1163,7 +1347,20 @@ function ForestMap({ character, onExit }) {
         character={character}
         isOpen={isInventoryOpen}
         onClose={() => setIsInventoryOpen(false)}
+        equippedWeapon={playerWeapon}
+        onEquipWeapon={(weapon) => {
+          setPlayerWeapon(weapon)
+          console.log('✅ Equipped weapon:', weapon.name)
+        }}
       />
+      
+      {/* 武器奖励弹窗 */}
+      {showWeaponReward && (
+        <WeaponReward 
+          weapon={showWeaponReward}
+          onClose={() => setShowWeaponReward(null)}
+        />
+      )}
     </div>
   )
 }

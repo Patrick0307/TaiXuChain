@@ -1,0 +1,318 @@
+.weapon-reward-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(5px);
+}
+
+.weapon-reward-overlay.enter {
+  animation: overlay-fade-in 0.5s ease-out;
+}
+
+.weapon-reward-overlay.exit {
+  animation: overlay-fade-out 0.5s ease-out forwards;
+}
+
+@keyframes overlay-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes overlay-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.weapon-reward-container {
+  position: relative;
+  width: 500px;
+  max-width: 90vw;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 3px solid #FFD700;
+  border-radius: 20px;
+  padding: 40px 30px;
+  box-shadow: 0 0 50px rgba(255, 215, 0, 0.5), inset 0 0 30px rgba(255, 215, 0, 0.1);
+  overflow: hidden;
+}
+
+.enter .weapon-reward-container {
+  animation: container-zoom-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.exit .weapon-reward-container {
+  animation: container-zoom-out 0.5s ease-out forwards;
+}
+
+@keyframes container-zoom-in {
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes container-zoom-out {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+}
+
+.reward-bg-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300px;
+  height: 300px;
+  transform: translate(-50%, -50%);
+  animation: glow-pulse 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.2); }
+}
+
+.reward-title {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.reward-title-text {
+  font-size: 1.8em;
+  font-weight: bold;
+  color: #FFD700;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+  animation: title-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes title-glow {
+  0%, 100% { text-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+  50% { text-shadow: 0 0 30px rgba(255, 215, 0, 1), 0 0 40px rgba(255, 215, 0, 0.6); }
+}
+
+.weapon-display {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 30px;
+}
+
+.weapon-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 180px;
+  height: 180px;
+  transform: translate(-50%, -50%);
+  border: 3px solid;
+  border-radius: 50%;
+  animation: ring-rotate 3s linear infinite;
+  box-shadow: 0 0 20px currentColor;
+}
+
+.weapon-ring-2 {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150px;
+  height: 150px;
+  transform: translate(-50%, -50%);
+  border: 2px solid;
+  border-radius: 50%;
+  animation: ring-rotate-reverse 2s linear infinite;
+  opacity: 0.6;
+}
+
+@keyframes ring-rotate {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes ring-rotate-reverse {
+  from { transform: translate(-50%, -50%) rotate(360deg); }
+  to { transform: translate(-50%, -50%) rotate(0deg); }
+}
+
+.weapon-icon-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: icon-float 2s ease-in-out infinite;
+}
+
+@keyframes icon-float {
+  0%, 100% { transform: translate(-50%, -50%) translateY(0); }
+  50% { transform: translate(-50%, -50%) translateY(-10px); }
+}
+
+.weapon-icon-large {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  animation: icon-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes icon-glow {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.3); }
+}
+
+.light-ray {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 100px;
+  transform-origin: center;
+  transform: translate(-50%, -50%) rotate(var(--angle));
+  animation: ray-pulse 2s ease-in-out infinite;
+  opacity: 0.6;
+}
+
+@keyframes ray-pulse {
+  0%, 100% { opacity: 0.3; height: 80px; }
+  50% { opacity: 0.8; height: 120px; }
+}
+
+.weapon-info {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.weapon-name {
+  font-size: 1.8em;
+  font-weight: bold;
+  margin-bottom: 8px;
+  text-shadow: 0 0 15px currentColor;
+  animation: name-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes name-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.weapon-rarity {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-shadow: 0 0 10px currentColor;
+}
+
+.weapon-stats {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 15px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.stat-label {
+  font-size: 0.9em;
+  color: #AAA;
+}
+
+.stat-value {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #FFF;
+}
+
+.stat-value.attack {
+  color: #FF6B6B;
+  text-shadow: 0 0 10px rgba(255, 107, 107, 0.8);
+}
+
+.reward-hint {
+  text-align: center;
+  color: #FFD700;
+  font-size: 1em;
+  margin-bottom: 20px;
+  animation: hint-fade 2s ease-in-out infinite;
+}
+
+@keyframes hint-fade {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.reward-close-btn {
+  display: block;
+  width: 150px;
+  margin: 0 auto;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1em;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5);
+  transition: all 0.3s ease;
+}
+
+.reward-close-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.7);
+}
+
+.reward-close-btn:active {
+  transform: translateY(0);
+}
+
+.floating-star {
+  position: absolute;
+  font-size: 1.5em;
+  animation: star-float linear infinite;
+  pointer-events: none;
+  opacity: 0;
+}
+
+@keyframes star-float {
+  0% {
+    transform: translateY(100vh) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) rotate(360deg);
+    opacity: 0;
+  }
+}

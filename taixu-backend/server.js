@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { sponsorCreatePlayer, getPlayerByAddress, getPlayerWeapon, getAllPlayerWeapons, sponsorMintWeapon } from './services/sponsorService.js';
+import { sponsorCreatePlayer, getPlayerByAddress, getPlayerWeapon, getAllPlayerWeapons, sponsorMintWeapon, sponsorMintRandomWeapon, getWeaponById } from './services/sponsorService.js';
 
 dotenv.config();
 
@@ -150,6 +150,41 @@ app.get('/api/weapons/:address', async (req, res) => {
   }
 });
 
+// 通过 objectId 查询武器
+app.get('/api/weapon-by-id/:objectId', async (req, res) => {
+  try {
+    const { objectId } = req.params;
+
+    if (!objectId) {
+      return res.status(400).json({ 
+        error: 'Missing weapon objectId' 
+      });
+    }
+
+    console.log(`[Query] Getting weapon by ID: ${objectId}`);
+
+    const weapon = await getWeaponById(objectId);
+
+    if (!weapon) {
+      return res.json({ 
+        exists: false,
+        weapon: null
+      });
+    }
+
+    res.json({ 
+      exists: true,
+      weapon
+    });
+  } catch (error) {
+    console.error('[Query] Error:', error);
+    res.status(500).json({ 
+      error: error.message,
+      details: error.toString()
+    });
+  }
+});
+
 // 赞助铸造武器
 app.post('/api/sponsor/mint-weapon', async (req, res) => {
   try {
@@ -169,6 +204,36 @@ app.post('/api/sponsor/mint-weapon', async (req, res) => {
       success: true, 
       result,
       message: 'Weapon minted successfully with sponsored gas'
+    });
+  } catch (error) {
+    console.error('[Sponsor] Error:', error);
+    res.status(500).json({ 
+      error: error.message,
+      details: error.toString()
+    });
+  }
+});
+
+// 赞助铸造随机武器（怪物掉落）
+app.post('/api/sponsor/mint-random-weapon', async (req, res) => {
+  try {
+    const { playerAddress } = req.body;
+
+    if (!playerAddress) {
+      return res.status(400).json({ 
+        error: 'Missing required field: playerAddress' 
+      });
+    }
+
+    console.log(`[Sponsor] Minting RANDOM weapon for ${playerAddress}`);
+
+    const { result, weaponInfo } = await sponsorMintRandomWeapon(playerAddress);
+
+    res.json({ 
+      success: true, 
+      result,
+      weaponInfo,
+      message: 'Random weapon minted successfully with sponsored gas'
     });
   } catch (error) {
     console.error('[Sponsor] Error:', error);

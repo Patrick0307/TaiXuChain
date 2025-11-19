@@ -8,8 +8,9 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
   const [isLoading, setIsLoading] = useState(true)
   const [selectedWeapon, setSelectedWeapon] = useState(null)
 
-  // 背包格子数量（可扩展）
-  const INVENTORY_SIZE = 20
+  // 背包格子数量（动态扩展，无上限）
+  // 根据武器数量动态计算，至少显示20个格子
+  const INVENTORY_SIZE = Math.max(20, weapons.length + 5)
 
   useEffect(() => {
     if (isOpen) {
@@ -137,7 +138,7 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
               })}
             </div>
             <div className="inventory-stats">
-              <span>武器数量: {weapons.length}/{INVENTORY_SIZE}</span>
+              <span>武器数量: {weapons.length}</span>
               {equippedWeapon && <span className="equipped-indicator">✓ 已装备: {equippedWeapon.name}</span>}
             </div>
           </div>
