@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { sponsorCreatePlayer, getPlayerByAddress, getPlayerWeapon, sponsorMintWeapon } from './services/sponsorService.js';
+import { sponsorCreatePlayer, getPlayerByAddress, getPlayerWeapon, getAllPlayerWeapons, sponsorMintWeapon } from './services/sponsorService.js';
 
 dotenv.config();
 
@@ -111,6 +111,35 @@ app.get('/api/weapon/:address', async (req, res) => {
     res.json({ 
       exists: true,
       weapon
+    });
+  } catch (error) {
+    console.error('[Query] Error:', error);
+    res.status(500).json({ 
+      error: error.message,
+      details: error.toString()
+    });
+  }
+});
+
+// 查询玩家所有武器
+app.get('/api/weapons/:address', async (req, res) => {
+  try {
+    const { address } = req.params;
+
+    if (!address) {
+      return res.status(400).json({ 
+        error: 'Missing player address' 
+      });
+    }
+
+    console.log(`[Query] Getting all weapons for address: ${address}`);
+
+    const weapons = await getAllPlayerWeapons(address);
+
+    res.json({ 
+      success: true,
+      count: weapons.length,
+      weapons
     });
   } catch (error) {
     console.error('[Query] Error:', error);

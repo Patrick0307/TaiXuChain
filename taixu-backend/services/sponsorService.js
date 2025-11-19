@@ -248,6 +248,68 @@ export async function getSponsorBalance() {
 }
 
 /**
+ * 查询玩家的所有武器
+ * @param {string} playerAddress - 玩家钱包地址
+ * @returns {Promise<Array>} 武器列表
+ */
+export async function getAllPlayerWeapons(playerAddress) {
+  try {
+    console.log(`[Query] Getting all weapons for: ${playerAddress}`);
+    
+    // 查询该地址拥有的所有对象
+    const objects = await suiClient.getOwnedObjects({
+      owner: playerAddress,
+      options: {
+        showType: true,
+        showContent: true,
+      },
+    });
+    
+    console.log(`[Query] Total objects found: ${objects.data.length}`);
+    
+    // 查找所有 Weapon 类型的对象（排除 WeaponMintCap）
+    const weaponObjects = objects.data.filter(obj => {
+      const objType = obj.data?.type;
+      return objType && objType.includes('::weapon::Weapon') && !objType.includes('WeaponMintCap');
+    });
+    
+    console.log(`[Query] Found ${weaponObjects.length} weapon(s)`);
+    
+    if (weaponObjects.length === 0) {
+      return [];
+    }
+    
+    // 转换为武器信息数组并按 version 排序（最新的在前）
+    const weapons = weaponObjects
+      .map(obj => {
+        const content = obj.data.content.fields;
+        if (!content) return null;
+        
+        return {
+          objectId: obj.data.objectId,
+          name: content.name,
+          weaponType: parseInt(content.weapon_type),
+          attack: parseInt(content.attack),
+          level: parseInt(content.level),
+          rarity: parseInt(content.rarity),
+          owner: content.owner,
+          createdAt: parseInt(content.created_at),
+          version: parseInt(obj.data.version),
+        };
+      })
+      .filter(weapon => weapon !== null)
+      .sort((a, b) => b.version - a.version); // 按 version 降序排序（最新的在前）
+    
+    console.log(`[Query] Returning ${weapons.length} weapon(s), sorted by version`);
+    
+    return weapons;
+  } catch (error) {
+    console.error('[Query] Error getting all weapons:', error);
+    throw error;
+  }
+}
+
+/**
  * 查询玩家的武器（根据职业过滤）
  * @param {string} playerAddress - 玩家钱包地址
  * @param {number} classId - 职业 ID (可选，用于过滤匹配职业的武器)

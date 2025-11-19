@@ -1,9 +1,9 @@
 import '../css/inventory.css'
 
-function InventorySlot({ weapon, isSelected, onClick }) {
+function InventorySlot({ weapon, isSelected, onClick, isEquipped }) {
   return (
     <div 
-      className={`inventory-slot ${weapon ? 'has-item' : ''} ${isSelected ? 'selected' : ''}`}
+      className={`inventory-slot ${weapon ? 'has-item' : ''} ${isSelected ? 'selected' : ''} ${isEquipped ? 'equipped' : ''}`}
       onClick={onClick}
     >
       {weapon ? (
@@ -14,6 +14,7 @@ function InventorySlot({ weapon, isSelected, onClick }) {
             className="weapon-icon-img"
           />
           <div className="weapon-level">Lv.{weapon.level}</div>
+          {isEquipped && <div className="equipped-badge">✓</div>}
         </div>
       ) : (
         <div className="slot-empty">

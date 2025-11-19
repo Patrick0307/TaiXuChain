@@ -170,6 +170,31 @@ export async function checkPlayerWeapon(walletAddress, classId = null) {
 }
 
 /**
+ * 获取玩家所有武器
+ * @param {string} walletAddress - 钱包地址
+ * @returns {Promise<Array>} 武器列表
+ */
+export async function getAllPlayerWeapons(walletAddress) {
+  try {
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
+    
+    const response = await fetch(`${BACKEND_URL}/api/weapons/${walletAddress}`)
+    
+    if (!response.ok) {
+      throw new Error('Failed to get player weapons')
+    }
+
+    const data = await response.json()
+    
+    console.log(`✅ Found ${data.count} weapon(s)`)
+    return data.weapons || []
+  } catch (error) {
+    console.error('❌ Error getting player weapons:', error)
+    throw error
+  }
+}
+
+/**
  * 赞助铸造武器（根据职业自动选择）
  * @param {string} walletAddress - 钱包地址
  * @param {number} classId - 职业 ID
