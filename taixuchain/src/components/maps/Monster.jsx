@@ -33,7 +33,7 @@ function Monster({
   // 攻击动画帧数（根据实际图片数量）
   const ATTACK_FRAMES = 12 // Minotaur_02_Attacking_000 到 011
   const DETECT_RANGE = 90 // 检测范围（像素）- 与玩家仇恨范围一致
-  const ATTACK_RANGE = 40 // 攻击范围（像素）- 近距离才攻击
+  const ATTACK_RANGE = 60 // 攻击范围（像素）- 与玩家攻击范围一致
   const MAX_CHASE_DISTANCE = 150 // 最大追击距离（像素）- 缩小追击距离
   const MOVE_SPEED = 0.8 // 怪物移动速度（比角色慢一些，让玩家可以逃跑）
   const RETURN_SPEED = 1.2 // 回归速度（比追击快，确保能快速回到原位）
@@ -256,12 +256,18 @@ function Monster({
     
     // 根据职业判断攻击类型
     const isWarrior = classCode === 1
-    const attackRange = ATTACK_RANGE + 20 // 攻击范围 60px
+    const attackRange = ATTACK_RANGE // 攻击范围 60px
     
-    // 只为主目标或溅射范围内的怪物输出调试信息
-    if (isMainTarget) {
-      console.log(`🎯 [Monster ${id}] Main Target - Distance: ${distance.toFixed(1)}px, HP: ${currentHp}/${maxHp}, Class: ${classCode === 1 ? 'Warrior' : classCode === 2 ? 'Archer' : 'Mage'}`)
-    }
+    // 输出详细的调试信息
+    console.log(`🔍 [Monster ${id}] Attack Check:`, {
+      distance: distance.toFixed(1),
+      attackRange,
+      isMainTarget,
+      isInSplashRange,
+      currentHp,
+      classCode,
+      className: classCode === 1 ? 'Warrior' : classCode === 2 ? 'Archer' : 'Mage'
+    })
     
     if (distance <= attackRange) {
       let damage = 0
