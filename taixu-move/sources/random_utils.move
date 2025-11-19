@@ -60,8 +60,18 @@ module taixu::random_utils {
         });
     }
 
+    /// 打怪掉落武器事件 - Monster Drop Event
+    public struct MonsterDropEvent has copy, drop {
+        player: address,
+        weapon_type: u8,
+        rarity: u8,
+        timestamp: u64,
+    }
+
     /// 打怪掉落武器 - Monster drop weapon
-    /// 打怪时有几率掉落武器，概率：普通80%，稀有15%，史诗5%
+    /// 打怪时掉落随机职业武器和随机品质
+    /// 职业：1=剑(武者), 2=弓(弓箭手), 3=法杖(术士)
+    /// 品质概率：普通80%，稀有15%，史诗5%
     public fun monster_drop_weapon(
         mint_cap: &WeaponMintCap,
         r: &Random,
@@ -72,7 +82,7 @@ module taixu::random_utils {
         // 生成随机数生成器
         let mut generator = random::new_generator(r, ctx);
         
-        // 随机武器类型 (1-3): 1=剑, 2=弓, 3=法杖
+        // 随机武器类型 (1-3): 1=剑(武者), 2=弓(弓箭手), 3=法杖(术士)
         let weapon_type = (random::generate_u8(&mut generator) % 3) + 1;
         
         // 随机稀有度，概率：普通80%，稀有15%，史诗5%
@@ -85,11 +95,11 @@ module taixu::random_utils {
             3  // 史诗品质 - Epic (5%)
         };
 
-        // 铸造武器并发送给玩家
+        // 铸造武器并发送给打怪的玩家
         weapon::mint_weapon(mint_cap, weapon_type, rarity, player, ctx);
 
-        // 发出事件
-        sui::event::emit(ChestOpenedEvent {
+        // 发出打怪掉落事件
+        sui::event::emit(MonsterDropEvent {
             player,
             weapon_type,
             rarity,

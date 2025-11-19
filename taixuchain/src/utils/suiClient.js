@@ -4,10 +4,10 @@ import { Transaction } from '@mysten/sui/transactions'
 // 初始化 Sui 客户端 - 使用 OneChain Testnet
 export const suiClient = new SuiClient({ url: 'https://rpc-testnet.onelabs.cc:443' })
 
-// 从环境变量或配置文件读取 (V7 - 2025-11-19)
-export const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID || '0x6e8dd6a265f76f209266521337fed8aa79f20f164f5d6b2f82758f223f77069c'
-export const REGISTRY_ID = import.meta.env.VITE_REGISTRY_ID || '0xe66c32207b25b87dbf2026164451cce514283a400cd596a65d05b5d67c88668d'
-export const MARKETPLACE_ID = import.meta.env.VITE_MARKETPLACE_ID || '0x79e7edfe8f4efc2d68fb186909165a12fb54c06458c8e056ed577815d320649f'
+// 从环境变量或配置文件读取 (V8 - 2025-11-20)
+export const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID || '0xbf08e952309ce954de4fc8b85eaa791adb2b407e2be10ebf91538f9915badb6e'
+export const REGISTRY_ID = import.meta.env.VITE_REGISTRY_ID || '0xb385cbebfde05028eb3dd95754ca2d3651d477bd438621741d393fb390776948'
+export const MARKETPLACE_ID = import.meta.env.VITE_MARKETPLACE_ID || '0x3b18f7a9fe90b85aad2e425ff42a1a27b73005d4eee08974c340c378c137e463'
 export const WEAPON_MINT_CAP = import.meta.env.VITE_WEAPON_MINT_CAP || '0xb7bd7f2b0f7f1a93a71e52a380345f930c2010997a7fccee27b70f59a66e5c95'
 
 // 职业映射
