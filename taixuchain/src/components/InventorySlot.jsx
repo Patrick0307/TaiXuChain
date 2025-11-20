@@ -14,7 +14,6 @@ function InventorySlot({ weapon, isSelected, onClick, isEquipped }) {
             className="weapon-icon-img"
           />
           <div className="weapon-level">Lv.{weapon.level}</div>
-          {isEquipped && <div className="equipped-badge">✓</div>}
         </div>
       ) : (
         <div className="slot-empty">
