@@ -1,10 +1,11 @@
 import '../css/inventory.css'
 
-function InventorySlot({ weapon, isSelected, onClick, isEquipped }) {
+function InventorySlot({ weapon, isSelected, onClick, isEquipped, canEquip }) {
   return (
     <div 
-      className={`inventory-slot ${weapon ? 'has-item' : ''} ${isSelected ? 'selected' : ''} ${isEquipped ? 'equipped' : ''}`}
+      className={`inventory-slot ${weapon ? 'has-item' : ''} ${isSelected ? 'selected' : ''} ${isEquipped ? 'equipped' : ''} ${weapon && canEquip === false ? 'cannot-equip' : ''}`}
       onClick={onClick}
+      title={weapon && canEquip === false ? '此武器不适合你的职业' : ''}
     >
       {weapon ? (
         <div className="slot-content">
@@ -14,6 +15,9 @@ function InventorySlot({ weapon, isSelected, onClick, isEquipped }) {
             className="weapon-icon-img"
           />
           <div className="weapon-level">Lv.{weapon.level}</div>
+          {weapon && canEquip === false && (
+            <div className="cannot-equip-icon">🚫</div>
+          )}
         </div>
       ) : (
         <div className="slot-empty">

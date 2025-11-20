@@ -83,9 +83,17 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
       return
     }
     
+    // 如果已经装备了这个武器，不做任何操作
+    if (equippedWeapon?.objectId === weapon.objectId) {
+      console.log('ℹ️ 武器已装备:', weapon.name)
+      return
+    }
+    
     if (onEquipWeapon) {
       onEquipWeapon(weapon)
       console.log('✅ 装备武器:', weapon.name)
+      // 显示成功提示
+      alert(`✅ 已装备: ${weapon.name}`)
     }
   }
 
@@ -112,6 +120,7 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
                     isSelected={selectedWeapon?.objectId === equippedWeapon.objectId}
                     onClick={() => handleSlotClick(equippedWeapon)}
                     isEquipped={true}
+                    canEquip={true}
                   />
                 ) : (
                   <div className="empty-equipped-slot">
@@ -126,6 +135,7 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
               {Array.from({ length: INVENTORY_SIZE }).map((_, index) => {
                 const weapon = weapons[index] || null
                 const isEquipped = equippedWeapon?.objectId === weapon?.objectId
+                const canEquipThis = weapon ? canEquipWeapon(weapon) : undefined
                 return (
                   <InventorySlot
                     key={weapon?.objectId || `empty-${index}`}
@@ -133,6 +143,7 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
                     isSelected={selectedWeapon?.objectId === weapon?.objectId}
                     onClick={() => handleSlotClick(weapon)}
                     isEquipped={isEquipped}
+                    canEquip={canEquipThis}
                   />
                 )
               })}
@@ -184,9 +195,9 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
                 </div>
                 <div className="weapon-actions">
                   <button 
-                    className="btn-equip"
+                    className={`btn-equip ${equippedWeapon?.objectId === selectedWeapon.objectId ? 'equipped' : ''}`}
                     onClick={() => handleEquipWeapon(selectedWeapon)}
-                    disabled={!canEquipWeapon(selectedWeapon)}
+                    disabled={!canEquipWeapon(selectedWeapon) || equippedWeapon?.objectId === selectedWeapon.objectId}
                   >
                     {equippedWeapon?.objectId === selectedWeapon.objectId ? '✓ 已装备' : '装备'}
                   </button>
@@ -195,6 +206,9 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
                 {!canEquipWeapon(selectedWeapon) && (
                   <div className="weapon-warning">
                     ⚠️ 此武器不适合你的职业
+                    <div style={{ fontSize: '0.8rem', marginTop: '5px', opacity: 0.8 }}>
+                      {getClassRequirement(selectedWeapon.weaponType)}
+                    </div>
                   </div>
                 )}
               </div>
@@ -251,6 +265,16 @@ function getRarityName(rarity) {
     3: '史诗'
   }
   return names[rarity] || '未知'
+}
+
+// 获取职业要求说明
+function getClassRequirement(weaponType) {
+  const requirements = {
+    1: '需要职业: 武者 ⚔️',
+    2: '需要职业: 弓箭手 🏹',
+    3: '需要职业: 术士 🪄'
+  }
+  return requirements[weaponType] || '未知职业要求'
 }
 
 export default Inventory
