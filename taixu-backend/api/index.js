@@ -84,4 +84,63 @@ app.post('/api/sponsor/create-player', async (req, res) => {
   }
 });
 
+// 获取 LingStone 余额
+app.get('/api/lingstone/balance/:address', async (req, res) => {
+  try {
+    const { address } = req.params;
+
+    if (!address) {
+      return res.status(400).json({ 
+        error: 'Missing wallet address' 
+      });
+    }
+
+    console.log(`[Query] Getting LingStone balance for: ${address}`);
+
+    const { getLingStoneBalance } = await import('../services/sponsorService.js');
+    const balance = await getLingStoneBalance(address);
+
+    res.json({ 
+      balance,
+      address
+    });
+  } catch (error) {
+    console.error('[Query] Error:', error);
+    res.status(500).json({ 
+      error: error.message,
+      details: error.toString()
+    });
+  }
+});
+
+// 赞助铸造 LingStone
+app.post('/api/sponsor/mint-lingstone', async (req, res) => {
+  try {
+    const { playerAddress } = req.body;
+
+    if (!playerAddress) {
+      return res.status(400).json({ 
+        error: 'Missing required field: playerAddress' 
+      });
+    }
+
+    console.log(`[Sponsor] Minting LingStone for ${playerAddress}`);
+
+    const { sponsorMintLingStone } = await import('../services/sponsorService.js');
+    const result = await sponsorMintLingStone(playerAddress);
+
+    res.json({ 
+      success: true, 
+      result,
+      message: 'LingStone minted successfully with sponsored gas'
+    });
+  } catch (error) {
+    console.error('[Sponsor] Error:', error);
+    res.status(500).json({ 
+      error: error.message,
+      details: error.toString()
+    });
+  }
+});
+
 export default app;

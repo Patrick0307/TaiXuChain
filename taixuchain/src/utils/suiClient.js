@@ -270,3 +270,63 @@ export async function mintRandomWeaponForPlayer(walletAddress) {
     throw error
   }
 }
+
+/**
+ * 获取 LingStone 余额
+ * @param {string} walletAddress - 钱包地址
+ * @returns {Promise<number>} LingStone 余额
+ */
+export async function getLingStoneBalance(walletAddress) {
+  try {
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
+    
+    const response = await fetch(`${BACKEND_URL}/api/lingstone/balance/${walletAddress}`)
+    
+    if (!response.ok) {
+      throw new Error('Failed to get LingStone balance')
+    }
+
+    const data = await response.json()
+    return data.balance || 0
+  } catch (error) {
+    console.error('❌ Error getting LingStone balance:', error)
+    return 0
+  }
+}
+
+/**
+ * 请求 LingStone（铸币 10000）
+ * @param {string} walletAddress - 钱包地址
+ * @returns {Promise<object>} 交易结果
+ */
+export async function requestLingStone(walletAddress) {
+  try {
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
+    
+    console.log('💎 Requesting LingStone with SPONSORED transaction...')
+    console.log('💰 Gas will be paid by game sponsor!')
+    
+    const response = await fetch(`${BACKEND_URL}/api/sponsor/mint-lingstone`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        playerAddress: walletAddress,
+      }),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.error || 'Failed to mint LingStone')
+    }
+
+    const data = await response.json()
+    console.log('✅ LingStone minted successfully!')
+    
+    return data.result
+  } catch (error) {
+    console.error('❌ Error requesting LingStone:', error)
+    throw error
+  }
+}

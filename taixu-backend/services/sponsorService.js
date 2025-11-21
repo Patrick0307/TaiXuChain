@@ -58,6 +58,8 @@ try {
 const PACKAGE_ID = process.env.PACKAGE_ID;
 const REGISTRY_ID = process.env.REGISTRY_ID;
 const WEAPON_MINT_CAP = process.env.WEAPON_MINT_CAP;
+const LINGSTONE_PACKAGE_ID = process.env.LINGSTONE_PACKAGE_ID;
+const LINGSTONE_TREASURY_CAP = process.env.LINGSTONE_TREASURY_CAP;
 
 /**
  * 赞助创建角色交易（完全赞助模式）
@@ -683,6 +685,238 @@ export async function sponsorMintRandomWeapon(playerAddress) {
     };
   } catch (error) {
     console.error('[Sponsor] ❌ Random weapon mint failed:', error);
+    throw error;
+  }
+}
+
+/**
+ * 获取 LingStone 余额
+ * @param {string} walletAddress - 钱包地址
+ * @returns {Promise<number>} LingStone 余额（已转换为可读格式）
+ */
+export async function getLingStoneBalance(walletAddress) {
+  try {
+    console.log(`[Query] Getting LingStone balance for: ${walletAddress}`);
+    
+    // 获取该地址的所有 LingStone coins
+    const coins = await suiClient.getAllCoins({
+      owner: walletAddress,
+    });
+    
+    // 过滤出 LingStone 代币
+    const lingStoneCoins = coins.data.filter(coin => 
+      coin.coinType.includes('::lingstone_coin::LINGSTONE_COIN')
+    );
+    
+    if (lingStoneCoins.length === 0) {
+      console.log(`[Query] No LingStone found for ${walletAddress}`);
+      return 0;
+    }
+    
+    // 计算总余额（单位：最小单位）
+    const totalBalance = lingStoneCoins.reduce((sum, coin) => {
+      return sum + BigInt(coin.balance);
+    }, BigInt(0));
+    
+    // 转换为可读格式（除以 10^9）
+    const readableBalance = Number(totalBalance) / 1e9;
+    
+    console.log(`[Query] LingStone balance: ${readableBalance} LING (${totalBalance} raw)`);
+    
+    return readableBalance;
+  } catch (error) {
+    console.error('[Query] Error getting LingStone balance:', error);
+    throw error;
+  }
+}
+
+/**
+ * 赞助铸造 LingStone（给玩家发送 10000 LING）
+ * @param {string} playerAddress - 玩家钱包地址
+ * @returns {Promise<object>} 交易结果
+ */
+export async function sponsorMintLingStone(playerAddress) {
+  try {
+    const sponsorAddress = sponsorKeypair.getPublicKey().toSuiAddress();
+    
+    console.log(`[Sponsor] Minting LingStone for ${playerAddress}`);
+    console.log(`  Amount: 10000 LING`);
+    console.log(`  Using sponsor wallet: ${sponsorAddress}`);
+    
+    // 检查 sponsor 是否拥有 TreasuryCap
+    console.log(`[Sponsor] Checking TreasuryCap ownership...`);
+    
+    let treasuryCapObject;
+    try {
+      treasuryCapObject = await suiClient.getObject({
+        id: LINGSTONE_TREASURY_CAP,
+        options: {
+          showOwner: true,
+          showType: true,
+        },
+      });
+      
+      const owner = treasuryCapObject.data?.owner;
+      console.log(`[Sponsor] TreasuryCap owner:`, owner);
+      
+      // 检查 owner 是否是 sponsor 地址
+      if (owner?.AddressOwner !== sponsorAddress) {
+        const currentOwner = owner?.AddressOwner;
+        console.log(`[Sponsor] ⚠️ TreasuryCap not owned by sponsor`);
+        console.log(`[Sponsor] Current owner: ${currentOwner}`);
+        console.log(`[Sponsor] Expected owner: ${sponsorAddress}`);
+        
+        // 检查是否被 weapon deploy 钱包拥有
+        const weaponDeployAddress = weaponDeployKeypair.getPublicKey().toSuiAddress();
+        
+        if (currentOwner === weaponDeployAddress) {
+          console.log(`[Sponsor] TreasuryCap owned by weapon deploy wallet, transferring to sponsor...`);
+          await transferTreasuryCapToSponsor();
+          console.log(`[Sponsor] ✅ TreasuryCap transferred successfully`);
+        } else {
+          // TreasuryCap 被其他地址拥有，无法自动转移
+          throw new Error(
+            `TreasuryCap is owned by ${currentOwner}, but sponsor is ${sponsorAddress}. ` +
+            `Please run 'node transfer-treasury-cap.js' to transfer ownership manually. ` +
+            `Make sure to set the correct private key in WEAPON_DEPLOY_PRIVATE_KEY environment variable.`
+          );
+        }
+      } else {
+        console.log(`[Sponsor] ✅ TreasuryCap is owned by sponsor`);
+      }
+    } catch (error) {
+      console.error(`[Sponsor] Error checking TreasuryCap:`, error);
+      throw new Error(`Failed to verify TreasuryCap ownership: ${error.message}`);
+    }
+    
+    // 获取 gas coins（使用 sponsor 钱包）
+    const allCoins = await suiClient.getAllCoins({
+      owner: sponsorAddress,
+    });
+    
+    let gasCoins = allCoins.data.filter(coin => 
+      coin.coinType === '0x2::sui::SUI' || 
+      coin.coinType === '0x2::oct::OCT' ||
+      coin.coinType.endsWith('::sui::SUI') ||
+      coin.coinType.endsWith('::oct::OCT')
+    );
+    
+    if (!gasCoins || gasCoins.length === 0) {
+      throw new Error('Sponsor wallet has no gas coins');
+    }
+    
+    console.log(`[Sponsor] Found ${gasCoins.length} gas coins`);
+    
+    // 创建交易（使用 sponsor 钱包作为 sender）
+    const tx = new Transaction();
+    tx.setSender(sponsorAddress);
+    
+    tx.setGasPayment(gasCoins.slice(0, 5).map(coin => ({
+      objectId: coin.coinObjectId,
+      version: coin.version,
+      digest: coin.digest,
+    })));
+    
+    // 铸造 10000 LING (需要乘以 10^9)
+    const amount = 10000 * 1e9;
+    
+    // 调用 mint 函数
+    tx.moveCall({
+      target: `${LINGSTONE_PACKAGE_ID}::lingstone_coin::mint`,
+      arguments: [
+        tx.object(LINGSTONE_TREASURY_CAP),
+        tx.pure.u64(amount),
+        tx.pure.address(playerAddress),
+      ],
+    });
+    
+    console.log(`[Sponsor] Signing and executing LingStone mint transaction...`);
+    
+    const result = await suiClient.signAndExecuteTransaction({
+      transaction: tx,
+      signer: sponsorKeypair,
+      options: {
+        showEffects: true,
+        showEvents: true,
+        showObjectChanges: true,
+      },
+    });
+    
+    console.log(`[Sponsor] ✅ LingStone minted successfully!`);
+    console.log(`  Digest: ${result.digest}`);
+    console.log(`  Amount: 10000 LING sent to ${playerAddress}`);
+    
+    return result;
+  } catch (error) {
+    console.error('[Sponsor] ❌ LingStone mint failed:', error);
+    throw error;
+  }
+}
+
+/**
+ * 将 TreasuryCap 转移给 sponsor 钱包
+ * @returns {Promise<object>} 交易结果
+ */
+async function transferTreasuryCapToSponsor() {
+  try {
+    const weaponDeployAddress = weaponDeployKeypair.getPublicKey().toSuiAddress();
+    const sponsorAddress = sponsorKeypair.getPublicKey().toSuiAddress();
+    
+    console.log(`[Transfer] Transferring TreasuryCap from ${weaponDeployAddress} to ${sponsorAddress}`);
+    
+    // 获取 gas coins（使用 weapon deploy 钱包）
+    const allCoins = await suiClient.getAllCoins({
+      owner: weaponDeployAddress,
+    });
+    
+    let gasCoins = allCoins.data.filter(coin => 
+      coin.coinType === '0x2::sui::SUI' || 
+      coin.coinType === '0x2::oct::OCT' ||
+      coin.coinType.endsWith('::sui::SUI') ||
+      coin.coinType.endsWith('::oct::OCT')
+    );
+    
+    if (!gasCoins || gasCoins.length === 0) {
+      throw new Error('Weapon deploy wallet has no gas coins');
+    }
+    
+    // 创建交易
+    const tx = new Transaction();
+    tx.setSender(weaponDeployAddress);
+    
+    tx.setGasPayment(gasCoins.slice(0, 5).map(coin => ({
+      objectId: coin.coinObjectId,
+      version: coin.version,
+      digest: coin.digest,
+    })));
+    
+    // 调用 transfer_treasury_cap 函数
+    tx.moveCall({
+      target: `${LINGSTONE_PACKAGE_ID}::lingstone_coin::transfer_treasury_cap`,
+      arguments: [
+        tx.object(LINGSTONE_TREASURY_CAP),
+        tx.pure.address(sponsorAddress),
+      ],
+    });
+    
+    console.log(`[Transfer] Signing and executing transfer transaction...`);
+    
+    const result = await suiClient.signAndExecuteTransaction({
+      transaction: tx,
+      signer: weaponDeployKeypair,
+      options: {
+        showEffects: true,
+        showEvents: true,
+        showObjectChanges: true,
+      },
+    });
+    
+    console.log(`[Transfer] ✅ TreasuryCap transferred successfully!`);
+    console.log(`  Digest: ${result.digest}`);
+    
+    return result;
+  } catch (error) {
+    console.error('[Transfer] ❌ TreasuryCap transfer failed:', error);
     throw error;
   }
 }

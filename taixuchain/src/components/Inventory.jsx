@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
 import InventorySlot from './InventorySlot'
-import { getAllPlayerWeapons } from '../utils/suiClient'
+import { getAllPlayerWeapons, getLingStoneBalance, requestLingStone } from '../utils/suiClient'
 import '../css/inventory.css'
 
 function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }) {
   const [weapons, setWeapons] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedWeapon, setSelectedWeapon] = useState(null)
+  const [lingStoneBalance, setLingStoneBalance] = useState(0)
+  const [isRequestingLingStone, setIsRequestingLingStone] = useState(false)
 
   // 背包格子数量（动态扩展，无上限）
   // 根据武器数量动态计算，至少显示20个格子
@@ -15,6 +17,7 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
   useEffect(() => {
     if (isOpen) {
       loadWeapons()
+      loadLingStoneBalance()
     }
   }, [isOpen, character])
 
@@ -41,6 +44,54 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
       setWeapons([])
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const loadLingStoneBalance = async () => {
+    try {
+      const walletAddress = window.currentWalletAddress || character.owner
+      
+      if (!walletAddress) {
+        console.warn('No wallet address found')
+        return
+      }
+
+      console.log('💎 Loading LingStone balance...')
+      const balance = await getLingStoneBalance(walletAddress)
+      setLingStoneBalance(balance)
+      console.log(`✅ LingStone balance: ${balance}`)
+    } catch (error) {
+      console.error('Error loading LingStone balance:', error)
+      setLingStoneBalance(0)
+    }
+  }
+
+  const handleRequestLingStone = async () => {
+    try {
+      setIsRequestingLingStone(true)
+      const walletAddress = window.currentWalletAddress || character.owner
+      
+      if (!walletAddress) {
+        alert('❌ 无法获取钱包地址')
+        return
+      }
+
+      console.log('💎 Requesting LingStone...')
+      await requestLingStone(walletAddress)
+      
+      // 等待交易确认（2秒）
+      console.log('⏳ 等待交易确认...')
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      // 重新加载余额
+      await loadLingStoneBalance()
+      
+      alert('✅ 成功获得 10000 LingStone!')
+    } catch (error) {
+      console.error('Error requesting LingStone:', error)
+      alert(`❌ 请求失败: ${error.message}`)
+    } finally {
+      setIsRequestingLingStone(false)
     }
   }
 
@@ -104,6 +155,18 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
       <div className="inventory-container" onClick={(e) => e.stopPropagation()}>
         <div className="inventory-header">
           <h2>🎒 背包</h2>
+          <div className="lingstone-display">
+            <span className="lingstone-label">💎 LingStone:</span>
+            <span className="lingstone-amount">{lingStoneBalance.toLocaleString()}</span>
+            <button 
+              className="lingstone-request-btn" 
+              onClick={handleRequestLingStone}
+              disabled={isRequestingLingStone}
+              title="请求 10000 LingStone"
+            >
+              {isRequestingLingStone ? '⏳' : '+'}
+            </button>
+          </div>
           <button className="inventory-close-btn" onClick={onClose}>✕</button>
         </div>
 

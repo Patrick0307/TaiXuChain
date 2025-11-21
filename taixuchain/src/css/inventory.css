@@ -65,6 +65,61 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
+/* LingStone 显示 */
+.lingstone-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 8px 15px;
+  border-radius: 20px;
+  border: 2px solid #4a4a6a;
+}
+
+.lingstone-label {
+  color: #aaa;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.lingstone-amount {
+  color: #00d4ff;
+  font-size: 1.1rem;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+  min-width: 60px;
+  text-align: right;
+}
+
+.lingstone-request-btn {
+  background: linear-gradient(135deg, #00d4ff, #0099cc);
+  border: none;
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 212, 255, 0.4);
+}
+
+.lingstone-request-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #00ffff, #00ccff);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.6);
+}
+
+.lingstone-request-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: linear-gradient(135deg, #666, #555);
+}
+
 .inventory-close-btn {
   background: rgba(255, 255, 255, 0.1);
   border: 2px solid rgba(255, 255, 255, 0.3);

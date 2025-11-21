@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { sponsorCreatePlayer, getPlayerByAddress, getPlayerWeapon, getAllPlayerWeapons, sponsorMintWeapon, sponsorMintRandomWeapon, getWeaponById } from './services/sponsorService.js';
+import { sponsorCreatePlayer, getPlayerByAddress, getPlayerWeapon, getAllPlayerWeapons, sponsorMintWeapon, sponsorMintRandomWeapon, getWeaponById, getLingStoneBalance, sponsorMintLingStone } from './services/sponsorService.js';
 
 dotenv.config();
 
@@ -234,6 +234,63 @@ app.post('/api/sponsor/mint-random-weapon', async (req, res) => {
       result,
       weaponInfo,
       message: 'Random weapon minted successfully with sponsored gas'
+    });
+  } catch (error) {
+    console.error('[Sponsor] Error:', error);
+    res.status(500).json({ 
+      error: error.message,
+      details: error.toString()
+    });
+  }
+});
+
+// 获取 LingStone 余额
+app.get('/api/lingstone/balance/:address', async (req, res) => {
+  try {
+    const { address } = req.params;
+
+    if (!address) {
+      return res.status(400).json({ 
+        error: 'Missing wallet address' 
+      });
+    }
+
+    console.log(`[Query] Getting LingStone balance for: ${address}`);
+
+    const balance = await getLingStoneBalance(address);
+
+    res.json({ 
+      balance,
+      address
+    });
+  } catch (error) {
+    console.error('[Query] Error:', error);
+    res.status(500).json({ 
+      error: error.message,
+      details: error.toString()
+    });
+  }
+});
+
+// 赞助铸造 LingStone
+app.post('/api/sponsor/mint-lingstone', async (req, res) => {
+  try {
+    const { playerAddress } = req.body;
+
+    if (!playerAddress) {
+      return res.status(400).json({ 
+        error: 'Missing required field: playerAddress' 
+      });
+    }
+
+    console.log(`[Sponsor] Minting LingStone for ${playerAddress}`);
+
+    const result = await sponsorMintLingStone(playerAddress);
+
+    res.json({ 
+      success: true, 
+      result,
+      message: 'LingStone minted successfully with sponsored gas'
     });
   } catch (error) {
     console.error('[Sponsor] Error:', error);
