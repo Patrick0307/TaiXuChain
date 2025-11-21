@@ -54,7 +54,7 @@ module taixu::weapon {
         let sponsor_mint_cap = WeaponMintCap {
             id: object::new(ctx),
         };
-        transfer::transfer(sponsor_mint_cap, @0x79cdae6481a154fae60b7563df1c21ab1e7ba6a1442fb6cb2d0b1175cebbac3f);
+        transfer::transfer(sponsor_mint_cap, @0x0d718270b1e5ef1352c3556df66d6e3b49c1187e13854d46ce68e22e646a8383);
     }
 
     /// 铸造武器 - Mint weapon (只有持有 WeaponMintCap 的人可以调用)

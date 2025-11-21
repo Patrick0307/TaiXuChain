@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // 测试地址（使用你的测试钱包地址）
-const TEST_ADDRESS = '0x79cdae6481a154fae60b7563df1c21ab1e7ba6a1442fb6cb2d0b1175cebbac3f';
+const TEST_ADDRESS = '0x0d718270b1e5ef1352c3556df66d6e3b49c1187e13854d46ce68e22e646a8383';
 
 async function testLingStone() {
   try {
