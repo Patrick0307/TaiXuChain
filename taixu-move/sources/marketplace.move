@@ -78,10 +78,11 @@ module taixu::marketplace {
     }
 
     /// 购买武器
+    /// 买家支付 LingCoin，sponsor 支付 gas
     public fun buy_weapon(
         marketplace: &mut Marketplace,
         escrowed: EscrowedWeapon,
-        payment: Coin<LINGSTONE_COIN>,
+        mut payment: Coin<LINGSTONE_COIN>,
         ctx: &mut TxContext
     ) {
         let EscrowedWeapon { id: escrowed_id, weapon, listing_id } = escrowed;
@@ -92,7 +93,15 @@ module taixu::marketplace {
         let Listing { id: listing_uid, weapon_id: _, seller, price, listed_at: _ } = listing;
 
         // 验证支付金额
-        assert!(coin::value(&payment) >= price, EInsufficientPayment);
+        let payment_value = coin::value(&payment);
+        assert!(payment_value >= price, EInsufficientPayment);
+
+        // 如果支付金额大于所需，退还多余的
+        if (payment_value > price) {
+            let refund_amount = payment_value - price;
+            let refund = coin::split(&mut payment, refund_amount, ctx);
+            transfer::public_transfer(refund, tx_context::sender(ctx));
+        };
 
         // 转移灵石给卖家
         transfer::public_transfer(payment, seller);

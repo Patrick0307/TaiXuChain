@@ -195,10 +195,21 @@ module taixu::player {
 
     /// 获得经验值 - Gain experience
     /// 由游戏服务器在战斗结束后调用
+    /// 注意：这个函数需要调用者支付 gas
+    /// 如果需要 sponsor 支付，请使用 gain_exp_sponsored
     public fun gain_exp(player: &mut Player, exp_amount: u64) {
         player.exp = player.exp + exp_amount;
 
         // 检查是否可以升级 - Check if can level up
+        while (player.exp >= player.exp_to_next_level && player.level < 100) {
+            level_up(player);
+        };
+    }
+    
+    /// 获得经验值（赞助版本）- Gain experience (sponsored)
+    /// Sponsor 支付 gas，玩家不需要支付任何费用
+    public entry fun gain_exp_sponsored(player: &mut Player, exp_amount: u64) {
+        player.exp = player.exp + exp_amount;
         while (player.exp >= player.exp_to_next_level && player.level < 100) {
             level_up(player);
         };

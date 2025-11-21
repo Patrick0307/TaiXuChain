@@ -3,6 +3,8 @@ module taixu::weapon {
     use sui::transfer;
     use sui::tx_context::{Self, TxContext};
     use std::string::{Self, String};
+    use sui::coin::{Self, Coin};
+    use lingstone::lingstone_coin::LINGSTONE_COIN;
 
     /// 武器类型常量 - Weapon Type Constants
     const WEAPON_TYPE_SWORD: u8 = 1;    // 剑 (武者) - Sword (Warrior)
@@ -21,6 +23,7 @@ module taixu::weapon {
     const EWeaponLevelMismatch: u64 = 3;  // 武器等级不匹配
     const EWeaponTypeMismatch: u64 = 4;   // 武器类型不匹配
     const ERarityMismatch: u64 = 5;       // 稀有度不匹配
+    const EInsufficientPayment: u64 = 6;  // 支付金额不足
 
     /// 武器结构 - Weapon Structure
     public struct Weapon has key, store {
@@ -92,6 +95,8 @@ module taixu::weapon {
     }
 
     /// 升级武器 - Upgrade weapon
+    /// 注意：这个函数需要玩家自己支付 gas
+    /// 如果需要 sponsor 支付，请使用 upgrade_weapon_sponsored
     public fun upgrade_weapon(weapon: &mut Weapon, levels: u64) {
         // 最大等级 100 - Max level 100
         assert!(weapon.level + levels <= 100, EMaxLevel);
@@ -101,14 +106,39 @@ module taixu::weapon {
         // 每升一级，攻击力增加 5 - +5 attack per level
         weapon.attack = weapon.attack + (levels * 5);
     }
+    
+    /// 升级武器（赞助版本）- Upgrade weapon (sponsored)
+    /// Sponsor 支付 gas，玩家不需要支付任何费用
+    public entry fun upgrade_weapon_sponsored(weapon: &mut Weapon, levels: u64) {
+        assert!(weapon.level + levels <= 100, EMaxLevel);
+        weapon.level = weapon.level + levels;
+        weapon.attack = weapon.attack + (levels * 5);
+    }
 
     /// 强化武器（增加攻击力）- Enhance weapon (increase attack)
+    /// 注意：这个函数需要玩家自己支付 gas
+    /// 如果需要 sponsor 支付，请使用 enhance_weapon_sponsored
     public fun enhance_weapon(weapon: &mut Weapon, attack_bonus: u64) {
+        weapon.attack = weapon.attack + attack_bonus;
+    }
+    
+    /// 强化武器（赞助版本）- Enhance weapon (sponsored)
+    /// Sponsor 支付 gas，玩家不需要支付任何费用
+    public entry fun enhance_weapon_sponsored(weapon: &mut Weapon, attack_bonus: u64) {
         weapon.attack = weapon.attack + attack_bonus;
     }
 
     /// 转移武器所有权 - Transfer weapon ownership
+    /// 注意：这个函数需要玩家自己支付 gas
+    /// 如果需要 sponsor 支付，请使用 transfer_weapon_sponsored
     public fun transfer_weapon(weapon: Weapon, recipient: address) {
+        transfer::public_transfer(weapon, recipient);
+    }
+    
+    /// 转移武器所有权（赞助版本）- Transfer weapon ownership (sponsored)
+    /// Sponsor 支付 gas，玩家不需要支付任何费用
+    /// 注意：这个函数会直接转移武器，不返回任何值
+    public entry fun transfer_weapon_sponsored(weapon: Weapon, recipient: address) {
         transfer::public_transfer(weapon, recipient);
     }
 
@@ -134,9 +164,12 @@ module taixu::weapon {
 
     /// 合成武器 - Merge two weapons of same level to create higher level weapon
     /// 两个相同等级、类型、稀有度的武器合成为等级+1的武器
+    /// 需要支付 LingCoin 作为合成费用
     public fun merge_weapons(
         weapon1: Weapon,
         weapon2: Weapon,
+        mut payment: Coin<LINGSTONE_COIN>,
+        sponsor_address: address,
         ctx: &mut TxContext
     ): Weapon {
         // 验证两个武器等级相同
@@ -154,6 +187,24 @@ module taixu::weapon {
         let new_level = weapon1.level + 1;
         let weapon_type = weapon1.weapon_type;
         let rarity = weapon1.rarity;
+        
+        // 计算合成费用：基础费用 100 LING + (等级 * 50 LING)
+        // 例如：等级1合成需要 150 LING，等级2合成需要 200 LING
+        let merge_cost = (100 + (weapon1.level * 50)) * 1_000_000_000; // 转换为最小单位
+        
+        // 验证支付金额
+        let payment_value = coin::value(&payment);
+        assert!(payment_value >= merge_cost, EInsufficientPayment);
+        
+        // 如果支付金额大于所需，退还多余的
+        if (payment_value > merge_cost) {
+            let refund_amount = payment_value - merge_cost;
+            let refund = coin::split(&mut payment, refund_amount, ctx);
+            transfer::public_transfer(refund, tx_context::sender(ctx));
+        };
+        
+        // 将合成费用转给 sponsor（用于支付 gas）
+        transfer::public_transfer(payment, sponsor_address);
         
         // 获取武器基础属性
         let (name, base_attack) = get_weapon_stats(weapon_type, rarity);
@@ -178,6 +229,11 @@ module taixu::weapon {
         };
 
         new_weapon
+    }
+    
+    /// 计算合成费用 - Calculate merge cost
+    public fun calculate_merge_cost(weapon_level: u64): u64 {
+        (100 + (weapon_level * 50)) * 1_000_000_000
     }
 
     // ========== 查询函数 - Query Functions ==========
