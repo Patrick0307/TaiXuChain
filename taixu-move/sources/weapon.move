@@ -157,6 +157,12 @@ module taixu::weapon {
         object::delete(id);
     }
 
+    /// 销毁武器（玩家可调用版本）- Burn weapon (player callable)
+    /// 玩家可以直接调用此函数销毁自己的武器
+    public entry fun burn_weapon_by_player(weapon: Weapon) {
+        burn_weapon(weapon);
+    }
+
     /// 转移铸造权限 - Transfer mint capability
     public fun transfer_mint_cap(mint_cap: WeaponMintCap, recipient: address) {
         transfer::transfer(mint_cap, recipient);
