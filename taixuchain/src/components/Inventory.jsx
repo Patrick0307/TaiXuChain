@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import InventorySlot from './InventorySlot'
-import { getAllPlayerWeapons, getLingStoneBalance, requestLingStone } from '../utils/suiClient'
+import { getAllPlayerWeapons, getLingStoneBalance, requestLingStone, burnWeapon } from '../utils/suiClient'
 import '../css/inventory.css'
 
 function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }) {
@@ -9,6 +9,7 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
   const [selectedWeapon, setSelectedWeapon] = useState(null)
   const [lingStoneBalance, setLingStoneBalance] = useState(0)
   const [isRequestingLingStone, setIsRequestingLingStone] = useState(false)
+  const [isBurningWeapon, setIsBurningWeapon] = useState(false)
 
   // 背包格子数量（动态扩展，无上限）
   // 根据武器数量动态计算，至少显示20个格子
@@ -148,6 +149,61 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
     }
   }
 
+  // 丢弃武器
+  const handleBurnWeapon = async (weapon) => {
+    // 确认对话框
+    const confirmed = window.confirm(
+      `⚠️ 确定要丢弃 ${weapon.name} 吗？\n\n` +
+      `等级: Lv.${weapon.level}\n` +
+      `攻击力: +${weapon.attack}\n\n` +
+      `此操作不可撤销！\n` +
+      `你需要签名确认此操作（需要少量 gas 费用）\n\n` +
+      `💡 提示：如果钱包显示错误，请确保你有足够的 OCT 代币支付 gas`
+    )
+    
+    if (!confirmed) {
+      return
+    }
+
+    try {
+      setIsBurningWeapon(true)
+      console.log('🔥 Burning weapon:', weapon.name, weapon.objectId)
+      
+      await burnWeapon(weapon.objectId)
+      
+      // 如果丢弃的是已装备的武器，取消装备
+      if (equippedWeapon?.objectId === weapon.objectId && onEquipWeapon) {
+        onEquipWeapon(null)
+      }
+      
+      // 等待交易确认（2秒）
+      console.log('⏳ 等待交易确认...')
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      // 重新加载武器列表
+      await loadWeapons()
+      
+      // 清除选中状态
+      setSelectedWeapon(null)
+      
+      alert(`✅ 已丢弃: ${weapon.name}`)
+    } catch (error) {
+      console.error('Error burning weapon:', error)
+      // 更友好的错误提示
+      if (error.message.includes('User rejected') || error.message.includes('rejected')) {
+        alert(`❌ 你取消了交易`)
+      } else if (error.message.includes('Insufficient') || error.message.includes('insufficient')) {
+        alert(`❌ Gas 不足\n\n请确保你的钱包有足够的 OCT 代币支付 gas 费用。\n你可以从水龙头获取测试代币：\nhttps://faucet-testnet.onelabs.cc/`)
+      } else if (error.message.includes('dry run') || error.message.includes('dryrun')) {
+        alert(`❌ 交易模拟失败\n\n可能原因：\n1. Gas 不足（需要 OCT 代币）\n2. 这是旧版本合约的武器，无法删除\n3. 武器对象状态异常\n\n请检查你的钱包余额或尝试删除其他武器`)
+      } else {
+        alert(`❌ 丢弃失败: ${error.message}\n\n如果这是旧版本的武器，可能无法删除`)
+      }
+    } finally {
+      setIsBurningWeapon(false)
+    }
+  }
+
   if (!isOpen) return null
 
   return (
@@ -265,6 +321,15 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
                     {equippedWeapon?.objectId === selectedWeapon.objectId ? '✓ 已装备' : '装备'}
                   </button>
                   <button className="btn-upgrade" disabled>升级</button>
+                </div>
+                <div className="weapon-actions">
+                  <button 
+                    className="btn-burn"
+                    onClick={() => handleBurnWeapon(selectedWeapon)}
+                    disabled={isBurningWeapon}
+                  >
+                    {isBurningWeapon ? '⏳ 丢弃中...' : '🔥 丢弃'}
+                  </button>
                 </div>
                 {!canEquipWeapon(selectedWeapon) && (
                   <div className="weapon-warning">

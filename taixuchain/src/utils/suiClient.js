@@ -330,3 +330,59 @@ export async function requestLingStone(walletAddress) {
     throw error
   }
 }
+
+/**
+ * 销毁武器（丢弃）- 玩家自己签名
+ * @param {string} weaponObjectId - 武器对象 ID
+ * @returns {Promise<object>} 交易结果
+ */
+export async function burnWeapon(weaponObjectId) {
+  try {
+    console.log('🔥 Burning weapon...')
+    console.log('  Weapon ID:', weaponObjectId)
+    console.log('  Package ID:', PACKAGE_ID)
+    console.log('📝 You will need to sign this transaction')
+    
+    // 获取钱包
+    const suiWallet = window.suiWallet
+    if (!suiWallet) {
+      throw new Error('Wallet not connected')
+    }
+
+    // 创建交易
+    const tx = new Transaction()
+    
+    // 设置 gas budget（销毁操作很简单，不需要太多 gas）
+    tx.setGasBudget(10000000) // 0.01 SUI/OCT
+    
+    // 调用 burn_weapon_by_player 函数
+    tx.moveCall({
+      target: `${PACKAGE_ID}::weapon::burn_weapon_by_player`,
+      arguments: [
+        tx.object(weaponObjectId),
+      ],
+    })
+    
+    console.log('🔥 Signing and executing burn transaction...')
+    console.log('  Target:', `${PACKAGE_ID}::weapon::burn_weapon_by_player`)
+    
+    // 玩家签名并执行交易
+    const result = await suiWallet.signAndExecuteTransaction({
+      transaction: tx,
+      options: {
+        showEffects: true,
+        showEvents: true,
+        showObjectChanges: true,
+      },
+    })
+    
+    console.log('✅ Weapon burned successfully!')
+    console.log('  Digest:', result.digest)
+    
+    return result
+  } catch (error) {
+    console.error('❌ Error burning weapon:', error)
+    console.error('  Error details:', error.message)
+    throw error
+  }
+}

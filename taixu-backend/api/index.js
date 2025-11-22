@@ -143,4 +143,34 @@ app.post('/api/sponsor/mint-lingstone', async (req, res) => {
   }
 });
 
+// 赞助销毁武器（玩家丢弃武器）
+app.post('/api/sponsor/burn-weapon', async (req, res) => {
+  try {
+    const { weaponObjectId } = req.body;
+
+    if (!weaponObjectId) {
+      return res.status(400).json({ 
+        error: 'Missing required field: weaponObjectId' 
+      });
+    }
+
+    console.log(`[Sponsor] Burning weapon: ${weaponObjectId}`);
+
+    const { sponsorBurnWeapon } = await import('../services/sponsorService.js');
+    const result = await sponsorBurnWeapon(weaponObjectId);
+
+    res.json({ 
+      success: true, 
+      result,
+      message: 'Weapon burned successfully with sponsored gas'
+    });
+  } catch (error) {
+    console.error('[Sponsor] Error:', error);
+    res.status(500).json({ 
+      error: error.message,
+      details: error.toString()
+    });
+  }
+});
+
 export default app;

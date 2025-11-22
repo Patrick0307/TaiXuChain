@@ -540,6 +540,22 @@
   cursor: not-allowed;
 }
 
+.btn-burn {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+  color: white;
+}
+
+.btn-burn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+}
+
+.btn-burn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: linear-gradient(135deg, #666, #555);
+}
+
 .weapon-warning {
   background: rgba(255, 152, 0, 0.2);
   border: 1px solid rgba(255, 152, 0, 0.5);

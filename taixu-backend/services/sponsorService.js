@@ -304,13 +304,14 @@ export async function getWeaponById(objectId) {
 }
 
 /**
- * 查询玩家的所有武器
+ * 查询玩家的所有武器（只返回当前 package 版本的武器）
  * @param {string} playerAddress - 玩家钱包地址
  * @returns {Promise<Array>} 武器列表
  */
 export async function getAllPlayerWeapons(playerAddress) {
   try {
     console.log(`[Query] Getting all weapons for: ${playerAddress}`);
+    console.log(`[Query] Current PACKAGE_ID: ${PACKAGE_ID}`);
     
     // 查询该地址拥有的所有对象（支持分页）
     let allObjects = [];
@@ -338,12 +339,25 @@ export async function getAllPlayerWeapons(playerAddress) {
     console.log(`[Query] Total objects found: ${allObjects.length}`);
     
     // 查找所有 Weapon 类型的对象（排除 WeaponMintCap）
+    // 并且只保留当前 PACKAGE_ID 的武器
     const weaponObjects = allObjects.filter(obj => {
       const objType = obj.data?.type;
-      return objType && objType.includes('::weapon::Weapon') && !objType.includes('WeaponMintCap');
+      if (!objType || !objType.includes('::weapon::Weapon') || objType.includes('WeaponMintCap')) {
+        return false;
+      }
+      
+      // 检查是否是当前 package 的武器
+      // 类型格式: 0x<package_id>::weapon::Weapon
+      const isCurrentPackage = objType.includes(PACKAGE_ID);
+      
+      if (!isCurrentPackage) {
+        console.log(`[Query] Skipping weapon from old package: ${objType}`);
+      }
+      
+      return isCurrentPackage;
     });
     
-    console.log(`[Query] Found ${weaponObjects.length} weapon(s)`);
+    console.log(`[Query] Found ${weaponObjects.length} weapon(s) from current package (${PACKAGE_ID})`);
     
     if (weaponObjects.length === 0) {
       return [];
@@ -365,12 +379,13 @@ export async function getAllPlayerWeapons(playerAddress) {
           owner: content.owner,
           createdAt: parseInt(content.created_at),
           version: parseInt(obj.data.version),
+          packageId: PACKAGE_ID, // 添加 package ID 信息
         };
       })
       .filter(weapon => weapon !== null)
       .sort((a, b) => b.version - a.version); // 按 version 降序排序（最新的在前）
     
-    console.log(`[Query] Returning ${weapons.length} weapon(s), sorted by version`);
+    console.log(`[Query] Returning ${weapons.length} weapon(s) from current package, sorted by version`);
     
     return weapons;
   } catch (error) {
@@ -917,6 +932,76 @@ async function transferTreasuryCapToSponsor() {
     return result;
   } catch (error) {
     console.error('[Transfer] ❌ TreasuryCap transfer failed:', error);
+    throw error;
+  }
+}
+
+/**
+ * 赞助销毁武器（玩家丢弃武器）
+ * @param {string} weaponObjectId - 武器对象 ID
+ * @returns {Promise<object>} 交易结果
+ */
+export async function sponsorBurnWeapon(weaponObjectId) {
+  try {
+    const sponsorAddress = sponsorKeypair.getPublicKey().toSuiAddress();
+    
+    console.log(`[Sponsor] Burning weapon: ${weaponObjectId}`);
+    console.log(`  Using sponsor wallet: ${sponsorAddress}`);
+    
+    // 获取 gas coins（使用 sponsor 钱包）
+    const allCoins = await suiClient.getAllCoins({
+      owner: sponsorAddress,
+    });
+    
+    let gasCoins = allCoins.data.filter(coin => 
+      coin.coinType === '0x2::sui::SUI' || 
+      coin.coinType === '0x2::oct::OCT' ||
+      coin.coinType.endsWith('::sui::SUI') ||
+      coin.coinType.endsWith('::oct::OCT')
+    );
+    
+    if (!gasCoins || gasCoins.length === 0) {
+      throw new Error('Sponsor wallet has no gas coins');
+    }
+    
+    console.log(`[Sponsor] Found ${gasCoins.length} gas coins`);
+    
+    // 创建交易（使用 sponsor 钱包作为 sender）
+    const tx = new Transaction();
+    tx.setSender(sponsorAddress);
+    
+    tx.setGasPayment(gasCoins.slice(0, 5).map(coin => ({
+      objectId: coin.coinObjectId,
+      version: coin.version,
+      digest: coin.digest,
+    })));
+    
+    // 调用 burn_weapon_by_player 函数
+    tx.moveCall({
+      target: `${PACKAGE_ID}::weapon::burn_weapon_by_player`,
+      arguments: [
+        tx.object(weaponObjectId),
+      ],
+    });
+    
+    console.log(`[Sponsor] Signing and executing weapon burn transaction...`);
+    
+    const result = await suiClient.signAndExecuteTransaction({
+      transaction: tx,
+      signer: sponsorKeypair,
+      options: {
+        showEffects: true,
+        showEvents: true,
+        showObjectChanges: true,
+      },
+    });
+    
+    console.log(`[Sponsor] ✅ Weapon burned successfully!`);
+    console.log(`  Digest: ${result.digest}`);
+    
+    return result;
+  } catch (error) {
+    console.error('[Sponsor] ❌ Weapon burn failed:', error);
     throw error;
   }
 }
