@@ -1101,3 +1101,44 @@ export async function sponsorMergeWeapon(playerAddress, weaponType, rarity, newL
     throw error;
   }
 }
+
+/**
+ * 获取 LingStone coin 对象列表
+ * @param {string} walletAddress - 钱包地址
+ * @returns {Promise<Array>} LingStone coin 对象列表
+ */
+export async function getLingStoneCoins(walletAddress) {
+  try {
+    console.log(`[Query] Getting LingStone coins for: ${walletAddress}`);
+    
+    // 获取该地址的所有 LingStone coins
+    const coins = await suiClient.getAllCoins({
+      owner: walletAddress,
+    });
+    
+    // 过滤出 LingStone 代币
+    const lingStoneCoins = coins.data.filter(coin => 
+      coin.coinType.includes('::lingstone_coin::LINGSTONE_COIN')
+    );
+    
+    if (lingStoneCoins.length === 0) {
+      console.log(`[Query] No LingStone coins found for ${walletAddress}`);
+      return [];
+    }
+    
+    // 转换为前端需要的格式
+    const coinList = lingStoneCoins.map(coin => ({
+      coinObjectId: coin.coinObjectId,
+      balance: parseInt(coin.balance),
+      version: coin.version,
+      digest: coin.digest,
+    }));
+    
+    console.log(`[Query] Found ${coinList.length} LingStone coin(s)`);
+    
+    return coinList;
+  } catch (error) {
+    console.error('[Query] Error getting LingStone coins:', error);
+    throw error;
+  }
+}

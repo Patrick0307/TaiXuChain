@@ -53,6 +53,14 @@ module lingstone::lingstone_coin {
         coin::burn(treasury_cap, coin);
     }
 
+    /// 支付代币（玩家版本，不需要 TreasuryCap）
+    /// 玩家将代币支付给指定地址（通常是 sponsor 或游戏金库）
+    /// sponsor 收到后可以选择 burn 或重新分配
+    public entry fun pay_coin(coin: Coin<LINGSTONE_COIN>, recipient: address) {
+        // 将代币转移给接收者
+        transfer::public_transfer(coin, recipient);
+    }
+
     /// 转移 TreasuryCap 权限
     public fun transfer_treasury_cap(
         treasury_cap: TreasuryCap<LINGSTONE_COIN>,

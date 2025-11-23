@@ -388,22 +388,27 @@ export async function burnWeapon(weaponObjectId) {
 }
 
 /**
- * 合成武器 - 玩家销毁两把武器，sponsor铸造升级后的武器
+ * 合成武器 - 玩家销毁LingStone和两把武器，sponsor铸造升级后的武器
  * @param {string} weapon1ObjectId - 第一把武器对象 ID
  * @param {string} weapon2ObjectId - 第二把武器对象 ID
  * @param {number} weaponType - 武器类型
  * @param {number} rarity - 稀有度
  * @param {number} newLevel - 新武器等级
  * @param {string} walletAddress - 钱包地址
+ * @param {number} weaponLevel - 当前武器等级（用于计算费用）
  * @returns {Promise<object>} 交易结果
  */
-export async function mergeWeapons(weapon1ObjectId, weapon2ObjectId, weaponType, rarity, newLevel, walletAddress) {
+export async function mergeWeapons(weapon1ObjectId, weapon2ObjectId, weaponType, rarity, newLevel, walletAddress, weaponLevel) {
   try {
     console.log('⚔️ Merging weapons...')
     console.log('  Weapon 1:', weapon1ObjectId)
     console.log('  Weapon 2:', weapon2ObjectId)
     console.log('  New Level:', newLevel)
-    console.log('📝 Step 1: You will sign to burn 2 weapons (you pay gas)')
+    
+    // 计算合成费用：基础费用 100 LING + (等级 * 50 LING)
+    const mergeCost = (100 + (weaponLevel * 50)) * 1_000_000_000
+    console.log(`💎 Merge cost: ${(100 + (weaponLevel * 50))} LING`)
+    console.log('📝 Step 1: You will sign to pay LingStone and burn 2 weapons (you pay gas)')
     
     // 获取钱包
     const suiWallet = window.suiWallet
@@ -411,9 +416,43 @@ export async function mergeWeapons(weapon1ObjectId, weapon2ObjectId, weaponType,
       throw new Error('Wallet not connected')
     }
 
-    // 步骤1：玩家销毁两把武器（玩家付gas）
+    // 步骤1：玩家销毁LingStone和两把武器（玩家付gas）
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
+    
+    // 获取玩家的 LingStone coin 对象
+    const response = await fetch(`${BACKEND_URL}/api/lingstone/coins/${walletAddress}`)
+    if (!response.ok) {
+      throw new Error('Failed to get LingStone coins')
+    }
+    const coinsData = await response.json()
+    
+    if (!coinsData.coins || coinsData.coins.length === 0) {
+      throw new Error('No LingStone coins found')
+    }
+    
+    // 找到足够余额的 coin 或合并多个 coins
+    let selectedCoin = null
+    for (const coin of coinsData.coins) {
+      if (coin.balance >= mergeCost) {
+        selectedCoin = coin.coinObjectId
+        break
+      }
+    }
+    
+    if (!selectedCoin) {
+      throw new Error(`Insufficient LingStone balance. Need ${(100 + (weaponLevel * 50))} LING`)
+    }
+    
     const tx = new Transaction()
-    tx.setGasBudget(20000000) // 0.02 SUI/OCT (两次销毁操作)
+    tx.setGasBudget(30000000) // 0.03 SUI/OCT (burn coin + 两次销毁武器)
+    
+    // 分割出需要的金额
+    const coinToSplit = tx.object(selectedCoin)
+    const splitCoin = tx.splitCoins(coinToSplit, [mergeCost])[0]
+    
+    // 直接转账 LingStone 给游戏金库（使用 Sui 原生转账）
+    const GAME_TREASURY_ADDRESS = import.meta.env.VITE_GAME_TREASURY_ADDRESS
+    tx.transferObjects([splitCoin], GAME_TREASURY_ADDRESS)
     
     // 销毁第一把武器
     tx.moveCall({
@@ -443,15 +482,13 @@ export async function mergeWeapons(weapon1ObjectId, weapon2ObjectId, weaponType,
       },
     })
     
-    console.log('✅ Weapons burned successfully!')
+    console.log('✅ LingStone paid and weapons burned successfully!')
     console.log('  Digest:', burnResult.digest)
     
     // 步骤2：调用后端，sponsor铸造新武器（sponsor付gas）
     console.log('💰 Step 2: Sponsor will mint upgraded weapon (sponsor pays gas)')
     
-    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
-    
-    const response = await fetch(`${BACKEND_URL}/api/sponsor/merge-weapon`, {
+    const mintResponse = await fetch(`${BACKEND_URL}/api/sponsor/merge-weapon`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -464,12 +501,12 @@ export async function mergeWeapons(weapon1ObjectId, weapon2ObjectId, weaponType,
       }),
     })
 
-    if (!response.ok) {
-      const errorData = await response.json()
+    if (!mintResponse.ok) {
+      const errorData = await mintResponse.json()
       throw new Error(errorData.error || 'Failed to merge weapons')
     }
 
-    const data = await response.json()
+    const data = await mintResponse.json()
     console.log('✅ New weapon minted successfully!')
     console.log('  Result:', data.result)
     

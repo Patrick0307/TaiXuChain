@@ -162,6 +162,9 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
     const weapon1 = selectedForMerge[0]
     const weapon2 = selectedForMerge[1]
     
+    // 计算合成费用
+    const mergeCost = 100 + (weapon1.level * 50)
+    
     // 确认对话框
     const confirmed = window.confirm(
       `⚔️ 确定要合成这两把武器吗？\n\n` +
@@ -169,7 +172,9 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
       `武器2: ${weapon2.name} (Lv.${weapon2.level})\n\n` +
       `合成后将获得:\n` +
       `${weapon1.name} (Lv.${weapon1.level + 1})\n\n` +
-      `步骤1: 你需要签名销毁这2把武器（你付gas）\n` +
+      `💎 合成费用: ${mergeCost} LingStone\n` +
+      `💰 当前余额: ${lingStoneBalance.toLocaleString()} LingStone\n\n` +
+      `步骤1: 你需要签名支付 ${mergeCost} LingStone 和销毁 2把武器（你付gas）\n` +
       `步骤2: Sponsor会铸造新武器给你（sponsor付gas）\n\n` +
       `此操作不可撤销！`
     )
@@ -190,7 +195,8 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
         weapon1.weaponType,
         weapon1.rarity,
         weapon1.level + 1,
-        walletAddress
+        walletAddress,
+        weapon1.level
       )
       
       // 如果合成的武器中有已装备的，取消装备

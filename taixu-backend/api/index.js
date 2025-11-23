@@ -113,6 +113,35 @@ app.get('/api/lingstone/balance/:address', async (req, res) => {
   }
 });
 
+// 获取 LingStone coin 对象
+app.get('/api/lingstone/coins/:address', async (req, res) => {
+  try {
+    const { address } = req.params;
+
+    if (!address) {
+      return res.status(400).json({ 
+        error: 'Missing wallet address' 
+      });
+    }
+
+    console.log(`[Query] Getting LingStone coins for: ${address}`);
+
+    const { getLingStoneCoins } = await import('../services/sponsorService.js');
+    const coins = await getLingStoneCoins(address);
+
+    res.json({ 
+      coins,
+      address
+    });
+  } catch (error) {
+    console.error('[Query] Error:', error);
+    res.status(500).json({ 
+      error: error.message,
+      details: error.toString()
+    });
+  }
+});
+
 // 赞助铸造 LingStone
 app.post('/api/sponsor/mint-lingstone', async (req, res) => {
   try {
