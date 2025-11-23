@@ -29,6 +29,6 @@ flavor = "sui"
 
 [env.onechain-testnet]
 chain-id = "1bd5c965"
-original-published-id = "0x0ed87ec91e74003e40894f533901939c9489c3faaee980d7eb359eebeebdf37f"
-latest-published-id = "0x0ed87ec91e74003e40894f533901939c9489c3faaee980d7eb359eebeebdf37f"
+original-published-id = "0x7217f3492c95cefb3c8a13a10d55ba0efb7d0f0eb5769cc8dd097912eeb0196e"
+latest-published-id = "0x7217f3492c95cefb3c8a13a10d55ba0efb7d0f0eb5769cc8dd097912eeb0196e"
 published-version = "1"

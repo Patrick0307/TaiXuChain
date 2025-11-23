@@ -11,6 +11,7 @@ module taixu::marketplace {
     const ENotListed: u64 = 0;
     const ENotOwner: u64 = 1;
     const EInsufficientPayment: u64 = 2;
+    const EInvalidPrice: u64 = 3;
 
     /// 武器挂单
     public struct Listing has key, store {
@@ -45,13 +46,18 @@ module taixu::marketplace {
         transfer::share_object(marketplace);
     }
 
-    /// 上架武器
-    public fun list_weapon(
+    /// 上架武器（玩家调用版本）
+    /// 玩家支付 gas，指定 LingStone 价格
+    /// price 单位：最小单位（1 LING = 1_000_000_000 最小单位）
+    public entry fun list_weapon(
         marketplace: &mut Marketplace,
         weapon: Weapon,
         price: u64,
         ctx: &mut TxContext
     ) {
+        // 验证价格大于 0
+        assert!(price > 0, EInvalidPrice);
+
         let weapon_id = object::id(&weapon);
         let listing_id = object::new(ctx);
         let listing_id_copy = object::uid_to_inner(&listing_id);
@@ -77,9 +83,10 @@ module taixu::marketplace {
         transfer::share_object(escrowed);
     }
 
-    /// 购买武器
-    /// 买家支付 LingCoin，sponsor 支付 gas
-    public fun buy_weapon(
+    /// 购买武器（买家调用版本）
+    /// 买家支付 LingStone + gas
+    /// LingStone 转移给卖家，武器转移给买家
+    public entry fun buy_weapon(
         marketplace: &mut Marketplace,
         escrowed: EscrowedWeapon,
         mut payment: Coin<LINGSTONE_COIN>,
@@ -115,8 +122,9 @@ module taixu::marketplace {
         object::delete(escrowed_id);
     }
 
-    /// 取消挂单
-    public fun cancel_listing(
+    /// 取消挂单（卖家调用版本）
+    /// 卖家支付 gas，取回武器
+    public entry fun cancel_listing(
         marketplace: &mut Marketplace,
         escrowed: EscrowedWeapon,
         ctx: &mut TxContext
@@ -139,9 +147,34 @@ module taixu::marketplace {
         object::delete(escrowed_id);
     }
 
+    // ========== 查询函数 - Query Functions ==========
+
     /// 查询市场总挂单数
     public fun get_total_listings(marketplace: &Marketplace): u64 {
         marketplace.total_listings
+    }
+
+    /// 检查武器是否已上架
+    public fun is_listed(marketplace: &Marketplace, weapon_id: ID): bool {
+        table::contains(&marketplace.listings, weapon_id)
+    }
+
+    /// 获取挂单信息（如果存在）
+    /// 返回：(seller, price, listed_at)
+    public fun get_listing_info(marketplace: &Marketplace, weapon_id: ID): (address, u64, u64) {
+        assert!(table::contains(&marketplace.listings, weapon_id), ENotListed);
+        let listing = table::borrow(&marketplace.listings, weapon_id);
+        (listing.seller, listing.price, listing.listed_at)
+    }
+
+    /// 获取托管武器的 listing_id
+    public fun get_escrowed_listing_id(escrowed: &EscrowedWeapon): ID {
+        escrowed.listing_id
+    }
+
+    /// 获取托管武器的引用（用于查询武器属性）
+    public fun borrow_escrowed_weapon(escrowed: &EscrowedWeapon): &Weapon {
+        &escrowed.weapon
     }
 
     #[test_only]
