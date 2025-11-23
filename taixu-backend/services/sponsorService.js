@@ -1005,3 +1005,99 @@ export async function sponsorBurnWeapon(weaponObjectId) {
     throw error;
   }
 }
+
+/**
+ * 赞助合成武器（铸造升级后的武器）
+ * @param {string} playerAddress - 玩家钱包地址
+ * @param {number} weaponType - 武器类型
+ * @param {number} rarity - 稀有度
+ * @param {number} newLevel - 新武器等级
+ * @returns {Promise<object>} 交易结果
+ */
+export async function sponsorMergeWeapon(playerAddress, weaponType, rarity, newLevel) {
+  try {
+    const weaponDeployAddress = weaponDeployKeypair.getPublicKey().toSuiAddress();
+    
+    console.log(`[Sponsor] Merging weapons for ${playerAddress}`);
+    console.log(`  Weapon Type: ${weaponType}, Rarity: ${rarity}, New Level: ${newLevel}`);
+    console.log(`  Using weapon deploy wallet: ${weaponDeployAddress}`);
+    
+    // 获取 gas coins（使用武器部署钱包）
+    const allCoins = await suiClient.getAllCoins({
+      owner: weaponDeployAddress,
+    });
+    
+    let gasCoins = allCoins.data.filter(coin => 
+      coin.coinType === '0x2::sui::SUI' || 
+      coin.coinType === '0x2::oct::OCT' ||
+      coin.coinType.endsWith('::sui::SUI') ||
+      coin.coinType.endsWith('::oct::OCT')
+    );
+    
+    if (!gasCoins || gasCoins.length === 0) {
+      throw new Error('Weapon deploy wallet has no gas coins');
+    }
+    
+    console.log(`[Sponsor] Found ${gasCoins.length} gas coins`);
+    
+    // 创建交易（使用武器部署钱包作为 sender）
+    const tx = new Transaction();
+    tx.setSender(weaponDeployAddress);
+    
+    tx.setGasPayment(gasCoins.slice(0, 5).map(coin => ({
+      objectId: coin.coinObjectId,
+      version: coin.version,
+      digest: coin.digest,
+    })));
+    
+    // 调用 mint_weapon_with_level 函数铸造指定等级的新武器
+    console.log(`[Sponsor] Minting weapon with level ${newLevel}...`);
+    tx.moveCall({
+      target: `${PACKAGE_ID}::weapon::mint_weapon_with_level`,
+      arguments: [
+        tx.object(WEAPON_MINT_CAP),
+        tx.pure.u8(weaponType),
+        tx.pure.u8(rarity),
+        tx.pure.u64(newLevel),
+        tx.pure.address(playerAddress),
+      ],
+    });
+    
+    console.log(`[Sponsor] Signing and executing weapon merge transaction...`);
+    
+    const result = await suiClient.signAndExecuteTransaction({
+      transaction: tx,
+      signer: weaponDeployKeypair,
+      options: {
+        showEffects: true,
+        showEvents: true,
+        showObjectChanges: true,
+      },
+    });
+    
+    console.log(`[Sponsor] ✅ Weapon merged successfully!`);
+    console.log(`  Digest: ${result.digest}`);
+    
+    // 提取新创建的武器 objectId
+    let weaponObjectId = null;
+    if (result.objectChanges) {
+      const createdWeapon = result.objectChanges.find(
+        change => change.type === 'created' && 
+        change.objectType && 
+        change.objectType.includes('::weapon::Weapon')
+      );
+      if (createdWeapon) {
+        weaponObjectId = createdWeapon.objectId;
+        console.log(`  New Weapon Object ID: ${weaponObjectId}`);
+      }
+    }
+    
+    return {
+      result,
+      weaponObjectId
+    };
+  } catch (error) {
+    console.error('[Sponsor] ❌ Weapon merge failed:', error);
+    throw error;
+  }
+}

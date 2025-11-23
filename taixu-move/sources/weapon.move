@@ -94,6 +94,51 @@ module taixu::weapon {
         transfer::public_transfer(weapon, recipient);
     }
 
+    /// 铸造指定等级的武器 - Mint weapon with specific level (sponsored)
+    /// 用于合成武器，sponsor 支付 gas
+    public entry fun mint_weapon_with_level(
+        _mint_cap: &WeaponMintCap,
+        weapon_type: u8,
+        rarity: u8,
+        level: u64,
+        recipient: address,
+        ctx: &mut TxContext
+    ) {
+        // 验证武器类型 - Validate weapon type
+        assert!(
+            weapon_type >= WEAPON_TYPE_SWORD && weapon_type <= WEAPON_TYPE_STAFF,
+            EInvalidWeaponType
+        );
+
+        // 验证稀有度 - Validate rarity
+        assert!(
+            rarity >= RARITY_COMMON && rarity <= RARITY_EPIC,
+            EInvalidRarity
+        );
+
+        // 验证等级 - Validate level
+        assert!(level >= 1 && level <= 100, EMaxLevel);
+
+        // 根据武器类型和稀有度获取武器名称和基础属性
+        let (name, base_attack) = get_weapon_stats(weapon_type, rarity);
+
+        // 计算攻击力：基础攻击力 + (等级-1) * 5
+        let attack = base_attack + ((level - 1) * 5);
+
+        let weapon = Weapon {
+            id: object::new(ctx),
+            name,
+            weapon_type,
+            attack,
+            level,
+            rarity,
+            created_at: tx_context::epoch(ctx),
+            owner: recipient,
+        };
+
+        transfer::public_transfer(weapon, recipient);
+    }
+
     /// 升级武器 - Upgrade weapon
     /// 注意：这个函数需要玩家自己支付 gas
     /// 如果需要 sponsor 支付，请使用 upgrade_weapon_sponsored

@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { sponsorCreatePlayer, getPlayerByAddress, getPlayerWeapon, getAllPlayerWeapons, sponsorMintWeapon, sponsorMintRandomWeapon, getWeaponById, getLingStoneBalance, sponsorMintLingStone, sponsorBurnWeapon } from './services/sponsorService.js';
+import { sponsorCreatePlayer, getPlayerByAddress, getPlayerWeapon, getAllPlayerWeapons, sponsorMintWeapon, sponsorMintRandomWeapon, getWeaponById, getLingStoneBalance, sponsorMintLingStone, sponsorBurnWeapon, sponsorMergeWeapon } from './services/sponsorService.js';
 
 dotenv.config();
 
@@ -320,6 +320,36 @@ app.post('/api/sponsor/burn-weapon', async (req, res) => {
       success: true, 
       result,
       message: 'Weapon burned successfully with sponsored gas'
+    });
+  } catch (error) {
+    console.error('[Sponsor] Error:', error);
+    res.status(500).json({ 
+      error: error.message,
+      details: error.toString()
+    });
+  }
+});
+
+// 赞助合成武器（铸造升级后的武器）
+app.post('/api/sponsor/merge-weapon', async (req, res) => {
+  try {
+    const { playerAddress, weaponType, rarity, newLevel } = req.body;
+
+    if (!playerAddress || !weaponType || !rarity || !newLevel) {
+      return res.status(400).json({ 
+        error: 'Missing required fields: playerAddress, weaponType, rarity, newLevel' 
+      });
+    }
+
+    console.log(`[Sponsor] Merging weapons for ${playerAddress}`);
+    console.log(`  Type: ${weaponType}, Rarity: ${rarity}, New Level: ${newLevel}`);
+
+    const result = await sponsorMergeWeapon(playerAddress, weaponType, rarity, newLevel);
+
+    res.json({ 
+      success: true, 
+      result,
+      message: 'Weapon merged successfully with sponsored gas'
     });
   } catch (error) {
     console.error('[Sponsor] Error:', error);

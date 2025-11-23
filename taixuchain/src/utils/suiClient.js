@@ -386,3 +386,99 @@ export async function burnWeapon(weaponObjectId) {
     throw error
   }
 }
+
+/**
+ * 合成武器 - 玩家销毁两把武器，sponsor铸造升级后的武器
+ * @param {string} weapon1ObjectId - 第一把武器对象 ID
+ * @param {string} weapon2ObjectId - 第二把武器对象 ID
+ * @param {number} weaponType - 武器类型
+ * @param {number} rarity - 稀有度
+ * @param {number} newLevel - 新武器等级
+ * @param {string} walletAddress - 钱包地址
+ * @returns {Promise<object>} 交易结果
+ */
+export async function mergeWeapons(weapon1ObjectId, weapon2ObjectId, weaponType, rarity, newLevel, walletAddress) {
+  try {
+    console.log('⚔️ Merging weapons...')
+    console.log('  Weapon 1:', weapon1ObjectId)
+    console.log('  Weapon 2:', weapon2ObjectId)
+    console.log('  New Level:', newLevel)
+    console.log('📝 Step 1: You will sign to burn 2 weapons (you pay gas)')
+    
+    // 获取钱包
+    const suiWallet = window.suiWallet
+    if (!suiWallet) {
+      throw new Error('Wallet not connected')
+    }
+
+    // 步骤1：玩家销毁两把武器（玩家付gas）
+    const tx = new Transaction()
+    tx.setGasBudget(20000000) // 0.02 SUI/OCT (两次销毁操作)
+    
+    // 销毁第一把武器
+    tx.moveCall({
+      target: `${PACKAGE_ID}::weapon::burn_weapon_by_player`,
+      arguments: [
+        tx.object(weapon1ObjectId),
+      ],
+    })
+    
+    // 销毁第二把武器
+    tx.moveCall({
+      target: `${PACKAGE_ID}::weapon::burn_weapon_by_player`,
+      arguments: [
+        tx.object(weapon2ObjectId),
+      ],
+    })
+    
+    console.log('🔥 Signing and executing burn transactions...')
+    
+    // 玩家签名并执行交易
+    const burnResult = await suiWallet.signAndExecuteTransaction({
+      transaction: tx,
+      options: {
+        showEffects: true,
+        showEvents: true,
+        showObjectChanges: true,
+      },
+    })
+    
+    console.log('✅ Weapons burned successfully!')
+    console.log('  Digest:', burnResult.digest)
+    
+    // 步骤2：调用后端，sponsor铸造新武器（sponsor付gas）
+    console.log('💰 Step 2: Sponsor will mint upgraded weapon (sponsor pays gas)')
+    
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
+    
+    const response = await fetch(`${BACKEND_URL}/api/sponsor/merge-weapon`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        playerAddress: walletAddress,
+        weaponType,
+        rarity,
+        newLevel,
+      }),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.error || 'Failed to merge weapons')
+    }
+
+    const data = await response.json()
+    console.log('✅ New weapon minted successfully!')
+    console.log('  Result:', data.result)
+    
+    return {
+      burnResult,
+      mintResult: data.result
+    }
+  } catch (error) {
+    console.error('❌ Error merging weapons:', error)
+    throw error
+  }
+}

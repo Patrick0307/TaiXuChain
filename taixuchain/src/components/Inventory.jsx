@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import InventorySlot from './InventorySlot'
-import { getAllPlayerWeapons, getLingStoneBalance, requestLingStone, burnWeapon } from '../utils/suiClient'
+import { getAllPlayerWeapons, getLingStoneBalance, requestLingStone, burnWeapon, mergeWeapons } from '../utils/suiClient'
 import '../css/inventory.css'
 
 function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }) {
@@ -10,6 +10,8 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
   const [lingStoneBalance, setLingStoneBalance] = useState(0)
   const [isRequestingLingStone, setIsRequestingLingStone] = useState(false)
   const [isBurningWeapon, setIsBurningWeapon] = useState(false)
+  const [isMerging, setIsMerging] = useState(false)
+  const [selectedForMerge, setSelectedForMerge] = useState([]) // 选中用于合成的武器
 
   // 背包格子数量（动态扩展，无上限）
   // 根据武器数量动态计算，至少显示20个格子
@@ -98,7 +100,130 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
 
   const handleSlotClick = (weapon) => {
     if (weapon) {
-      setSelectedWeapon(selectedWeapon?.objectId === weapon.objectId ? null : weapon)
+      // 如果在合成模式，处理选择逻辑
+      if (isMerging) {
+        handleMergeSelection(weapon)
+      } else {
+        setSelectedWeapon(selectedWeapon?.objectId === weapon.objectId ? null : weapon)
+      }
+    }
+  }
+
+  // 处理合成模式下的武器选择
+  const handleMergeSelection = (weapon) => {
+    const isSelected = selectedForMerge.some(w => w.objectId === weapon.objectId)
+    
+    if (isSelected) {
+      // 取消选择
+      setSelectedForMerge(selectedForMerge.filter(w => w.objectId !== weapon.objectId))
+    } else {
+      // 检查是否已选择2把
+      if (selectedForMerge.length >= 2) {
+        alert('⚠️ 最多只能选择2把武器进行合成')
+        return
+      }
+      
+      // 检查是否与已选择的武器匹配
+      if (selectedForMerge.length > 0) {
+        const first = selectedForMerge[0]
+        if (first.weaponType !== weapon.weaponType) {
+          alert('⚠️ 只能合成相同类型的武器')
+          return
+        }
+        if (first.rarity !== weapon.rarity) {
+          alert('⚠️ 只能合成相同稀有度的武器')
+          return
+        }
+        if (first.level !== weapon.level) {
+          alert('⚠️ 只能合成相同等级的武器')
+          return
+        }
+      }
+      
+      // 添加到选择列表
+      setSelectedForMerge([...selectedForMerge, weapon])
+    }
+  }
+
+  // 切换合成模式
+  const toggleMergeMode = () => {
+    setIsMerging(!isMerging)
+    setSelectedForMerge([])
+    setSelectedWeapon(null)
+  }
+
+  // 执行合成
+  const handleMergeWeapons = async () => {
+    if (selectedForMerge.length !== 2) {
+      alert('⚠️ 请选择2把武器进行合成')
+      return
+    }
+
+    const weapon1 = selectedForMerge[0]
+    const weapon2 = selectedForMerge[1]
+    
+    // 确认对话框
+    const confirmed = window.confirm(
+      `⚔️ 确定要合成这两把武器吗？\n\n` +
+      `武器1: ${weapon1.name} (Lv.${weapon1.level})\n` +
+      `武器2: ${weapon2.name} (Lv.${weapon2.level})\n\n` +
+      `合成后将获得:\n` +
+      `${weapon1.name} (Lv.${weapon1.level + 1})\n\n` +
+      `步骤1: 你需要签名销毁这2把武器（你付gas）\n` +
+      `步骤2: Sponsor会铸造新武器给你（sponsor付gas）\n\n` +
+      `此操作不可撤销！`
+    )
+    
+    if (!confirmed) {
+      return
+    }
+
+    try {
+      setIsBurningWeapon(true)
+      const walletAddress = window.currentWalletAddress || character.owner
+      
+      console.log('⚔️ Merging weapons:', weapon1.name, weapon2.name)
+      
+      await mergeWeapons(
+        weapon1.objectId,
+        weapon2.objectId,
+        weapon1.weaponType,
+        weapon1.rarity,
+        weapon1.level + 1,
+        walletAddress
+      )
+      
+      // 如果合成的武器中有已装备的，取消装备
+      if (equippedWeapon && 
+          (equippedWeapon.objectId === weapon1.objectId || 
+           equippedWeapon.objectId === weapon2.objectId) && 
+          onEquipWeapon) {
+        onEquipWeapon(null)
+      }
+      
+      // 等待交易确认（3秒，因为有两个交易）
+      console.log('⏳ 等待交易确认...')
+      await new Promise(resolve => setTimeout(resolve, 3000))
+      
+      // 重新加载武器列表
+      await loadWeapons()
+      
+      // 清除选中状态
+      setSelectedForMerge([])
+      setIsMerging(false)
+      
+      alert(`✅ 合成成功！获得 ${weapon1.name} (Lv.${weapon1.level + 1})`)
+    } catch (error) {
+      console.error('Error merging weapons:', error)
+      if (error.message.includes('User rejected') || error.message.includes('rejected')) {
+        alert(`❌ 你取消了交易`)
+      } else if (error.message.includes('Insufficient') || error.message.includes('insufficient')) {
+        alert(`❌ Gas 不足\n\n请确保你的钱包有足够的 OCT 代币支付 gas 费用。`)
+      } else {
+        alert(`❌ 合成失败: ${error.message}`)
+      }
+    } finally {
+      setIsBurningWeapon(false)
     }
   }
 
@@ -249,17 +374,31 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
               </div>
             </div>
             
+            {/* 合成模式提示 */}
+            {isMerging && (
+              <div className="merge-mode-banner">
+                <span>⚔️ 合成模式：选择2把相同类型、稀有度、等级的武器</span>
+                <span className="merge-count">已选择: {selectedForMerge.length}/2</span>
+                {selectedForMerge.length === 2 && (
+                  <button className="btn-confirm-merge" onClick={handleMergeWeapons}>
+                    确认合成
+                  </button>
+                )}
+              </div>
+            )}
+            
             {/* 背包格子 */}
             <div className="inventory-grid">
               {Array.from({ length: INVENTORY_SIZE }).map((_, index) => {
                 const weapon = weapons[index] || null
                 const isEquipped = equippedWeapon?.objectId === weapon?.objectId
                 const canEquipThis = weapon ? canEquipWeapon(weapon) : undefined
+                const isSelectedForMerge = weapon && selectedForMerge.some(w => w.objectId === weapon.objectId)
                 return (
                   <InventorySlot
                     key={weapon?.objectId || `empty-${index}`}
                     weapon={weapon}
-                    isSelected={selectedWeapon?.objectId === weapon?.objectId}
+                    isSelected={isMerging ? isSelectedForMerge : selectedWeapon?.objectId === weapon?.objectId}
                     onClick={() => handleSlotClick(weapon)}
                     isEquipped={isEquipped}
                     canEquip={canEquipThis}
@@ -320,13 +459,18 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
                   >
                     {equippedWeapon?.objectId === selectedWeapon.objectId ? '✓ 已装备' : '装备'}
                   </button>
-                  <button className="btn-upgrade" disabled>升级</button>
+                  <button 
+                    className={`btn-merge ${isMerging ? 'active' : ''}`}
+                    onClick={toggleMergeMode}
+                  >
+                    {isMerging ? '取消合成' : '⚔️ 合成'}
+                  </button>
                 </div>
                 <div className="weapon-actions">
                   <button 
                     className="btn-burn"
                     onClick={() => handleBurnWeapon(selectedWeapon)}
-                    disabled={isBurningWeapon}
+                    disabled={isBurningWeapon || isMerging}
                   >
                     {isBurningWeapon ? '⏳ 丢弃中...' : '🔥 丢弃'}
                   </button>
