@@ -718,13 +718,14 @@ export async function getLingStoneBalance(walletAddress) {
       owner: walletAddress,
     });
     
-    // 过滤出 LingStone 代币
+    // 过滤出 LingStone 代币（只计算当前版本）
+    const correctVersionType = `${PACKAGE_ID}::lingstone_coin::LINGSTONE_COIN`;
     const lingStoneCoins = coins.data.filter(coin => 
-      coin.coinType.includes('::lingstone_coin::LINGSTONE_COIN')
+      coin.coinType === correctVersionType
     );
     
     if (lingStoneCoins.length === 0) {
-      console.log(`[Query] No LingStone found for ${walletAddress}`);
+      console.log(`[Query] No LingStone found for ${walletAddress} (version: ${PACKAGE_ID})`);
       return 0;
     }
     
@@ -1116,13 +1117,14 @@ export async function getLingStoneCoins(walletAddress) {
       owner: walletAddress,
     });
     
-    // 过滤出 LingStone 代币
+    // 过滤出 LingStone 代币（只返回当前版本）
+    const correctVersionType = `${PACKAGE_ID}::lingstone_coin::LINGSTONE_COIN`;
     const lingStoneCoins = coins.data.filter(coin => 
-      coin.coinType.includes('::lingstone_coin::LINGSTONE_COIN')
+      coin.coinType === correctVersionType
     );
     
     if (lingStoneCoins.length === 0) {
-      console.log(`[Query] No LingStone coins found for ${walletAddress}`);
+      console.log(`[Query] No LingStone coins found for ${walletAddress} (version: ${PACKAGE_ID})`);
       return [];
     }
     
@@ -1132,6 +1134,7 @@ export async function getLingStoneCoins(walletAddress) {
       balance: parseInt(coin.balance),
       version: coin.version,
       digest: coin.digest,
+      coinType: coin.coinType, // 添加 coinType 用于版本检查
     }));
     
     console.log(`[Query] Found ${coinList.length} LingStone coin(s)`);
@@ -1139,6 +1142,307 @@ export async function getLingStoneCoins(walletAddress) {
     return coinList;
   } catch (error) {
     console.error('[Query] Error getting LingStone coins:', error);
+    throw error;
+  }
+}
+
+// ========== 市场相关函数 ==========
+
+const MARKETPLACE_ID = process.env.MARKETPLACE_ID;
+
+/**
+ * 查询 WeaponSold 事件
+ * @param {string} rpcUrl - RPC URL
+ * @returns {Promise<Array>} 售出事件列表
+ */
+async function querySoldEvents(rpcUrl) {
+  try {
+    const eventType = `${PACKAGE_ID}::marketplace::WeaponSold`;
+    
+    const response = await fetch(rpcUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'suix_queryEvents',
+        params: [
+          {
+            MoveEventType: eventType
+          },
+          null,
+          100,
+          true
+        ]
+      })
+    });
+    
+    const data = await response.json();
+    return data.result?.data || [];
+  } catch (error) {
+    console.error(`[Query] Error querying sold events:`, error.message);
+    return [];
+  }
+}
+
+/**
+ * 查询 ListingCancelled 事件
+ * @param {string} rpcUrl - RPC URL
+ * @returns {Promise<Array>} 取消事件列表
+ */
+async function queryCancelledEvents(rpcUrl) {
+  try {
+    const eventType = `${PACKAGE_ID}::marketplace::ListingCancelled`;
+    
+    const response = await fetch(rpcUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'suix_queryEvents',
+        params: [
+          {
+            MoveEventType: eventType
+          },
+          null,
+          100,
+          true
+        ]
+      })
+    });
+    
+    const data = await response.json();
+    return data.result?.data || [];
+  } catch (error) {
+    console.error(`[Query] Error querying cancelled events:`, error.message);
+    return [];
+  }
+}
+
+/**
+ * 获取所有市场挂单
+ * @returns {Promise<Array>} 挂单列表
+ */
+export async function getAllMarketplaceListings() {
+  try {
+    console.log(`[Query] Getting all marketplace listings`);
+    console.log(`[Query] Marketplace ID: ${MARKETPLACE_ID}`);
+    console.log(`[Query] Package ID: ${PACKAGE_ID}`);
+    
+    if (!MARKETPLACE_ID) {
+      console.error(`[Query] MARKETPLACE_ID is not configured!`);
+      return [];
+    }
+    
+    // 获取 Marketplace 对象
+    const marketplaceObject = await suiClient.getObject({
+      id: MARKETPLACE_ID,
+      options: {
+        showContent: true,
+      },
+    });
+    
+    if (!marketplaceObject.data) {
+      console.log(`[Query] Marketplace not found`);
+      return [];
+    }
+    
+    console.log(`[Query] Marketplace object:`, JSON.stringify(marketplaceObject.data, null, 2));
+    
+    const content = marketplaceObject.data.content.fields;
+    const totalListings = parseInt(content.total_listings);
+    
+    console.log(`[Query] Total listings: ${totalListings}`);
+    
+    if (totalListings === 0) {
+      console.log(`[Query] No listings in marketplace, returning empty array`);
+      return [];
+    }
+    
+    // 使用事件查询来获取市场挂单
+    console.log(`[Query] Querying WeaponListed events...`);
+    
+    const listings = [];
+    
+    try {
+      const rpcUrl = process.env.SUI_RPC_URL || 'https://rpc-testnet.onelabs.cc:443';
+      const eventType = `${PACKAGE_ID}::marketplace::WeaponListed`;
+      
+      console.log(`[Query] RPC URL: ${rpcUrl}`);
+      console.log(`[Query] Event type: ${eventType}`);
+      
+      // 查询 WeaponListed 事件
+      const response = await fetch(rpcUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'suix_queryEvents',
+          params: [
+            {
+              MoveEventType: eventType
+            },
+            null,  // cursor
+            100,   // limit
+            true   // descending order (newest first)
+          ]
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.error) {
+        console.error(`[Query] RPC error:`, data.error);
+        console.log(`[Query] Returning empty array`);
+        return [];
+      }
+      
+      const events = data.result?.data || [];
+      console.log(`[Query] Found ${events.length} WeaponListed event(s)`);
+      
+      // 查询 WeaponSold 和 ListingCancelled 事件来过滤已售出或取消的挂单
+      const soldEvents = await querySoldEvents(rpcUrl);
+      const cancelledEvents = await queryCancelledEvents(rpcUrl);
+      
+      // 策略：
+      // 1. 对于每个 weapon_id，只保留最新的上架记录
+      // 2. 检查该上架记录之后是否有售出或取消事件
+      // 3. 使用事件时间戳（timestamp）而不是 epoch，因为多个事件可能在同一个 epoch
+      
+      // 首先，按 weapon_id 分组，找到每个武器的最新上架记录
+      const latestListings = new Map(); // weapon_id -> latest listing event
+      
+      for (const event of events) {
+        const listing = event.parsedJson;
+        const weaponId = listing.weapon_id;
+        const timestamp = event.timestampMs || event.timestamp;
+        
+        if (!latestListings.has(weaponId)) {
+          latestListings.set(weaponId, { event, timestamp });
+        } else {
+          const current = latestListings.get(weaponId);
+          const currentTimestamp = current.timestamp;
+          
+          // 比较时间戳，保留最新的
+          if (timestamp > currentTimestamp) {
+            latestListings.set(weaponId, { event, timestamp });
+          }
+        }
+      }
+      
+      console.log(`[Query] Found ${latestListings.size} unique weapon(s) with latest listings`);
+      
+      // 创建 weapon_id -> 所有售出事件的映射（包含时间戳）
+      const soldWeaponEvents = new Map();
+      soldEvents.forEach(e => {
+        const weaponId = e.parsedJson.weapon_id;
+        const timestamp = e.timestampMs || e.timestamp;
+        if (!soldWeaponEvents.has(weaponId)) {
+          soldWeaponEvents.set(weaponId, []);
+        }
+        soldWeaponEvents.get(weaponId).push({ timestamp, event: e });
+      });
+      
+      // 创建 weapon_id -> 所有取消事件的映射（包含时间戳）
+      const cancelledWeaponEvents = new Map();
+      cancelledEvents.forEach(e => {
+        const weaponId = e.parsedJson.weapon_id;
+        const timestamp = e.timestampMs || e.timestamp;
+        if (!cancelledWeaponEvents.has(weaponId)) {
+          cancelledWeaponEvents.set(weaponId, []);
+        }
+        cancelledWeaponEvents.get(weaponId).push({ timestamp, event: e });
+      });
+      
+      console.log(`[Query] Found ${soldWeaponEvents.size} weapon(s) with sold events`);
+      console.log(`[Query] Found ${cancelledWeaponEvents.size} weapon(s) with cancelled events`);
+      
+      // 处理每个最新的上架记录
+      for (const [weaponId, { event, timestamp: listingTimestamp }] of latestListings) {
+        try {
+          const listing = event.parsedJson;
+          
+          // 检查是否在上架后被售出（找到任何一个售出时间戳 > 上架时间戳）
+          const soldEventsForWeapon = soldWeaponEvents.get(weaponId) || [];
+          const wasSoldAfterListing = soldEventsForWeapon.some(({ timestamp }) => timestamp > listingTimestamp);
+          
+          if (wasSoldAfterListing) {
+            console.log(`[Query] Skipping weapon ${weaponId} (sold after listing)`);
+            continue;
+          }
+          
+          // 检查是否在上架后被取消（找到任何一个取消时间戳 > 上架时间戳）
+          const cancelledEventsForWeapon = cancelledWeaponEvents.get(weaponId) || [];
+          const wasCancelledAfterListing = cancelledEventsForWeapon.some(({ timestamp }) => timestamp > listingTimestamp);
+          
+          if (wasCancelledAfterListing) {
+            console.log(`[Query] Skipping weapon ${weaponId} (cancelled after listing)`);
+            continue;
+          }
+          
+          // 将 weapon_name 从 bytes 转换为字符串
+          let weaponName = listing.weapon_name;
+          if (Array.isArray(weaponName)) {
+            weaponName = Buffer.from(weaponName).toString('utf8');
+          }
+          
+          const listingData = {
+            escrowedObjectId: listing.escrowed_id,
+            weaponId: listing.weapon_id,
+            seller: listing.seller,
+            price: parseInt(listing.price),
+            weapon: {
+              objectId: listing.weapon_id,
+              name: weaponName,
+              weaponType: parseInt(listing.weapon_type),
+              attack: parseInt(listing.weapon_attack),
+              level: parseInt(listing.weapon_level),
+              rarity: parseInt(listing.weapon_rarity),
+            },
+            listedAt: parseInt(listing.listed_at),
+          };
+          
+          listings.push(listingData);
+        } catch (error) {
+          console.error(`[Query] Error processing event:`, error.message);
+        }
+      }
+    } catch (error) {
+      console.error(`[Query] Error querying events:`, error.message);
+    }
+    
+    console.log(`[Query] Returning ${listings.length} listing(s)`);
+    
+    return listings;
+  } catch (error) {
+    console.error('[Query] Error getting marketplace listings:', error);
+    throw error;
+  }
+}
+
+/**
+ * 获取单个挂单详情
+ * @param {string} weaponId - 武器 ID
+ * @returns {Promise<object|null>} 挂单详情或 null
+ */
+export async function getMarketplaceListing(weaponId) {
+  try {
+    console.log(`[Query] Getting listing for weapon: ${weaponId}`);
+    console.log(`[Query] ⚠️ Warning: Cannot fetch listing details without indexer service`);
+    
+    // 由于 Sui SDK 限制，我们无法直接查询 shared objects
+    // 返回 null 表示未找到
+    return null;
+  } catch (error) {
+    console.error('[Query] Error getting marketplace listing:', error);
     throw error;
   }
 }

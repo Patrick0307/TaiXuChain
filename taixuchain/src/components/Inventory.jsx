@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import InventorySlot from './InventorySlot'
-import { getAllPlayerWeapons, getLingStoneBalance, requestLingStone, burnWeapon, mergeWeapons } from '../utils/suiClient'
+import { getAllPlayerWeapons, getLingStoneBalance, requestLingStone, burnWeapon, mergeWeapons, listWeaponOnMarket } from '../utils/suiClient'
 import '../css/inventory.css'
 
 function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }) {
@@ -12,6 +12,7 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
   const [isBurningWeapon, setIsBurningWeapon] = useState(false)
   const [isMerging, setIsMerging] = useState(false)
   const [selectedForMerge, setSelectedForMerge] = useState([]) // 选中用于合成的武器
+  const [isListingWeapon, setIsListingWeapon] = useState(false)
 
   // 背包格子数量（动态扩展，无上限）
   // 根据武器数量动态计算，至少显示20个格子
@@ -280,6 +281,87 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
     }
   }
 
+  // 上架到市场
+  const handleListWeapon = async (weapon) => {
+    // 输入价格
+    const priceInput = prompt(
+      `📦 上架武器到市场\n\n` +
+      `武器: ${weapon.name} (Lv.${weapon.level})\n` +
+      `攻击力: +${weapon.attack}\n` +
+      `品质: ${getRarityName(weapon.rarity)}\n\n` +
+      `请输入价格（LingStone）：`
+    )
+    
+    if (!priceInput) {
+      return
+    }
+    
+    const price = parseFloat(priceInput)
+    
+    if (isNaN(price) || price <= 0) {
+      alert('❌ 无效的价格')
+      return
+    }
+    
+    // 确认对话框
+    const confirmed = window.confirm(
+      `📦 确定要上架这把武器吗？\n\n` +
+      `武器: ${weapon.name} (Lv.${weapon.level})\n` +
+      `攻击力: +${weapon.attack}\n` +
+      `品质: ${getRarityName(weapon.rarity)}\n\n` +
+      `💎 价格: ${price} LingStone\n\n` +
+      `你需要签名确认此操作（需要少量 gas 费用）\n` +
+      `武器将被托管到市场，直到售出或取消挂单\n\n` +
+      `💡 提示：如果钱包显示错误，请确保你有足够的 OCT 代币支付 gas`
+    )
+    
+    if (!confirmed) {
+      return
+    }
+
+    try {
+      setIsListingWeapon(true)
+      console.log('📦 Listing weapon:', weapon.name)
+      console.log('  Object ID:', weapon.objectId)
+      console.log('  Price:', price, 'LING')
+      
+      const result = await listWeaponOnMarket(weapon.objectId, price)
+      
+      console.log('✅ Transaction successful:', result.digest)
+      
+      // 如果上架的是已装备的武器，取消装备
+      if (equippedWeapon?.objectId === weapon.objectId && onEquipWeapon) {
+        onEquipWeapon(null)
+      }
+      
+      // 等待更长时间确保区块链索引器更新（4秒）
+      console.log('⏳ 等待区块链索引更新（4秒）...')
+      await new Promise(resolve => setTimeout(resolve, 4000))
+      
+      // 重新加载武器列表
+      console.log('🔄 刷新背包...')
+      await loadWeapons()
+      
+      // 清除选中状态
+      setSelectedWeapon(null)
+      
+      console.log('✅ 上架完成！武器已托管到市场')
+      alert(`✅ 已上架: ${weapon.name}\n价格: ${price} LING\n\n💡 提示：武器已从背包移除并托管到市场`)
+    } catch (error) {
+      console.error('Error listing weapon:', error)
+      // 更友好的错误提示
+      if (error.message.includes('User rejected') || error.message.includes('rejected')) {
+        alert(`❌ 你取消了交易`)
+      } else if (error.message.includes('Insufficient') || error.message.includes('insufficient')) {
+        alert(`❌ Gas 不足\n\n请确保你的钱包有足够的 OCT 代币支付 gas 费用。`)
+      } else {
+        alert(`❌ 上架失败: ${error.message}`)
+      }
+    } finally {
+      setIsListingWeapon(false)
+    }
+  }
+
   // 丢弃武器
   const handleBurnWeapon = async (weapon) => {
     // 确认对话框
@@ -352,6 +434,15 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
               title="请求 10000 LingStone"
             >
               {isRequestingLingStone ? '⏳' : '+'}
+            </button>
+            <button 
+              className="lingstone-request-btn" 
+              onClick={() => { loadWeapons(); loadLingStoneBalance(); }}
+              disabled={isLoading}
+              title="刷新背包"
+              style={{ marginLeft: '5px' }}
+            >
+              {isLoading ? '⏳' : '🔄'}
             </button>
           </div>
           <button className="inventory-close-btn" onClick={onClose}>✕</button>
@@ -473,6 +564,13 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
                   </button>
                 </div>
                 <div className="weapon-actions">
+                  <button 
+                    className="btn-list-market"
+                    onClick={() => handleListWeapon(selectedWeapon)}
+                    disabled={isListingWeapon || isMerging}
+                  >
+                    {isListingWeapon ? '⏳ 上架中...' : '📦 上架市场'}
+                  </button>
                   <button 
                     className="btn-burn"
                     onClick={() => handleBurnWeapon(selectedWeapon)}

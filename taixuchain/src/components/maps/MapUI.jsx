@@ -1,6 +1,6 @@
 import '../../css/maps/MapUI.css'
 
-function MapUI({ character, playerPos, tileSize, onExit, playerCurrentHp, playerWeapon, onOpenInventory }) {
+function MapUI({ character, playerPos, tileSize, onExit, playerCurrentHp, playerWeapon, onOpenInventory, onOpenMarketplace }) {
   // 计算玩家总攻击力
   const weaponAttack = playerWeapon ? playerWeapon.attack : 0
   const totalAttack = (character.attack || 0) + weaponAttack
@@ -28,6 +28,9 @@ function MapUI({ character, playerPos, tileSize, onExit, playerCurrentHp, player
         <div className="top-bar-buttons">
           <button onClick={onOpenInventory} className="inventory-button" title="打开背包 (I)">
             🎒
+          </button>
+          <button onClick={onOpenMarketplace} className="marketplace-button" title="打开市场 (M)">
+            🏪
           </button>
           <button onClick={onExit} className="exit-map-button">
             ← Exit
@@ -73,7 +76,7 @@ function MapUI({ character, playerPos, tileSize, onExit, playerCurrentHp, player
       </div>
 
       <div className="controls-hint">
-        🎮 WASD/Arrows | SPACE=Attack | I=Inventory | ESC=Exit
+        🎮 WASD/Arrows | SPACE=Attack | I=Inventory | M=Market | ESC=Exit
       </div>
     </div>
   )

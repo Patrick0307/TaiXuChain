@@ -4,6 +4,8 @@ module taixu::marketplace {
     use sui::tx_context::{Self, TxContext};
     use sui::coin::{Self, Coin};
     use sui::table::{Self, Table};
+    use sui::event;
+    use std::string;
     use taixu::weapon::{Self, Weapon};
     use lingstone::lingstone_coin::LINGSTONE_COIN;
 
@@ -12,6 +14,40 @@ module taixu::marketplace {
     const ENotOwner: u64 = 1;
     const EInsufficientPayment: u64 = 2;
     const EInvalidPrice: u64 = 3;
+
+    /// ========== 事件 - Events ==========
+
+    /// 武器上架事件
+    public struct WeaponListed has copy, drop {
+        weapon_id: ID,
+        escrowed_id: ID,
+        seller: address,
+        price: u64,
+        weapon_name: vector<u8>,
+        weapon_type: u8,
+        weapon_level: u64,
+        weapon_attack: u64,
+        weapon_rarity: u8,
+        listed_at: u64,
+    }
+
+    /// 武器售出事件
+    public struct WeaponSold has copy, drop {
+        weapon_id: ID,
+        seller: address,
+        buyer: address,
+        price: u64,
+        weapon_name: vector<u8>,
+        sold_at: u64,
+    }
+
+    /// 挂单取消事件
+    public struct ListingCancelled has copy, drop {
+        weapon_id: ID,
+        seller: address,
+        weapon_name: vector<u8>,
+        cancelled_at: u64,
+    }
 
     /// 武器挂单
     public struct Listing has key, store {
@@ -59,26 +95,53 @@ module taixu::marketplace {
         assert!(price > 0, EInvalidPrice);
 
         let weapon_id = object::id(&weapon);
+        
+        // 获取武器信息用于事件
+        let weapon_name = weapon::get_name(&weapon);
+        let weapon_type = weapon::get_weapon_type(&weapon);
+        let weapon_level = weapon::get_level(&weapon);
+        let weapon_attack = weapon::get_attack(&weapon);
+        let weapon_rarity = weapon::get_rarity(&weapon);
+        
         let listing_id = object::new(ctx);
         let listing_id_copy = object::uid_to_inner(&listing_id);
+        let listed_at = tx_context::epoch(ctx);
+        let seller = tx_context::sender(ctx);
 
         let listing = Listing {
             id: listing_id,
             weapon_id,
-            seller: tx_context::sender(ctx),
+            seller,
             price,
-            listed_at: tx_context::epoch(ctx),
+            listed_at,
         };
 
         // 将武器托管
+        let escrowed_id_uid = object::new(ctx);
+        let escrowed_id = object::uid_to_inner(&escrowed_id_uid);
+        
         let escrowed = EscrowedWeapon {
-            id: object::new(ctx),
+            id: escrowed_id_uid,
             weapon,
             listing_id: listing_id_copy,
         };
 
         table::add(&mut marketplace.listings, weapon_id, listing);
         marketplace.total_listings = marketplace.total_listings + 1;
+
+        // 发出上架事件
+        event::emit(WeaponListed {
+            weapon_id,
+            escrowed_id,
+            seller,
+            price,
+            weapon_name: *string::bytes(&weapon_name),
+            weapon_type,
+            weapon_level,
+            weapon_attack,
+            weapon_rarity,
+            listed_at,
+        });
 
         transfer::share_object(escrowed);
     }
@@ -92,8 +155,11 @@ module taixu::marketplace {
         mut payment: Coin<LINGSTONE_COIN>,
         ctx: &mut TxContext
     ) {
-        let EscrowedWeapon { id: escrowed_id, weapon, listing_id } = escrowed;
+        let EscrowedWeapon { id: escrowed_id, weapon, listing_id: _ } = escrowed;
         let weapon_id = object::id(&weapon);
+        
+        // 获取武器名称用于事件
+        let weapon_name = weapon::get_name(&weapon);
 
         // 获取挂单信息
         let listing = table::remove(&mut marketplace.listings, weapon_id);
@@ -110,13 +176,25 @@ module taixu::marketplace {
             transfer::public_transfer(refund, tx_context::sender(ctx));
         };
 
+        let buyer = tx_context::sender(ctx);
+
         // 转移灵石给卖家
         transfer::public_transfer(payment, seller);
 
         // 转移武器给买家
-        transfer::public_transfer(weapon, tx_context::sender(ctx));
+        transfer::public_transfer(weapon, buyer);
 
         marketplace.total_listings = marketplace.total_listings - 1;
+
+        // 发出售出事件
+        event::emit(WeaponSold {
+            weapon_id,
+            seller,
+            buyer,
+            price,
+            weapon_name: *string::bytes(&weapon_name),
+            sold_at: tx_context::epoch(ctx),
+        });
 
         object::delete(listing_uid);
         object::delete(escrowed_id);
@@ -129,8 +207,11 @@ module taixu::marketplace {
         escrowed: EscrowedWeapon,
         ctx: &mut TxContext
     ) {
-        let EscrowedWeapon { id: escrowed_id, weapon, listing_id } = escrowed;
+        let EscrowedWeapon { id: escrowed_id, weapon, listing_id: _ } = escrowed;
         let weapon_id = object::id(&weapon);
+        
+        // 获取武器名称用于事件
+        let weapon_name = weapon::get_name(&weapon);
 
         let listing = table::remove(&mut marketplace.listings, weapon_id);
         let Listing { id: listing_uid, weapon_id: _, seller, price: _, listed_at: _ } = listing;
@@ -142,6 +223,14 @@ module taixu::marketplace {
         transfer::public_transfer(weapon, seller);
 
         marketplace.total_listings = marketplace.total_listings - 1;
+
+        // 发出取消事件
+        event::emit(ListingCancelled {
+            weapon_id,
+            seller,
+            weapon_name: *string::bytes(&weapon_name),
+            cancelled_at: tx_context::epoch(ctx),
+        });
 
         object::delete(listing_uid);
         object::delete(escrowed_id);

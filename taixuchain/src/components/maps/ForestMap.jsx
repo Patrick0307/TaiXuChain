@@ -3,6 +3,7 @@ import MapUI from './MapUI'
 import MapCharacter from './MapCharacter'
 import Monster from './Monster'
 import Inventory from '../Inventory'
+import Marketplace from '../Marketplace'
 import LootBox from './LootBox'
 import WeaponReward from './WeaponReward'
 import { checkPlayerWeapon, mintWeaponForPlayer, mintRandomWeaponForPlayer, getAllPlayerWeapons } from '../../utils/suiClient'
@@ -12,6 +13,7 @@ function ForestMap({ character, onExit }) {
   const [playerWeapon, setPlayerWeapon] = useState(null)
   const [isCheckingWeapon, setIsCheckingWeapon] = useState(true)
   const [isInventoryOpen, setIsInventoryOpen] = useState(false)
+  const [isMarketplaceOpen, setIsMarketplaceOpen] = useState(false)
   const canvasRef = useRef(null)
   const [mapData, setMapData] = useState(null)
   const [playerPos, setPlayerPos] = useState(null) // 初始为null，等待地图加载后计算
@@ -324,6 +326,11 @@ function ForestMap({ character, onExit }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
+        // 如果市场打开，先关闭市场
+        if (isMarketplaceOpen) {
+          setIsMarketplaceOpen(false)
+          return
+        }
         // 如果背包打开，先关闭背包
         if (isInventoryOpen) {
           setIsInventoryOpen(false)
@@ -337,6 +344,13 @@ function ForestMap({ character, onExit }) {
       if (e.key === 'i' || e.key === 'I') {
         e.preventDefault()
         setIsInventoryOpen(prev => !prev)
+        return
+      }
+      
+      // M键打开/关闭市场
+      if (e.key === 'm' || e.key === 'M') {
+        e.preventDefault()
+        setIsMarketplaceOpen(prev => !prev)
         return
       }
       
@@ -396,7 +410,7 @@ function ForestMap({ character, onExit }) {
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
     }
-  }, [onExit, character, playerWeapon, PLAYER_ATTACK_INTERVAL, isInventoryOpen])
+  }, [onExit, character, playerWeapon, PLAYER_ATTACK_INTERVAL, isInventoryOpen, isMarketplaceOpen])
 
   // 移动角色和行走动画（使用RAF确保流畅）
   useEffect(() => {
@@ -1340,6 +1354,7 @@ function ForestMap({ character, onExit }) {
         playerCurrentHp={playerCurrentHp}
         playerWeapon={playerWeapon}
         onOpenInventory={() => setIsInventoryOpen(true)}
+        onOpenMarketplace={() => setIsMarketplaceOpen(true)}
       />
       
       {/* 背包系统 */}
@@ -1352,6 +1367,13 @@ function ForestMap({ character, onExit }) {
           setPlayerWeapon(weapon)
           console.log('✅ Equipped weapon:', weapon.name)
         }}
+      />
+      
+      {/* 市场系统 */}
+      <Marketplace 
+        character={character}
+        isOpen={isMarketplaceOpen}
+        onClose={() => setIsMarketplaceOpen(false)}
       />
       
       {/* 武器奖励弹窗 */}

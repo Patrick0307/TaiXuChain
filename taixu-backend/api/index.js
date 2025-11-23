@@ -233,4 +233,63 @@ app.post('/api/sponsor/merge-weapon', async (req, res) => {
   }
 });
 
+// ========== 市场 API ==========
+
+// 获取所有市场挂单
+app.get('/api/marketplace/listings', async (req, res) => {
+  try {
+    console.log('[Query] Getting all marketplace listings');
+
+    const { getAllMarketplaceListings } = await import('../services/sponsorService.js');
+    const listings = await getAllMarketplaceListings();
+
+    res.json({ 
+      success: true,
+      listings,
+      count: listings.length
+    });
+  } catch (error) {
+    console.error('[Query] Error:', error);
+    res.status(500).json({ 
+      error: error.message,
+      details: error.toString()
+    });
+  }
+});
+
+// 获取单个挂单详情
+app.get('/api/marketplace/listing/:weaponId', async (req, res) => {
+  try {
+    const { weaponId } = req.params;
+
+    if (!weaponId) {
+      return res.status(400).json({ 
+        error: 'Missing weapon ID' 
+      });
+    }
+
+    console.log(`[Query] Getting listing for weapon: ${weaponId}`);
+
+    const { getMarketplaceListing } = await import('../services/sponsorService.js');
+    const listing = await getMarketplaceListing(weaponId);
+
+    if (!listing) {
+      return res.status(404).json({ 
+        error: 'Listing not found' 
+      });
+    }
+
+    res.json({ 
+      success: true,
+      listing
+    });
+  } catch (error) {
+    console.error('[Query] Error:', error);
+    res.status(500).json({ 
+      error: error.message,
+      details: error.toString()
+    });
+  }
+});
+
 export default app;

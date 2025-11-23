@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { sponsorCreatePlayer, getPlayerByAddress, getPlayerWeapon, getAllPlayerWeapons, sponsorMintWeapon, sponsorMintRandomWeapon, getWeaponById, getLingStoneBalance, getLingStoneCoins, sponsorMintLingStone, sponsorBurnWeapon, sponsorMergeWeapon } from './services/sponsorService.js';
+import { sponsorCreatePlayer, getPlayerByAddress, getPlayerWeapon, getAllPlayerWeapons, sponsorMintWeapon, sponsorMintRandomWeapon, getWeaponById, getLingStoneBalance, getLingStoneCoins, sponsorMintLingStone, sponsorBurnWeapon, sponsorMergeWeapon, getAllMarketplaceListings, getMarketplaceListing } from './services/sponsorService.js';
 
 dotenv.config();
 
@@ -381,6 +381,63 @@ app.post('/api/sponsor/merge-weapon', async (req, res) => {
     });
   } catch (error) {
     console.error('[Sponsor] Error:', error);
+    res.status(500).json({ 
+      error: error.message,
+      details: error.toString()
+    });
+  }
+});
+
+// ========== 市场 API ==========
+
+// 获取所有市场挂单
+app.get('/api/marketplace/listings', async (req, res) => {
+  try {
+    console.log('[Query] Getting all marketplace listings');
+
+    const listings = await getAllMarketplaceListings();
+
+    res.json({ 
+      success: true,
+      listings,
+      count: listings.length
+    });
+  } catch (error) {
+    console.error('[Query] Error:', error);
+    res.status(500).json({ 
+      error: error.message,
+      details: error.toString()
+    });
+  }
+});
+
+// 获取单个挂单详情
+app.get('/api/marketplace/listing/:weaponId', async (req, res) => {
+  try {
+    const { weaponId } = req.params;
+
+    if (!weaponId) {
+      return res.status(400).json({ 
+        error: 'Missing weapon ID' 
+      });
+    }
+
+    console.log(`[Query] Getting listing for weapon: ${weaponId}`);
+
+    const listing = await getMarketplaceListing(weaponId);
+
+    if (!listing) {
+      return res.status(404).json({ 
+        error: 'Listing not found' 
+      });
+    }
+
+    res.json({ 
+      success: true,
+      listing
+    });
+  } catch (error) {
+    console.error('[Query] Error:', error);
     res.status(500).json({ 
       error: error.message,
       details: error.toString()

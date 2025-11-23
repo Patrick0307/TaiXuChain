@@ -519,3 +519,315 @@ export async function mergeWeapons(weapon1ObjectId, weapon2ObjectId, weaponType,
     throw error
   }
 }
+
+// ========== 市场相关函数 ==========
+
+/**
+ * 上架武器到市场 - 玩家自己签名
+ * @param {string} weaponObjectId - 武器对象 ID
+ * @param {number} price - 价格（LING，会自动转换为最小单位）
+ * @returns {Promise<object>} 交易结果
+ */
+export async function listWeaponOnMarket(weaponObjectId, price) {
+  try {
+    console.log('📦 Listing weapon on marketplace...')
+    console.log('  Weapon ID:', weaponObjectId)
+    console.log('  Price:', price, 'LING')
+    console.log('📝 You will need to sign this transaction')
+    
+    // 获取钱包
+    const suiWallet = window.suiWallet
+    if (!suiWallet) {
+      throw new Error('Wallet not connected')
+    }
+
+    // 创建交易
+    const tx = new Transaction()
+    
+    // 设置 gas budget
+    tx.setGasBudget(20000000) // 0.02 SUI/OCT
+    
+    // 将价格转换为最小单位（1 LING = 1_000_000_000 最小单位）
+    const priceInSmallestUnit = price * 1_000_000_000
+    
+    // 调用 list_weapon 函数
+    tx.moveCall({
+      target: `${PACKAGE_ID}::marketplace::list_weapon`,
+      arguments: [
+        tx.object(MARKETPLACE_ID),
+        tx.object(weaponObjectId),
+        tx.pure.u64(priceInSmallestUnit),
+      ],
+    })
+    
+    console.log('📦 Signing and executing list transaction...')
+    console.log('  Target:', `${PACKAGE_ID}::marketplace::list_weapon`)
+    console.log('  Marketplace ID:', MARKETPLACE_ID)
+    
+    // 玩家签名并执行交易
+    const result = await suiWallet.signAndExecuteTransaction({
+      transaction: tx,
+      options: {
+        showEffects: true,
+        showEvents: true,
+        showObjectChanges: true,
+      },
+    })
+    
+    console.log('✅ Weapon listed successfully!')
+    console.log('  Digest:', result.digest)
+    
+    return result
+  } catch (error) {
+    console.error('❌ Error listing weapon:', error)
+    console.error('  Error details:', error.message)
+    throw error
+  }
+}
+
+/**
+ * 购买市场上的武器 - 买家自己签名并支付
+ * @param {string} escrowedObjectId - 托管武器对象 ID
+ * @param {number} price - 价格（LING）
+ * @param {string} buyerAddress - 买家地址
+ * @returns {Promise<object>} 交易结果
+ */
+export async function buyWeaponFromMarket(escrowedObjectId, price, buyerAddress) {
+  try {
+    console.log('💰 Buying weapon from marketplace...')
+    console.log('  Escrowed Object ID:', escrowedObjectId)
+    console.log('  Price:', price, 'LING')
+    console.log('📝 You will need to sign this transaction and pay', price, 'LING')
+    
+    // 获取钱包
+    const suiWallet = window.suiWallet
+    if (!suiWallet) {
+      throw new Error('Wallet not connected')
+    }
+
+    // 获取买家的 LingStone coin 对象
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
+    
+    const response = await fetch(`${BACKEND_URL}/api/lingstone/coins/${buyerAddress}`)
+    if (!response.ok) {
+      throw new Error('Failed to get LingStone coins')
+    }
+    const coinsData = await response.json()
+    
+    if (!coinsData.coins || coinsData.coins.length === 0) {
+      throw new Error('No LingStone coins found')
+    }
+    
+    // 将价格转换为最小单位
+    const priceInSmallestUnit = price * 1_000_000_000
+    
+    // 找到足够余额的 coin
+    let selectedCoin = null
+    let selectedCoinBalance = 0
+    
+    console.log('💎 Available LingStone coins:')
+    coinsData.coins.forEach((coin, index) => {
+      const coinBalance = coin.balance / 1_000_000_000
+      console.log(`  Coin ${index + 1}: ${coin.coinObjectId}`)
+      console.log(`    Balance: ${coinBalance} LING (${coin.balance} raw)`)
+      console.log(`    Type: ${coin.coinType || 'unknown'}`)
+    })
+    
+    // 过滤出正确版本的 LingStone（匹配当前 PACKAGE_ID）
+    const correctVersionCoins = coinsData.coins.filter(coin => {
+      // 如果后端返回了 coinType，检查是否匹配当前 PACKAGE_ID
+      if (coin.coinType) {
+        return coin.coinType === `${PACKAGE_ID}::lingstone_coin::LINGSTONE_COIN`
+      }
+      // 如果没有 coinType，假设是正确版本（向后兼容）
+      return true
+    })
+    
+    console.log(`💎 Found ${correctVersionCoins.length} coin(s) with correct version (${PACKAGE_ID})`)
+    
+    if (correctVersionCoins.length === 0) {
+      throw new Error(`❌ LingStone 版本不匹配！\n\n你的 LingStone 代币是旧版本的。\n市场只接受当前版本 (${PACKAGE_ID}) 的 LingStone。\n\n请点击"领取 LingStone"按钮获取新版本的代币。`)
+    }
+    
+    for (const coin of correctVersionCoins) {
+      if (coin.balance >= priceInSmallestUnit) {
+        selectedCoin = coin.coinObjectId
+        selectedCoinBalance = coin.balance
+        break
+      }
+    }
+    
+    if (!selectedCoin) {
+      const totalBalance = correctVersionCoins.reduce((sum, coin) => sum + coin.balance, 0) / 1_000_000_000
+      throw new Error(`Insufficient LingStone balance. Need ${price} LING, but total balance is ${totalBalance} LING`)
+    }
+    
+    console.log('💎 Selected coin:', selectedCoin)
+    console.log(`  Balance: ${selectedCoinBalance / 1_000_000_000} LING (${selectedCoinBalance} raw)`)
+    console.log(`  Required: ${price} LING (${priceInSmallestUnit} raw)`)
+    
+    // 创建交易
+    const tx = new Transaction()
+    
+    // 设置 gas budget
+    tx.setGasBudget(30000000) // 0.03 SUI/OCT
+    
+    console.log('💎 Using LingStone coin:', selectedCoin)
+    console.log('  Balance:', selectedCoinBalance / 1_000_000_000, 'LING')
+    console.log('  Required:', price, 'LING')
+    console.log('💰 Calling buy_weapon (contract will handle change)...')
+    
+    // 直接传递整个 coin 给 buy_weapon，合约会处理找零
+    // 注意：必须使用正确的泛型类型参数
+    tx.moveCall({
+      target: `${PACKAGE_ID}::marketplace::buy_weapon`,
+      typeArguments: [],
+      arguments: [
+        tx.object(MARKETPLACE_ID),
+        tx.object(escrowedObjectId),
+        tx.object(selectedCoin),
+      ],
+    })
+    
+    console.log('💰 Signing and executing buy transaction...')
+    console.log('  Target:', `${PACKAGE_ID}::marketplace::buy_weapon`)
+    
+    // 买家签名并执行交易
+    const result = await suiWallet.signAndExecuteTransaction({
+      transaction: tx,
+      options: {
+        showEffects: true,
+        showEvents: true,
+        showObjectChanges: true,
+      },
+    })
+    
+    console.log('✅ Weapon purchased successfully!')
+    console.log('  Digest:', result.digest)
+    
+    return result
+  } catch (error) {
+    console.error('❌ Error buying weapon:', error)
+    console.error('  Error details:', error.message)
+    console.error('  Full error:', error)
+    
+    // 提供更友好的错误信息
+    if (error.message && error.message.includes('Insufficient')) {
+      throw new Error(`余额不足。请确保你有足够的 LingStone (需要 ${price} LING) 和 OCT 代币支付 gas 费用。`)
+    } else if (error.message && error.message.includes('TypeMismatch')) {
+      throw new Error(`LingStone 版本不匹配！\n\n你的 LingStone 代币可能是旧版本的。\n市场只接受当前版本的 LingStone。\n\n请点击"领取 LingStone"按钮获取新版本的代币。`)
+    } else if (error.message && error.message.includes('dry run')) {
+      throw new Error(`交易验证失败。可能原因：\n1. LingStone 版本不匹配（需要新版本）\n2. LingStone 余额不足\n3. 武器已被售出\n4. Gas 代币不足\n\n原始错误: ${error.message}`)
+    }
+    
+    throw error
+  }
+}
+
+/**
+ * 取消市场挂单 - 卖家自己签名
+ * @param {string} escrowedObjectId - 托管武器对象 ID
+ * @returns {Promise<object>} 交易结果
+ */
+export async function cancelMarketListing(escrowedObjectId) {
+  try {
+    console.log('❌ Canceling marketplace listing...')
+    console.log('  Escrowed Object ID:', escrowedObjectId)
+    console.log('📝 You will need to sign this transaction')
+    
+    // 获取钱包
+    const suiWallet = window.suiWallet
+    if (!suiWallet) {
+      throw new Error('Wallet not connected')
+    }
+
+    // 创建交易
+    const tx = new Transaction()
+    
+    // 设置 gas budget
+    tx.setGasBudget(20000000) // 0.02 SUI/OCT
+    
+    // 调用 cancel_listing 函数
+    tx.moveCall({
+      target: `${PACKAGE_ID}::marketplace::cancel_listing`,
+      arguments: [
+        tx.object(MARKETPLACE_ID),
+        tx.object(escrowedObjectId),
+      ],
+    })
+    
+    console.log('❌ Signing and executing cancel transaction...')
+    console.log('  Target:', `${PACKAGE_ID}::marketplace::cancel_listing`)
+    
+    // 卖家签名并执行交易
+    const result = await suiWallet.signAndExecuteTransaction({
+      transaction: tx,
+      options: {
+        showEffects: true,
+        showEvents: true,
+        showObjectChanges: true,
+      },
+    })
+    
+    console.log('✅ Listing canceled successfully!')
+    console.log('  Digest:', result.digest)
+    
+    return result
+  } catch (error) {
+    console.error('❌ Error canceling listing:', error)
+    console.error('  Error details:', error.message)
+    throw error
+  }
+}
+
+/**
+ * 获取所有市场挂单
+ * @returns {Promise<Array>} 挂单列表
+ */
+export async function getAllMarketplaceListings() {
+  try {
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
+    
+    const response = await fetch(`${BACKEND_URL}/api/marketplace/listings`)
+    
+    if (!response.ok) {
+      throw new Error('Failed to get marketplace listings')
+    }
+
+    const data = await response.json()
+    
+    console.log(`✅ Found ${data.count} listing(s)`)
+    return data.listings || []
+  } catch (error) {
+    console.error('❌ Error getting marketplace listings:', error)
+    throw error
+  }
+}
+
+/**
+ * 获取单个挂单详情
+ * @param {string} weaponId - 武器 ID
+ * @returns {Promise<object|null>} 挂单详情或 null
+ */
+export async function getMarketplaceListing(weaponId) {
+  try {
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
+    
+    const response = await fetch(`${BACKEND_URL}/api/marketplace/listing/${weaponId}`)
+    
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null
+      }
+      throw new Error('Failed to get marketplace listing')
+    }
+
+    const data = await response.json()
+    
+    console.log(`✅ Listing found`)
+    return data.listing
+  } catch (error) {
+    console.error('❌ Error getting marketplace listing:', error)
+    throw error
+  }
+}
