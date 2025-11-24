@@ -74,6 +74,26 @@ class WebSocketService {
       case 'player_hp_update':
         this.handlePlayerHpUpdate(ws, data);
         break;
+      
+      case 'game_state_sync':
+        this.handleGameStateSync(ws, data);
+        break;
+      
+      case 'request_game_state':
+        this.handleRequestGameState(ws, data);
+        break;
+      
+      case 'lootbox_pickup':
+        this.handleLootBoxPickup(ws, data);
+        break;
+      
+      case 'monster_damage':
+        this.handleMonsterDamage(ws, data);
+        break;
+      
+      case 'monster_death':
+        this.handleMonsterDeath(ws, data);
+        break;
 
       default:
         console.warn('⚠️ Unknown message type:', type);
@@ -119,7 +139,10 @@ class WebSocketService {
         data: {
           roomId: room.id,
           players: Array.from(room.players.values()),
-          monsters: room.monsters
+          monsters: room.monsters,
+          lootBoxes: room.lootBoxes,
+          isHost: room.hostId === playerId,
+          hostId: room.hostId
         }
       }));
 
@@ -223,16 +246,122 @@ class WebSocketService {
     
     if (!client) return;
 
-    const { roomId } = client;
-    const { monsters } = data;
+    const { roomId, playerId } = client;
 
-    roomService.syncMonsters(roomId, monsters);
+    // 只有主机可以更新怪物状态
+    if (!roomService.isHost(roomId, playerId)) {
+      console.warn(`⚠️ Non-host ${playerId} tried to update monsters`);
+      return;
+    }
+
+    const { monsters } = data;
+    roomService.syncGameState(roomId, { monsters });
 
     // 广播怪物状态给房间内其他玩家
     this.broadcastToRoom(roomId, {
       type: 'monsters_updated',
       data: { monsters }
-    }, client.playerId);
+    }, playerId);
+  }
+
+  handleGameStateSync(ws, data) {
+    const client = this.clients.get(ws);
+    
+    if (!client) return;
+
+    const { roomId, playerId } = client;
+
+    // 只有主机可以同步游戏状态
+    if (!roomService.isHost(roomId, playerId)) {
+      console.warn(`⚠️ Non-host ${playerId} tried to sync game state`);
+      return;
+    }
+
+    const { gameState } = data;
+    roomService.syncGameState(roomId, gameState);
+
+    // 广播游戏状态给房间内所有玩家
+    this.broadcastToRoom(roomId, {
+      type: 'game_state_synced',
+      data: { gameState }
+    }, playerId);
+  }
+
+  handleRequestGameState(ws, data) {
+    const client = this.clients.get(ws);
+    
+    if (!client) return;
+
+    const { roomId } = client;
+    const gameState = roomService.getGameState(roomId);
+
+    if (gameState) {
+      ws.send(JSON.stringify({
+        type: 'game_state_response',
+        data: { gameState }
+      }));
+    }
+  }
+
+  handleLootBoxPickup(ws, data) {
+    const client = this.clients.get(ws);
+    
+    if (!client) return;
+
+    const { roomId, playerId } = client;
+    const { lootBoxId } = data;
+
+    const result = roomService.pickupLootBox(roomId, lootBoxId, playerId);
+
+    if (result.success) {
+      // 广播宝箱被拾取
+      this.broadcastToRoom(roomId, {
+        type: 'lootbox_picked',
+        data: {
+          lootBoxId,
+          playerId,
+          lootBox: result.lootBox
+        }
+      });
+    } else {
+      // 通知玩家拾取失败
+      ws.send(JSON.stringify({
+        type: 'lootbox_pickup_failed',
+        data: { message: result.message }
+      }));
+    }
+  }
+
+  handleMonsterDamage(ws, data) {
+    const client = this.clients.get(ws);
+    
+    if (!client) return;
+
+    const { roomId } = client;
+    const { monsterId, damage, attackerId } = data;
+
+    // 广播怪物受伤事件
+    this.broadcastToRoom(roomId, {
+      type: 'monster_damaged',
+      data: { monsterId, damage, attackerId }
+    });
+  }
+
+  handleMonsterDeath(ws, data) {
+    const client = this.clients.get(ws);
+    
+    if (!client) return;
+
+    const { roomId } = client;
+    const { monsterId, killerId, killerName, position } = data;
+
+    console.log(`💀 Monster ${monsterId} killed by ${killerName} in room ${roomId}`);
+
+    // 广播怪物死亡事件（通知主机生成宝箱）
+    this.broadcastToRoom(roomId, {
+      type: 'monster_died',
+      data: { monsterId, killerId, killerName, position }
+    });
   }
 
   handlePlayerHpUpdate(ws, data) {

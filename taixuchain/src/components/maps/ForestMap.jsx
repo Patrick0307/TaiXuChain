@@ -10,8 +10,10 @@ import { checkPlayerWeapon, mintWeaponForPlayer, mintRandomWeaponForPlayer, getA
 import websocketClient from '../../services/websocketClient'
 import '../../css/maps/ForestMap.css'
 
-function ForestMap({ character, onExit, roomId = null, initialPlayers = [] }) {
+function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHostProp = false, hostIdProp = null, initialMonstersProp = [] }) {
   const [otherPlayers, setOtherPlayers] = useState(new Map()) // 其他玩家
+  const [isHost, setIsHost] = useState(isHostProp) // 是否是主机（从props初始化）
+  const [hostId, setHostId] = useState(hostIdProp) // 主机ID（从props初始化）
   const [playerWeapon, setPlayerWeapon] = useState(null)
   const [isCheckingWeapon, setIsCheckingWeapon] = useState(true)
   const [isInventoryOpen, setIsInventoryOpen] = useState(false)
@@ -43,6 +45,7 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [] }) {
   const monsterIdCounter = useRef(0) // 怪物ID计数器
   const lastPlayerAttackTime = useRef(0) // 上次玩家攻击时间
   const lastSyncTime = useRef(0) // 上次同步时间
+  const processedLootBoxes = useRef(new Set()) // 已处理的宝箱ID
 
   const TILE_SIZE = 32
   const PLAYER_SIZE = 10  // 非常小的角色
@@ -52,24 +55,116 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [] }) {
   const PLAYER_ATTACK_RANGE = 60 // 玩家攻击范围（像素）
   const PLAYER_ATTACK_INTERVAL = 1000 // 玩家攻击间隔（毫秒）
 
-  // 初始化其他玩家（从props）
+  // 初始化其他玩家、主机状态和怪物（从props）
   useEffect(() => {
-    if (!roomId || !initialPlayers || initialPlayers.length === 0) return
+    if (!roomId) return
 
     const currentPlayerId = window.currentWalletAddress || character.owner
-    console.log('🏠 Initializing players from props:', initialPlayers.length)
+    
+    // 初始化主机信息
+    console.log('🏠 Initializing room info - Am I host?', isHostProp, 'Host ID:', hostIdProp)
+    setIsHost(isHostProp)
+    setHostId(hostIdProp)
     
     // 初始化其他玩家列表（排除自己）
-    const otherPlayersMap = new Map()
-    initialPlayers.forEach(player => {
-      if (player.id !== currentPlayerId) {
-        console.log('👤 Adding existing player:', player.name, player.id)
-        otherPlayersMap.set(player.id, player)
+    if (initialPlayers && initialPlayers.length > 0) {
+      console.log('🏠 Initializing players from props:', initialPlayers.length)
+      const otherPlayersMap = new Map()
+      initialPlayers.forEach(player => {
+        if (player.id !== currentPlayerId) {
+          console.log('👤 Adding existing player:', player.name, player.id)
+          otherPlayersMap.set(player.id, player)
+        }
+      })
+      setOtherPlayers(otherPlayersMap)
+      console.log('✅ Initialized other players:', otherPlayersMap.size)
+    }
+    
+    // 如果不是主机且有初始怪物数据，使用它
+    if (!isHostProp && initialMonstersProp && initialMonstersProp.length > 0) {
+      console.log('📥 Initializing monsters from props:', initialMonstersProp.length)
+      setMonsters(initialMonstersProp)
+    }
+  }, [roomId, initialPlayers, isHostProp, hostIdProp, initialMonstersProp, character])
+
+  // 主机生成怪物（只在单人模式或作为主机时）
+  useEffect(() => {
+    if (!mapData) return // 等待地图加载
+    if (monsters.length > 0) return // 已经有怪物了，不重复生成
+
+    // 判断是否应该生成怪物
+    const shouldGenerate = !roomId || isHost // 单人模式或多人模式的主机
+    
+    if (!shouldGenerate) {
+      console.log('⏳ Waiting for game state from host...')
+      return
+    }
+
+    const spawnPoints = window.spawnPoints
+    if (!spawnPoints || spawnPoints.length === 0) {
+      console.warn('⚠️ No spawn points found')
+      return
+    }
+
+    console.log(`👑 ${roomId ? 'Host' : 'Single player'} generating monsters...`)
+    
+    const initialMonsters = []
+    spawnPoints.forEach((spawn, spawnIndex) => {
+      const countProp = spawn.properties?.find(p => p.name === 'Count')
+      const count = countProp ? countProp.value : 2
+      
+      for (let i = 0; i < count; i++) {
+        const monsterType = i === 0 ? 'CowMonster1' : 'CowMonster2'
+        const offsetX = (Math.random() - 0.2) * 80
+        const offsetY = (Math.random() - 1.2) * 80
+        
+        const initialX = spawn.x + offsetX
+        const initialY = spawn.y + offsetY
+        
+        // 获取怪物基础属性
+        const monsterStats = {
+          'CowMonster1': { maxHp: 100, attack: 10 },
+          'CowMonster2': { maxHp: 150, attack: 15 }
+        }
+        const stats = monsterStats[monsterType] || { maxHp: 100, attack: 10 }
+        
+        initialMonsters.push({
+          id: monsterIdCounter.current++,
+          type: monsterType,
+          x: initialX,
+          y: initialY,
+          initialX: initialX,
+          initialY: initialY,
+          spawnPoint: spawnIndex,
+          alive: true,
+          hp: stats.maxHp,
+          maxHp: stats.maxHp,
+          attack: stats.attack
+        })
       }
     })
-    setOtherPlayers(otherPlayersMap)
-    console.log('✅ Initialized other players:', otherPlayersMap.size)
-  }, [roomId, initialPlayers, character])
+    
+    console.log(`✅ Generated ${initialMonsters.length} monsters`)
+    console.log('Monster details:', initialMonsters.map(m => ({ id: m.id, type: m.type, x: m.x, y: m.y })))
+    setMonsters(initialMonsters)
+
+    // 如果是多人模式的主机，同步怪物状态
+    if (roomId && isHost) {
+      console.log('📤 Host syncing initial monsters to server')
+      websocketClient.syncGameState({
+        monsters: initialMonsters,
+        lootBoxes: []
+      })
+    }
+  }, [mapData, roomId, isHost, monsters.length])
+
+  // 调试：监控怪物状态变化
+  useEffect(() => {
+    console.log('🐮 Monsters state updated:', monsters.length, 'monsters')
+    if (monsters.length > 0) {
+      console.log('Alive monsters:', monsters.filter(m => m.alive).length)
+    }
+  }, [monsters])
 
   // WebSocket 多人游戏同步
   useEffect(() => {
@@ -77,12 +172,196 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [] }) {
 
     const currentPlayerId = window.currentWalletAddress || character.owner
 
+    // 监听房间加入成功（获取主机信息）
+    websocketClient.on('room_joined', (data) => {
+      const { isHost: amIHost, hostId: roomHostId, monsters: serverMonsters, lootBoxes: serverLootBoxes } = data
+      console.log('🏠 Room info - Am I host?', amIHost, 'Host ID:', roomHostId)
+      setIsHost(amIHost)
+      setHostId(roomHostId)
+
+      // 如果不是主机，接收服务器的游戏状态
+      if (!amIHost && serverMonsters && serverMonsters.length > 0) {
+        console.log('📥 Receiving game state from server:', serverMonsters.length, 'monsters')
+        setMonsters(serverMonsters)
+      }
+      if (!amIHost && serverLootBoxes && serverLootBoxes.length > 0) {
+        console.log('📥 Receiving loot boxes from server:', serverLootBoxes.length, 'boxes')
+        setLootBoxes(serverLootBoxes)
+      }
+    })
+
+    // 监听游戏状态同步（主机广播）
+    websocketClient.on('game_state_synced', (data) => {
+      const { gameState } = data
+      console.log('📥 Game state synced from host')
+      console.log('  Monsters:', gameState.monsters?.length || 0)
+      console.log('  Loot boxes:', gameState.lootBoxes?.length || 0)
+      
+      if (gameState.monsters) {
+        console.log('  Updating monsters...')
+        setMonsters(gameState.monsters)
+      }
+      if (gameState.lootBoxes) {
+        console.log('  Updating loot boxes...')
+        console.log('  Loot box details:', gameState.lootBoxes)
+        setLootBoxes(gameState.lootBoxes)
+      }
+    })
+
+    // 监听怪物状态更新
+    websocketClient.on('monsters_updated', (data) => {
+      const { monsters: updatedMonsters } = data
+      console.log('📥 Monsters updated:', updatedMonsters.length)
+      setMonsters(updatedMonsters)
+    })
+
+    // 监听宝箱拾取失败
+    websocketClient.on('lootbox_pickup_failed', (data) => {
+      console.log('❌ Loot box pickup failed:', data.message)
+      alert(`拾取失败：${data.message}`)
+    })
+
+    // 监听宝箱被拾取
+    websocketClient.on('lootbox_picked', async (data) => {
+      const { lootBoxId, playerId } = data
+      console.log('📦 Loot box picked:', lootBoxId, 'by', playerId)
+      
+      // 移除宝箱（所有玩家都移除）
+      setLootBoxes(prev => prev.filter(box => box.id !== lootBoxId))
+      
+      // 如果是自己拾取的，铸造武器
+      if (playerId === (window.currentWalletAddress || character.owner)) {
+        // 检查是否已处理过这个宝箱（只检查自己的）
+        if (processedLootBoxes.current.has(lootBoxId)) {
+          console.log('⚠️ Loot box already processed, skipping weapon mint...')
+          return
+        }
+        
+        // 标记为已处理
+        processedLootBoxes.current.add(lootBoxId)
+        
+        console.log('🎁 I picked the loot box, minting weapon...')
+        
+        // 添加延迟，避免区块链并发问题
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
+        try {
+          const walletAddress = window.currentWalletAddress || character.owner
+          console.log('🔄 Starting weapon minting for:', walletAddress)
+          
+          const { result, weaponInfo } = await mintRandomWeaponForPlayer(walletAddress)
+          
+          console.log('✅ Weapon minted successfully!')
+          console.log('🎁 Weapon info:', weaponInfo)
+          console.log('📝 Transaction digest:', result.digest)
+          
+          // 直接显示武器奖励（使用交易返回的信息）
+          if (weaponInfo && weaponInfo.weaponType && weaponInfo.rarity) {
+            // 根据武器类型和品质构造武器信息
+            const weaponNames = {
+              1: { 1: 'Iron Sword', 2: 'Azure Edge Sword', 3: 'Dragon Roar Sword' },
+              2: { 1: 'Hunter Bow', 2: 'Swift Wind Bow', 3: 'Cloud Piercer Bow' },
+              3: { 1: 'Wooden Staff', 2: 'Starlight Staff', 3: 'Primordial Staff' }
+            }
+            
+            const weaponAttacks = {
+              1: { 1: 20, 2: 40, 3: 70 },
+              2: { 1: 18, 2: 38, 3: 65 },
+              3: { 1: 22, 2: 42, 3: 75 }
+            }
+            
+            const constructedWeapon = {
+              objectId: weaponInfo.objectId,
+              name: weaponNames[weaponInfo.weaponType]?.[weaponInfo.rarity] || 'Unknown Weapon',
+              weaponType: weaponInfo.weaponType,
+              attack: weaponAttacks[weaponInfo.weaponType]?.[weaponInfo.rarity] || 20,
+              level: 1,
+              rarity: weaponInfo.rarity,
+              owner: walletAddress
+            }
+            
+            console.log('🎉 Showing weapon reward:', constructedWeapon)
+            setShowWeaponReward(constructedWeapon)
+          } else {
+            console.warn('⚠️ Weapon info incomplete, showing generic reward')
+            alert('武器已铸造！请查看背包')
+          }
+        } catch (error) {
+          console.error('❌ Failed to mint weapon:', error)
+          console.error('Error details:', error.message)
+          alert('铸造武器失败：' + error.message + '\n请查看背包或稍后重试')
+        }
+      }
+    })
+
+    // 监听怪物受伤
+    websocketClient.on('monster_damaged', (data) => {
+      const { monsterId, damage, attackerId } = data
+      console.log('💥 Monster damaged:', monsterId, 'damage:', damage, 'by:', attackerId)
+      // 更新怪物HP（如果是主机，已经在本地处理了）
+      if (!isHost) {
+        setMonsters(prev => prev.map(m => 
+          m.id === monsterId ? { ...m, hp: Math.max(0, (m.hp || m.maxHp) - damage) } : m
+        ))
+      }
+    })
+
+    // 监听怪物死亡（主机接收非主机玩家的击杀通知）
+    websocketClient.on('monster_died', (data) => {
+      const { monsterId, killerId, killerName, position } = data
+      console.log(`💀 Received monster death notification: ${monsterId} killed by ${killerName}`)
+      
+      // 只有主机处理宝箱生成
+      if (!isHost) {
+        console.log('⚠️ Non-host received monster_died, ignoring')
+        return
+      }
+      
+      console.log('👑 Host generating loot box for killer:', killerName)
+      
+      // 更新怪物状态
+      const updatedMonsters = monsters.map(m => 
+        m.id === monsterId ? { ...m, alive: false, hp: 0 } : m
+      )
+      setMonsters(updatedMonsters)
+      
+      // 生成宝箱（归属于击杀者）
+      const newLootBox = {
+        id: lootBoxIdCounter.current++,
+        x: position.x,
+        y: position.y,
+        monsterId: monsterId,
+        ownerId: killerId,
+        ownerName: killerName,
+        pickedBy: null
+      }
+      const updatedLootBoxes = [...lootBoxes, newLootBox]
+      setLootBoxes(updatedLootBoxes)
+      console.log(`📦 Host spawned loot box at (${position.x}, ${position.y}) for ${killerName}`)
+      
+      // 同步游戏状态给所有玩家
+      console.log('📤 Host syncing game state after non-host kill')
+      websocketClient.syncGameState({
+        monsters: updatedMonsters,
+        lootBoxes: updatedLootBoxes
+      })
+    })
+
     // 监听其他玩家加入
     websocketClient.on('player_joined', (data) => {
       const { player } = data
       if (player.id !== currentPlayerId) {
         console.log('👤 Player joined:', player.name)
         setOtherPlayers(prev => new Map(prev).set(player.id, player))
+        
+        // 如果是主机，同步当前游戏状态给新玩家
+        if (isHost) {
+          console.log('📤 Host syncing game state to new player')
+          websocketClient.syncGameState({
+            monsters: monsters,
+            lootBoxes: lootBoxes
+          })
+        }
       }
     })
 
@@ -116,12 +395,6 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [] }) {
       // 可以在这里添加攻击特效
     })
 
-    // 监听怪物更新
-    websocketClient.on('monsters_updated', (data) => {
-      const { monsters: updatedMonsters } = data
-      setMonsters(updatedMonsters)
-    })
-
     // 监听其他玩家HP更新
     websocketClient.on('player_hp_updated', (data) => {
       const { playerId, hp } = data
@@ -137,14 +410,20 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [] }) {
 
     return () => {
       // 清理监听器
+      websocketClient.off('room_joined')
+      websocketClient.off('game_state_synced')
+      websocketClient.off('monsters_updated')
+      websocketClient.off('lootbox_picked')
+      websocketClient.off('lootbox_pickup_failed')
+      websocketClient.off('monster_damaged')
+      websocketClient.off('monster_died')
       websocketClient.off('player_joined')
       websocketClient.off('player_left')
       websocketClient.off('player_moved')
       websocketClient.off('player_attacked')
-      websocketClient.off('monsters_updated')
       websocketClient.off('player_hp_updated')
     }
-  }, [roomId, character])
+  }, [roomId, character, isHost, monsters, lootBoxes])
 
   // 检查并赠送武器
   useEffect(() => {
@@ -309,44 +588,14 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [] }) {
           console.warn('No collision layer found in map')
         }
 
-        // 提取怪物刷新点
+        // 提取怪物刷新点（保存到ref，稍后由主机生成）
         const spawnsLayer = data.layers.find(layer => layer.name === 'spawns')
         if (spawnsLayer && spawnsLayer.objects) {
           const spawnPoints = spawnsLayer.objects.filter(obj => obj.name === 'Spawns')
           console.log(`Found ${spawnPoints.length} spawn points`)
           
-          // 在每个刷新点生成2个怪物（1个CowMonster1，1个CowMonster2）
-          const initialMonsters = []
-          spawnPoints.forEach((spawn, spawnIndex) => {
-            // 获取刷新点的Count属性（默认为2）
-            const countProp = spawn.properties?.find(p => p.name === 'Count')
-            const count = countProp ? countProp.value : 2
-            
-            // 生成指定数量的怪物
-            for (let i = 0; i < count; i++) {
-              const monsterType = i === 0 ? 'CowMonster1' : 'CowMonster2'
-              // 在刷新点周围随机偏移位置，避免重叠（增大偏移范围）
-              const offsetX = (Math.random() - 0.2) * 80
-              const offsetY = (Math.random() - 1.2) * 80
-              
-              const initialX = spawn.x + offsetX
-              const initialY = spawn.y + offsetY
-              
-              initialMonsters.push({
-                id: monsterIdCounter.current++,
-                type: monsterType,
-                x: initialX,
-                y: initialY,
-                initialX: initialX, // 保存初始位置
-                initialY: initialY, // 保存初始位置
-                spawnPoint: spawnIndex,
-                alive: true
-              })
-            }
-          })
-          
-          console.log(`Spawned ${initialMonsters.length} monsters`)
-          setMonsters(initialMonsters)
+          // 保存刷新点信息，等待确认主机身份后再生成怪物
+          window.spawnPoints = spawnPoints
         } else {
           console.warn('No spawns layer found in map')
         }
@@ -1172,14 +1421,45 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [] }) {
         
         const boxScreenPos = getLootBoxScreenPosition(lootBox.x, lootBox.y)
         
+        const currentPlayerId = window.currentWalletAddress || character.owner
+        const isOwner = !lootBox.ownerId || lootBox.ownerId === currentPlayerId
+        
         return (
           <LootBox
             key={lootBox.id}
             screenPosition={boxScreenPos}
             boxSize={40 * MAP_SCALE}
+            ownerName={lootBox.ownerName}
+            isOwner={isOwner}
             onOpen={async () => {
+              const currentPlayerId = window.currentWalletAddress || character.owner
+              
+              // 检查宝箱归属
+              if (lootBox.ownerId && lootBox.ownerId !== currentPlayerId) {
+                console.log(`⚠️ This loot box belongs to ${lootBox.ownerName}`)
+                alert(`这个宝箱属于 ${lootBox.ownerName}，只有他/她可以拾取！`)
+                return
+              }
+              
               console.log(`📦 Opening loot box ${lootBox.id}...`)
               
+              // 多人模式：先请求服务器验证
+              if (roomId) {
+                websocketClient.pickupLootBox(lootBox.id)
+                // 等待服务器响应（通过监听器处理）
+                return
+              }
+              
+              // 单人模式：检查是否已处理
+              if (processedLootBoxes.current.has(lootBox.id)) {
+                console.log('⚠️ Loot box already processed, skipping...')
+                return
+              }
+              
+              // 标记为已处理
+              processedLootBoxes.current.add(lootBox.id)
+              
+              // 单人模式：直接处理
               try {
                 // 获取玩家钱包地址
                 const walletAddress = window.currentWalletAddress || character.owner
@@ -1307,6 +1587,8 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [] }) {
       
       {/* 怪物层 - 在角色之前渲染 */}
       {!showTeleportEffect && (() => {
+        console.log('🎨 Rendering monsters:', monsters.length, 'total,', monsters.filter(m => m.alive).length, 'alive')
+        
         // 计算最近的怪物（主目标）
         let closestMonsterId = null
         let closestDistance = Infinity
@@ -1404,21 +1686,53 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [] }) {
                 ))
               }}
               onDeath={() => {
-                // 处理怪物死亡
-                setMonsters(prev => prev.map(m => 
-                  m.id === monster.id ? { ...m, alive: false } : m
-                ))
                 console.log(`💀 Monster ${monster.id} defeated!`)
                 
-                // 在怪物位置生成宝箱
+                // 所有玩家都更新本地怪物状态
+                const updatedMonsters = monsters.map(m => 
+                  m.id === monster.id ? { ...m, alive: false, hp: 0 } : m
+                )
+                setMonsters(updatedMonsters)
+                
+                // 如果是多人模式的非主机，通知主机怪物死亡
+                if (roomId && !isHost) {
+                  console.log('⚠️ Non-host: notifying host about monster death')
+                  const killerId = window.currentWalletAddress || character.owner
+                  websocketClient.reportMonsterDeath(
+                    monster.id,
+                    killerId,
+                    character.name,
+                    { x: monster.x, y: monster.y }
+                  )
+                  return
+                }
+                
+                // 主机或单人模式：生成宝箱
+                const killerId = window.currentWalletAddress || character.owner
                 const newLootBox = {
                   id: lootBoxIdCounter.current++,
                   x: monster.x,
                   y: monster.y,
-                  monsterId: monster.id
+                  monsterId: monster.id,
+                  ownerId: killerId, // 归属于击杀者
+                  ownerName: character.name,
+                  pickedBy: null
                 }
-                setLootBoxes(prev => [...prev, newLootBox])
-                console.log(`📦 Loot box spawned at (${monster.x}, ${monster.y})`)
+                const updatedLootBoxes = [...lootBoxes, newLootBox]
+                setLootBoxes(updatedLootBoxes)
+                console.log(`📦 Loot box spawned at (${monster.x}, ${monster.y}) for ${character.name}`)
+
+                // 如果是多人模式的主机，同步游戏状态
+                if (roomId && isHost) {
+                  console.log('📤 Host syncing game state after monster death')
+                  console.log('  Monsters:', updatedMonsters.length, 'alive:', updatedMonsters.filter(m => m.alive).length)
+                  console.log('  Loot boxes:', updatedLootBoxes.length)
+                  console.log('  New loot box:', newLootBox)
+                  websocketClient.syncGameState({
+                    monsters: updatedMonsters,
+                    lootBoxes: updatedLootBoxes
+                  })
+                }
               }}
               onAttackPlayer={(damage) => {
                 // 怪物攻击玩家

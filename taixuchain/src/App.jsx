@@ -18,6 +18,9 @@ function App() {
   const [selectedMap, setSelectedMap] = useState(null)
   const [roomId, setRoomId] = useState(null) // 多人房间ID
   const [roomPlayers, setRoomPlayers] = useState([]) // 房间内的玩家列表
+  const [isHost, setIsHost] = useState(false) // 是否是主机
+  const [hostId, setHostId] = useState(null) // 主机ID
+  const [initialMonsters, setInitialMonsters] = useState([]) // 初始怪物列表
   const [isCheckingPlayer, setIsCheckingPlayer] = useState(false)
 
   const handleWalletConnected = async (address) => {
@@ -105,18 +108,24 @@ function App() {
     console.log('Character registered to blockchain:', character)
   }
 
-  const handleMapSelected = (mapId, roomIdParam = null, playersParam = []) => {
+  const handleMapSelected = (mapId, roomIdParam = null, playersParam = [], isHostParam = false, hostIdParam = null, monstersParam = []) => {
     setSelectedMap(mapId)
     setRoomId(roomIdParam)
     setRoomPlayers(playersParam)
+    setIsHost(isHostParam)
+    setHostId(hostIdParam)
+    setInitialMonsters(monstersParam)
     setGameStage('game')
-    console.log('Selected map:', mapId, roomIdParam ? `(Room: ${roomIdParam}, Players: ${playersParam.length})` : '(Single Player)')
+    console.log('Selected map:', mapId, roomIdParam ? `(Room: ${roomIdParam}, Players: ${playersParam.length}, Host: ${isHostParam}, Monsters: ${monstersParam.length})` : '(Single Player)')
   }
 
   const handleExitMap = () => {
     setSelectedMap(null)
     setRoomId(null)
     setRoomPlayers([])
+    setIsHost(false)
+    setHostId(null)
+    setInitialMonsters([])
     setGameStage('mapSelection')
   }
 
@@ -182,7 +191,15 @@ function App() {
       {!isCheckingPlayer && gameStage === 'game' && finalCharacter && selectedMap && (
         <>
           {selectedMap === 'forest' && (
-            <ForestMap character={finalCharacter} onExit={handleExitMap} roomId={roomId} initialPlayers={roomPlayers} />
+            <ForestMap 
+              character={finalCharacter} 
+              onExit={handleExitMap} 
+              roomId={roomId} 
+              initialPlayers={roomPlayers}
+              isHostProp={isHost}
+              hostIdProp={hostId}
+              initialMonstersProp={initialMonsters}
+            />
           )}
           {selectedMap !== 'forest' && (
             <div style={{ 

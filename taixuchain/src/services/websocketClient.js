@@ -137,6 +137,30 @@ class WebSocketClient {
   sendPlayerHpUpdate(hp) {
     this.send('player_hp_update', { hp });
   }
+
+  // 游戏状态同步（主机专用）
+  syncGameState(gameState) {
+    this.send('game_state_sync', { gameState });
+  }
+
+  requestGameState() {
+    this.send('request_game_state', {});
+  }
+
+  // 宝箱拾取
+  pickupLootBox(lootBoxId) {
+    this.send('lootbox_pickup', { lootBoxId });
+  }
+
+  // 怪物受伤
+  reportMonsterDamage(monsterId, damage, attackerId) {
+    this.send('monster_damage', { monsterId, damage, attackerId });
+  }
+
+  // 怪物死亡（通知主机生成宝箱）
+  reportMonsterDeath(monsterId, killerId, killerName, position) {
+    this.send('monster_death', { monsterId, killerId, killerName, position });
+  }
 }
 
 export default new WebSocketClient();

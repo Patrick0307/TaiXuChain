@@ -5,7 +5,9 @@ function LootBox({
   screenPosition, 
   onOpen, 
   onClose,
-  boxSize = 40
+  boxSize = 40,
+  ownerName = null, // 宝箱归属者名字
+  isOwner = true // 当前玩家是否是归属者
 }) {
   const [countdown, setCountdown] = useState(5) // 5秒倒计时
   const [isOpening, setIsOpening] = useState(false)
@@ -23,6 +25,11 @@ function LootBox({
 
   const handleClick = () => {
     if (countdown > 0 || isOpening) return
+    
+    // 如果不是归属者，不允许打开
+    if (!isOwner) {
+      return
+    }
     
     setIsOpening(true)
     
@@ -76,11 +83,33 @@ function LootBox({
         </div>
       )}
       
+      {/* 归属者名字 */}
+      {ownerName && !isOwner && (
+        <div style={{
+          position: 'absolute',
+          top: '-25px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          color: '#FFD700',
+          fontSize: '12px',
+          fontWeight: 'bold',
+          textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+          whiteSpace: 'nowrap',
+          pointerEvents: 'none'
+        }}>
+          {ownerName}的宝箱
+        </div>
+      )}
+      
       {/* 光效 */}
       {countdown === 0 && !isOpening && (
         <>
-          <div className="glow-ring"></div>
-          <div className="glow-pulse"></div>
+          <div className="glow-ring" style={{ 
+            borderColor: isOwner ? '#FFD700' : '#888' 
+          }}></div>
+          <div className="glow-pulse" style={{ 
+            background: isOwner ? 'radial-gradient(circle, rgba(255,215,0,0.6) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(136,136,136,0.4) 0%, transparent 70%)'
+          }}></div>
         </>
       )}
       

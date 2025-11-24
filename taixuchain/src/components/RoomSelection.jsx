@@ -23,15 +23,18 @@ function RoomSelection({ character, onRoomJoined, onBack }) {
     websocketClient.on('room_created', (data) => {
       console.log('Room created:', data)
       setIsConnecting(false)
-      onRoomJoined(data.roomId, data.mapName, []) // 创建时没有其他玩家
+      // 创建者就是主机
+      onRoomJoined(data.roomId, data.mapName, [], true, null, []) // players, isHost, hostId, monsters
     })
 
     // 监听加入房间成功
     websocketClient.on('room_joined', (data) => {
       console.log('Room joined:', data)
       console.log('Players in room:', data.players)
+      console.log('Is host:', data.isHost)
+      console.log('Monsters from server:', data.monsters?.length || 0)
       setIsConnecting(false)
-      onRoomJoined(data.roomId, 'forest', data.players) // 传递玩家列表
+      onRoomJoined(data.roomId, 'forest', data.players, data.isHost, data.hostId, data.monsters || [])
     })
 
     // 监听公开房间列表

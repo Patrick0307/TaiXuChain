@@ -13,17 +13,22 @@ class RoomService {
     const roomId = uuidv4().replace(/-/g, '').substring(0, 8).toUpperCase();
     const room = {
       id: roomId,
-      hostId: hostPlayerId,
+      hostId: hostPlayerId, // 房主（主机）
       mapName: mapName,
       isPublic: isPublic,
       players: new Map(), // playerId -> playerData
-      monsters: [], // 怪物状态
+      monsters: [], // 怪物状态（由主机管理）
+      lootBoxes: [], // 宝箱状态（由主机管理）
+      gameState: {
+        initialized: false,
+        lastUpdate: Date.now()
+      },
       createdAt: Date.now(),
       maxPlayers: 10
     };
 
     this.rooms.set(roomId, room);
-    console.log(`🏠 Room created: ${roomId} (${isPublic ? 'Public' : 'Private'}) by ${hostPlayerId}`);
+    console.log(`🏠 Room created: ${roomId} (${isPublic ? 'Public' : 'Private'}) by ${hostPlayerId} (HOST)`);
     
     return room;
   }
@@ -148,15 +153,75 @@ class RoomService {
     return room;
   }
 
-  // 同步怪物状态
-  syncMonsters(roomId, monsters) {
+  // 同步游戏状态（由主机调用）
+  syncGameState(roomId, gameState) {
     const room = this.rooms.get(roomId);
     
     if (room) {
-      room.monsters = monsters;
+      room.monsters = gameState.monsters || room.monsters;
+      room.lootBoxes = gameState.lootBoxes || room.lootBoxes;
+      room.gameState.lastUpdate = Date.now();
+      room.gameState.initialized = true;
     }
 
     return room;
+  }
+
+  // 获取游戏状态
+  getGameState(roomId) {
+    const room = this.rooms.get(roomId);
+    
+    if (!room) {
+      return null;
+    }
+
+    return {
+      monsters: room.monsters,
+      lootBoxes: room.lootBoxes,
+      initialized: room.gameState.initialized
+    };
+  }
+
+  // 检查是否是主机
+  isHost(roomId, playerId) {
+    const room = this.rooms.get(roomId);
+    return room && room.hostId === playerId;
+  }
+
+  // 拾取宝箱（归属检查 + 先到先得）
+  pickupLootBox(roomId, lootBoxId, playerId) {
+    const room = this.rooms.get(roomId);
+    
+    if (!room) {
+      return { success: false, message: 'Room not found' };
+    }
+
+    const lootBoxIndex = room.lootBoxes.findIndex(box => box.id === lootBoxId);
+    
+    if (lootBoxIndex === -1) {
+      return { success: false, message: 'Loot box not found' };
+    }
+
+    const lootBox = room.lootBoxes[lootBoxIndex];
+    
+    // 检查归属
+    if (lootBox.ownerId && lootBox.ownerId !== playerId) {
+      return { 
+        success: false, 
+        message: `This loot box belongs to ${lootBox.ownerName || 'another player'}` 
+      };
+    }
+    
+    // 检查是否已被拾取
+    if (lootBox.pickedBy) {
+      return { success: false, message: 'Already picked up' };
+    }
+
+    // 标记为已拾取
+    lootBox.pickedBy = playerId;
+    lootBox.pickedAt = Date.now();
+
+    return { success: true, lootBox };
   }
 }
 

@@ -49,10 +49,10 @@ function MapSelection({ character, onMapSelected }) {
     }
   }
 
-  const handleRoomJoined = (roomId, mapName, players) => {
+  const handleRoomJoined = (roomId, mapName, players, isHost, hostId, monsters) => {
     // 加入房间后进入地图，传递房间数据
-    setRoomData({ roomId, players })
-    onMapSelected(mapName, roomId, players)
+    setRoomData({ roomId, players, isHost, hostId, monsters })
+    onMapSelected(mapName, roomId, players, isHost, hostId, monsters)
   }
 
   // 如果显示房间选择界面
