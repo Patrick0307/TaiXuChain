@@ -1,11 +1,14 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { createServer } from 'http';
 import { sponsorCreatePlayer, getPlayerByAddress, getPlayerWeapon, getAllPlayerWeapons, sponsorMintWeapon, sponsorMintRandomWeapon, getWeaponById, getLingStoneBalance, getLingStoneCoins, sponsorMintLingStone, sponsorBurnWeapon, sponsorMergeWeapon, getAllMarketplaceListings, getMarketplaceListing } from './services/sponsorService.js';
+import websocketService from './services/websocketService.js';
 
 dotenv.config();
 
 const app = express();
+const server = createServer(app);
 const PORT = process.env.PORT || 3001;
 
 // 中间件
@@ -445,8 +448,12 @@ app.get('/api/marketplace/listing/:weaponId', async (req, res) => {
   }
 });
 
+// 初始化 WebSocket 服务
+websocketService.initialize(server);
+
 // 启动服务器
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`🚀 Taixu Backend running on http://localhost:${PORT}`);
   console.log(`📝 Sponsor wallet will pay gas for all player transactions`);
+  console.log(`🔌 WebSocket server ready for multiplayer connections`);
 });

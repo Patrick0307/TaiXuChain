@@ -1,9 +1,13 @@
 import { useState } from 'react'
 import '../css/MapSelection.css'
 import AnimatedCharacter from './AnimatedCharacter'
+import RoomSelection from './RoomSelection'
 
 function MapSelection({ character, onMapSelected }) {
   const [selectedMap, setSelectedMap] = useState(null)
+  const [gameMode, setGameMode] = useState(null) // 'single' or 'multi'
+  const [showRoomSelection, setShowRoomSelection] = useState(false)
+  const [roomData, setRoomData] = useState(null) // 存储房间数据
 
   const maps = [
     {
@@ -34,9 +38,32 @@ function MapSelection({ character, onMapSelected }) {
   }
 
   const handleConfirm = () => {
-    if (selectedMap) {
-      onMapSelected(selectedMap)
+    if (selectedMap && gameMode) {
+      if (gameMode === 'single') {
+        // 单人模式直接进入地图
+        onMapSelected(selectedMap, null)
+      } else {
+        // 多人模式显示房间选择
+        setShowRoomSelection(true)
+      }
     }
+  }
+
+  const handleRoomJoined = (roomId, mapName, players) => {
+    // 加入房间后进入地图，传递房间数据
+    setRoomData({ roomId, players })
+    onMapSelected(mapName, roomId, players)
+  }
+
+  // 如果显示房间选择界面
+  if (showRoomSelection) {
+    return (
+      <RoomSelection 
+        character={character}
+        onRoomJoined={handleRoomJoined}
+        onBack={() => setShowRoomSelection(false)}
+      />
+    )
   }
 
   return (
@@ -100,6 +127,27 @@ function MapSelection({ character, onMapSelected }) {
         </div>
       </div>
 
+      {/* 游戏模式选择 */}
+      <div className="game-mode-selection">
+        <h2 style={{ textAlign: 'center', marginBottom: '20px', color: '#ffd700' }}>选择游戏模式</h2>
+        <div style={{ display: 'flex', gap: '20px', justifyContent: 'center' }}>
+          <button
+            className={`mode-button ${gameMode === 'single' ? 'selected' : ''}`}
+            onClick={() => setGameMode('single')}
+          >
+            <span style={{ fontSize: '2rem' }}>🎮</span>
+            <div>单人模式</div>
+          </button>
+          <button
+            className={`mode-button ${gameMode === 'multi' ? 'selected' : ''}`}
+            onClick={() => setGameMode('multi')}
+          >
+            <span style={{ fontSize: '2rem' }}>👥</span>
+            <div>多人模式</div>
+          </button>
+        </div>
+      </div>
+
       <div className="maps-container">
         {maps.map((map) => (
           <div
@@ -123,9 +171,9 @@ function MapSelection({ character, onMapSelected }) {
         <button 
           className="confirm-button"
           onClick={handleConfirm}
-          disabled={!selectedMap}
+          disabled={!selectedMap || !gameMode}
         >
-          {selectedMap ? 'Enter Map →' : 'Please Select a Map'}
+          {selectedMap && gameMode ? (gameMode === 'multi' ? '选择房间 →' : '进入地图 →') : '请选择模式和地图'}
         </button>
       </div>
     </div>

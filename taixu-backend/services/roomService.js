@@ -1,0 +1,163 @@
+// 房间管理服务
+import { v4 as uuidv4 } from 'uuid';
+
+class RoomService {
+  constructor() {
+    this.rooms = new Map(); // roomId -> Room
+    this.playerRooms = new Map(); // playerId -> roomId
+  }
+
+  // 创建新房间
+  createRoom(hostPlayerId, mapName, isPublic = true) {
+    // 生成8位大写字母数字组合的房间号
+    const roomId = uuidv4().replace(/-/g, '').substring(0, 8).toUpperCase();
+    const room = {
+      id: roomId,
+      hostId: hostPlayerId,
+      mapName: mapName,
+      isPublic: isPublic,
+      players: new Map(), // playerId -> playerData
+      monsters: [], // 怪物状态
+      createdAt: Date.now(),
+      maxPlayers: 10
+    };
+
+    this.rooms.set(roomId, room);
+    console.log(`🏠 Room created: ${roomId} (${isPublic ? 'Public' : 'Private'}) by ${hostPlayerId}`);
+    
+    return room;
+  }
+
+  // 加入房间
+  joinRoom(roomId, playerId, playerData) {
+    // 确保房间ID是大写
+    const normalizedRoomId = roomId.toUpperCase();
+    const room = this.rooms.get(normalizedRoomId);
+    
+    if (!room) {
+      console.log(`❌ Room not found: ${normalizedRoomId}`);
+      console.log(`📋 Available rooms:`, Array.from(this.rooms.keys()));
+      throw new Error('Room not found');
+    }
+
+    if (room.players.size >= room.maxPlayers) {
+      throw new Error('Room is full');
+    }
+
+    // 添加玩家到房间
+    room.players.set(playerId, {
+      id: playerId,
+      ...playerData,
+      position: { x: 0, y: 0 },
+      direction: 'down',
+      isMoving: false,
+      hp: playerData.hp || 100,
+      joinedAt: Date.now()
+    });
+
+    this.playerRooms.set(playerId, normalizedRoomId);
+    
+    console.log(`👤 Player ${playerId} joined room ${normalizedRoomId} (${room.players.size}/${room.maxPlayers})`);
+    
+    return room;
+  }
+
+  // 离开房间
+  leaveRoom(playerId) {
+    const roomId = this.playerRooms.get(playerId);
+    
+    if (!roomId) {
+      return null;
+    }
+
+    const room = this.rooms.get(roomId);
+    
+    if (room) {
+      room.players.delete(playerId);
+      console.log(`👋 Player ${playerId} left room ${roomId}`);
+
+      // 如果房间空了，删除房间
+      if (room.players.size === 0) {
+        this.rooms.delete(roomId);
+        console.log(`🗑️ Room ${roomId} deleted (empty)`);
+      }
+    }
+
+    this.playerRooms.delete(playerId);
+    return roomId;
+  }
+
+  // 获取房间
+  getRoom(roomId) {
+    return this.rooms.get(roomId);
+  }
+
+  // 获取玩家所在房间
+  getPlayerRoom(playerId) {
+    const roomId = this.playerRooms.get(playerId);
+    return roomId ? this.rooms.get(roomId) : null;
+  }
+
+  // 获取所有公开房间
+  getPublicRooms() {
+    return Array.from(this.rooms.values())
+      .filter(room => room.isPublic)
+      .map(room => ({
+        id: room.id,
+        hostId: room.hostId,
+        mapName: room.mapName,
+        playerCount: room.players.size,
+        maxPlayers: room.maxPlayers,
+        createdAt: room.createdAt
+      }));
+  }
+
+  // 更新玩家位置
+  updatePlayerPosition(playerId, position, direction, isMoving) {
+    const room = this.getPlayerRoom(playerId);
+    
+    if (!room) {
+      return null;
+    }
+
+    const player = room.players.get(playerId);
+    
+    if (player) {
+      player.position = position;
+      player.direction = direction;
+      player.isMoving = isMoving;
+    }
+
+    return room;
+  }
+
+  // 更新玩家HP
+  updatePlayerHp(playerId, hp) {
+    const room = this.getPlayerRoom(playerId);
+    
+    if (!room) {
+      return null;
+    }
+
+    const player = room.players.get(playerId);
+    
+    if (player) {
+      player.hp = hp;
+    }
+
+    return room;
+  }
+
+  // 同步怪物状态
+  syncMonsters(roomId, monsters) {
+    const room = this.rooms.get(roomId);
+    
+    if (room) {
+      room.monsters = monsters;
+    }
+
+    return room;
+  }
+}
+
+export default new RoomService();

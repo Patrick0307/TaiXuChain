@@ -7,9 +7,11 @@ import Marketplace from '../Marketplace'
 import LootBox from './LootBox'
 import WeaponReward from './WeaponReward'
 import { checkPlayerWeapon, mintWeaponForPlayer, mintRandomWeaponForPlayer, getAllPlayerWeapons } from '../../utils/suiClient'
+import websocketClient from '../../services/websocketClient'
 import '../../css/maps/ForestMap.css'
 
-function ForestMap({ character, onExit }) {
+function ForestMap({ character, onExit, roomId = null, initialPlayers = [] }) {
+  const [otherPlayers, setOtherPlayers] = useState(new Map()) // 其他玩家
   const [playerWeapon, setPlayerWeapon] = useState(null)
   const [isCheckingWeapon, setIsCheckingWeapon] = useState(true)
   const [isInventoryOpen, setIsInventoryOpen] = useState(false)
@@ -40,6 +42,7 @@ function ForestMap({ character, onExit }) {
   const isMovingRef = useRef(false) // 用 ref 存储实时移动状态
   const monsterIdCounter = useRef(0) // 怪物ID计数器
   const lastPlayerAttackTime = useRef(0) // 上次玩家攻击时间
+  const lastSyncTime = useRef(0) // 上次同步时间
 
   const TILE_SIZE = 32
   const PLAYER_SIZE = 10  // 非常小的角色
@@ -48,6 +51,100 @@ function ForestMap({ character, onExit }) {
   const MONSTER_SIZE = 32 // 怪物大小（像素）- 缩小到32
   const PLAYER_ATTACK_RANGE = 60 // 玩家攻击范围（像素）
   const PLAYER_ATTACK_INTERVAL = 1000 // 玩家攻击间隔（毫秒）
+
+  // 初始化其他玩家（从props）
+  useEffect(() => {
+    if (!roomId || !initialPlayers || initialPlayers.length === 0) return
+
+    const currentPlayerId = window.currentWalletAddress || character.owner
+    console.log('🏠 Initializing players from props:', initialPlayers.length)
+    
+    // 初始化其他玩家列表（排除自己）
+    const otherPlayersMap = new Map()
+    initialPlayers.forEach(player => {
+      if (player.id !== currentPlayerId) {
+        console.log('👤 Adding existing player:', player.name, player.id)
+        otherPlayersMap.set(player.id, player)
+      }
+    })
+    setOtherPlayers(otherPlayersMap)
+    console.log('✅ Initialized other players:', otherPlayersMap.size)
+  }, [roomId, initialPlayers, character])
+
+  // WebSocket 多人游戏同步
+  useEffect(() => {
+    if (!roomId) return // 单人模式不需要同步
+
+    const currentPlayerId = window.currentWalletAddress || character.owner
+
+    // 监听其他玩家加入
+    websocketClient.on('player_joined', (data) => {
+      const { player } = data
+      if (player.id !== currentPlayerId) {
+        console.log('👤 Player joined:', player.name)
+        setOtherPlayers(prev => new Map(prev).set(player.id, player))
+      }
+    })
+
+    // 监听其他玩家离开
+    websocketClient.on('player_left', (data) => {
+      const { playerId } = data
+      console.log('👋 Player left:', playerId)
+      setOtherPlayers(prev => {
+        const newMap = new Map(prev)
+        newMap.delete(playerId)
+        return newMap
+      })
+    })
+
+    // 监听其他玩家移动
+    websocketClient.on('player_moved', (data) => {
+      const { playerId, position, direction, isMoving } = data
+      setOtherPlayers(prev => {
+        const newMap = new Map(prev)
+        const player = newMap.get(playerId)
+        if (player) {
+          newMap.set(playerId, { ...player, position, direction, isMoving })
+        }
+        return newMap
+      })
+    })
+
+    // 监听其他玩家攻击
+    websocketClient.on('player_attacked', (data) => {
+      console.log('⚔️ Player attacked:', data)
+      // 可以在这里添加攻击特效
+    })
+
+    // 监听怪物更新
+    websocketClient.on('monsters_updated', (data) => {
+      const { monsters: updatedMonsters } = data
+      setMonsters(updatedMonsters)
+    })
+
+    // 监听其他玩家HP更新
+    websocketClient.on('player_hp_updated', (data) => {
+      const { playerId, hp } = data
+      setOtherPlayers(prev => {
+        const newMap = new Map(prev)
+        const player = newMap.get(playerId)
+        if (player) {
+          newMap.set(playerId, { ...player, hp })
+        }
+        return newMap
+      })
+    })
+
+    return () => {
+      // 清理监听器
+      websocketClient.off('player_joined')
+      websocketClient.off('player_left')
+      websocketClient.off('player_moved')
+      websocketClient.off('player_attacked')
+      websocketClient.off('monsters_updated')
+      websocketClient.off('player_hp_updated')
+    }
+  }, [roomId, character])
 
   // 检查并赠送武器
   useEffect(() => {
@@ -509,6 +606,12 @@ function ForestMap({ character, onExit }) {
       // 只在实际变化时更新 state
       if (posChanged) {
         setPlayerPos({ x: newX, y: newY })
+        
+        // 多人模式：同步位置到服务器（节流：每100ms最多发送一次）
+        if (roomId && (!lastSyncTime.current || Date.now() - lastSyncTime.current > 100)) {
+          websocketClient.sendPlayerMove({ x: newX, y: newY }, newDirection, moving)
+          lastSyncTime.current = Date.now()
+        }
       }
       if (dirChanged) {
         setDirection(newDirection)
@@ -1333,6 +1436,80 @@ function ForestMap({ character, onExit }) {
         })
       })()}
       
+      {/* 其他玩家层 */}
+      {!showTeleportEffect && Array.from(otherPlayers.values()).map(player => {
+        // 计算其他玩家在屏幕上的位置
+        const getOtherPlayerScreenPosition = (playerX, playerY) => {
+          if (!canvasRef.current || !mapData || !playerPosRef.current) return { x: 0, y: 0 }
+          
+          const canvas = canvasRef.current
+          const scaledMapWidth = mapData.width * TILE_SIZE * MAP_SCALE
+          const scaledMapHeight = mapData.height * TILE_SIZE * MAP_SCALE
+          const scaledPlayerX = Math.round(playerPosRef.current.x * MAP_SCALE)
+          const scaledPlayerY = Math.round(playerPosRef.current.y * MAP_SCALE)
+          const scaledPlayerSize = PLAYER_SIZE * MAP_SCALE
+
+          let cameraX = scaledPlayerX - canvas.width / 2 + scaledPlayerSize / 2
+          let cameraY = scaledPlayerY - canvas.height / 2 + scaledPlayerSize / 2
+
+          const maxCameraX = scaledMapWidth - canvas.width
+          const maxCameraY = scaledMapHeight - canvas.height
+
+          cameraX = Math.max(0, Math.min(cameraX, maxCameraX))
+          cameraY = Math.max(0, Math.min(cameraY, maxCameraY))
+
+          if (scaledMapWidth < canvas.width) cameraX = -(canvas.width - scaledMapWidth) / 2
+          if (scaledMapHeight < canvas.height) cameraY = -(canvas.height - scaledMapHeight) / 2
+
+          const scaledOtherX = Math.round(playerX * MAP_SCALE)
+          const scaledOtherY = Math.round(playerY * MAP_SCALE)
+          
+          return {
+            x: Math.round(scaledOtherX - cameraX),
+            y: Math.round(scaledOtherY - cameraY)
+          }
+        }
+
+        const otherPlayerScreenPos = getOtherPlayerScreenPosition(
+          player.position?.x || 0, 
+          player.position?.y || 0
+        )
+
+        return (
+          <div key={player.id}>
+            <MapCharacter 
+              character={{
+                ...character,
+                name: player.name || 'Player',
+                id: player.classId || character.id
+              }}
+              screenPosition={otherPlayerScreenPos}
+              walkOffset={{ x: 0, y: 0 }}
+              direction={player.direction || 'down'}
+              playerSize={scaledPlayerSize}
+              mapScale={MAP_SCALE}
+              weapon={null}
+              isOtherPlayer={true}
+            />
+            {/* 显示其他玩家名字 */}
+            <div style={{
+              position: 'absolute',
+              left: otherPlayerScreenPos.x + scaledPlayerSize / 2,
+              top: otherPlayerScreenPos.y - 20,
+              transform: 'translateX(-50%)',
+              color: 'white',
+              fontSize: '12px',
+              fontWeight: 'bold',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.8)',
+              pointerEvents: 'none',
+              whiteSpace: 'nowrap'
+            }}>
+              {player.name}
+            </div>
+          </div>
+        )
+      })}
+
       {/* 角色层 - 叠加在Canvas上，传送特效结束后才显示 */}
       {!showTeleportEffect && (
         <MapCharacter 
@@ -1356,6 +1533,33 @@ function ForestMap({ character, onExit }) {
         onOpenInventory={() => setIsInventoryOpen(true)}
         onOpenMarketplace={() => setIsMarketplaceOpen(true)}
       />
+      
+      {/* 房间信息显示 */}
+      {roomId && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          background: 'rgba(0, 0, 0, 0.8)',
+          color: 'white',
+          padding: '15px 20px',
+          borderRadius: '10px',
+          border: '2px solid #667eea',
+          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.5)',
+          zIndex: 100,
+          minWidth: '200px'
+        }}>
+          <div style={{ fontSize: '0.9rem', color: '#aaa', marginBottom: '5px' }}>
+            🏠 多人房间
+          </div>
+          <div style={{ fontSize: '1.2rem', fontWeight: 'bold', letterSpacing: '2px', marginBottom: '10px' }}>
+            {roomId}
+          </div>
+          <div style={{ fontSize: '0.85rem', color: '#8BC34A' }}>
+            👥 {otherPlayers.size + 1} 名玩家在线
+          </div>
+        </div>
+      )}
       
       {/* 背包系统 */}
       <Inventory 

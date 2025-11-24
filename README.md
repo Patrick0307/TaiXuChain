@@ -52,10 +52,13 @@ TaiXuChain/
 
 ## 🚀 快速开始
 
-### 方式 1：一键启动（推荐）
+### 方式 1：一键启动多人模式（推荐）⭐ NEW
 
-```powershell
-# 同时启动后端和前端
+```bash
+# Windows
+start-multiplayer.bat
+
+# 或手动启动
 .\start-all.ps1
 ```
 
@@ -90,7 +93,11 @@ sui move build
 
 **首次使用？** 请查看 [赞助交易设置指南](./SPONSORED_TRANSACTION_SETUP.md)
 
+**多人游戏？** 请查看 [多人游戏快速开始](./QUICK_START.md) ⭐ NEW
+
 **后端文档：** [taixu-backend/README.md](./taixu-backend/README.md)
+
+**多人功能指南：** [MULTIPLAYER_GUIDE.md](./MULTIPLAYER_GUIDE.md) ⭐ NEW
 
 ## 🎮 游戏特性
 
@@ -100,6 +107,7 @@ sui move build
 - 🏪 去中心化市场
 - 💰 游戏内代币经济（灵石）
 - ⭐ **零门槛** - 玩家无需代币即可开始游戏（赞助交易）
+- 👥 **多人在线** - 实时多人游戏支持 ⭐ NEW
 
 ## 💰 赞助交易系统
 

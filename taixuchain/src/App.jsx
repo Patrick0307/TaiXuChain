@@ -16,6 +16,8 @@ function App() {
   const [customizedCharacter, setCustomizedCharacter] = useState(null)
   const [finalCharacter, setFinalCharacter] = useState(null)
   const [selectedMap, setSelectedMap] = useState(null)
+  const [roomId, setRoomId] = useState(null) // 多人房间ID
+  const [roomPlayers, setRoomPlayers] = useState([]) // 房间内的玩家列表
   const [isCheckingPlayer, setIsCheckingPlayer] = useState(false)
 
   const handleWalletConnected = async (address) => {
@@ -103,14 +105,18 @@ function App() {
     console.log('Character registered to blockchain:', character)
   }
 
-  const handleMapSelected = (mapId) => {
+  const handleMapSelected = (mapId, roomIdParam = null, playersParam = []) => {
     setSelectedMap(mapId)
+    setRoomId(roomIdParam)
+    setRoomPlayers(playersParam)
     setGameStage('game')
-    console.log('Selected map:', mapId)
+    console.log('Selected map:', mapId, roomIdParam ? `(Room: ${roomIdParam}, Players: ${playersParam.length})` : '(Single Player)')
   }
 
   const handleExitMap = () => {
     setSelectedMap(null)
+    setRoomId(null)
+    setRoomPlayers([])
     setGameStage('mapSelection')
   }
 
@@ -176,7 +182,7 @@ function App() {
       {!isCheckingPlayer && gameStage === 'game' && finalCharacter && selectedMap && (
         <>
           {selectedMap === 'forest' && (
-            <ForestMap character={finalCharacter} onExit={handleExitMap} />
+            <ForestMap character={finalCharacter} onExit={handleExitMap} roomId={roomId} initialPlayers={roomPlayers} />
           )}
           {selectedMap !== 'forest' && (
             <div style={{ 
