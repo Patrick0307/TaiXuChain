@@ -14,14 +14,19 @@ function Monster({
   onAttackPlayer, // 攻击玩家回调
   playerAttackTrigger, // 玩家攻击触发器（时间戳）
   isMainTarget, // 是否是主目标（最近的怪物）
-  isInSplashRange // 是否在溅射范围内（仅武者使用）
+  isInSplashRange, // 是否在溅射范围内（仅武者使用）
+  isHost = true, // 是否是主机（主机执行AI，非主机只显示）
+  allPlayers = [], // 所有玩家位置（主机用于计算最近的玩家）
+  monsterStateUpdate = null, // 野怪状态更新（用于非主机同步攻击动作和血条）
+  onStateChange = null // 状态变化回调（主机用于广播状态）
 }) {
   const [isAttacking, setIsAttacking] = useState(false)
   const [attackFrame, setAttackFrame] = useState(0)
   const [isDead, setIsDead] = useState(false)
   const [deathAnimation, setDeathAnimation] = useState(0) // 死亡动画进度 0-1
-  const [currentHp, setCurrentHp] = useState(150) // 怪物当前生命值
-  const [maxHp] = useState(150) // 怪物最大生命值
+  // 使用传入的 HP，如果没有则使用默认值
+  const [currentHp, setCurrentHp] = useState(monsterWorldPos?.hp || 150) // 怪物当前生命值
+  const [maxHp] = useState(monsterWorldPos?.maxHp || 150) // 怪物最大生命值
   const [showHealthBar, setShowHealthBar] = useState(false) // 是否显示血条
   const [isActivated, setIsActivated] = useState(false) // 野怪是否被激活过
   const [showDamage, setShowDamage] = useState(null) // 显示伤害数字
@@ -30,6 +35,9 @@ function Monster({
   const returnTimerRef = useRef(null) // 回归延迟计时器
   const lastAttackTimeRef = useRef(0) // 上次攻击玩家的时间
   const lastPlayerAttackRef = useRef(0) // 上次被玩家攻击的时间
+  
+  // 非主机的位置插值
+
 
   // 攻击动画帧数（根据实际图片数量）
   const ATTACK_FRAMES = 12 // Minotaur_02_Attacking_000 到 011
@@ -77,9 +85,53 @@ function Monster({
     onPositionUpdateRef.current = onPositionUpdate
   }, [playerPos, monsterWorldPos, initialPos, onPositionUpdate])
 
+  // 同步传入的 HP（非主机接收主机同步的 HP）
+  useEffect(() => {
+    if (!isHost && monsterWorldPos?.hp !== undefined) {
+      setCurrentHp(monsterWorldPos.hp)
+    }
+  }, [monsterWorldPos?.hp, isHost])
+
+  // 非主机：接收野怪状态更新（攻击动作、血条变化等）
+  useEffect(() => {
+    if (!isHost && monsterStateUpdate && monsterStateUpdate.monsterId === id) {
+      console.log(`📥 [Monster ${id}] Received state update:`, monsterStateUpdate)
+      
+      // 更新攻击状态
+      if (monsterStateUpdate.isAttacking !== undefined) {
+        setIsAttacking(monsterStateUpdate.isAttacking)
+        if (monsterStateUpdate.isAttacking) {
+          setShowHealthBar(true)
+        }
+      }
+      
+      // 更新HP
+      if (monsterStateUpdate.hp !== undefined) {
+        const oldHp = currentHp
+        setCurrentHp(monsterStateUpdate.hp)
+        
+        // 显示伤害数字
+        if (monsterStateUpdate.damage !== undefined && monsterStateUpdate.damage > 0) {
+          setShowDamage(monsterStateUpdate.damage)
+          setTimeout(() => setShowDamage(null), 800)
+        }
+        
+        // 显示血条
+        setShowHealthBar(true)
+        
+        console.log(`💔 [Monster ${id}] HP updated: ${oldHp} → ${monsterStateUpdate.hp}`)
+      }
+      
+      // 更新激活状态
+      if (monsterStateUpdate.isActivated !== undefined) {
+        setIsActivated(monsterStateUpdate.isActivated)
+      }
+    }
+  }, [monsterStateUpdate, isHost, id, currentHp])
+
   // 怪物AI逻辑函数（提取出来以便复用）
   const updateMonsterBehavior = () => {
-    if (isDead) return
+    if (isDead || !isHost) return // 非主机不执行AI
 
     const currentPlayerPos = playerPosRef.current
     const currentMonsterPos = monsterWorldPosRef.current
@@ -88,9 +140,37 @@ function Monster({
 
     if (!currentPlayerPos || !currentMonsterPos || !currentInitialPos || !currentOnPositionUpdate) return
 
-    // 计算玩家和怪物之间的距离
-    const dx = currentPlayerPos.x - currentMonsterPos.x
-    const dy = currentPlayerPos.y - currentMonsterPos.y
+    // 如果是主机且有多个玩家，找到最近的玩家
+    let targetPlayerPos = currentPlayerPos
+    let minDistance = Infinity
+    
+    if (isHost && allPlayers && allPlayers.length > 0) {
+      // 遍历所有玩家，找到最近的
+      allPlayers.forEach(player => {
+        if (player.position) {
+          const dx = player.position.x - currentMonsterPos.x
+          const dy = player.position.y - currentMonsterPos.y
+          const dist = Math.sqrt(dx * dx + dy * dy)
+          if (dist < minDistance) {
+            minDistance = dist
+            targetPlayerPos = player.position
+          }
+        }
+      })
+      
+      // 也考虑主机自己
+      const dxSelf = currentPlayerPos.x - currentMonsterPos.x
+      const dySelf = currentPlayerPos.y - currentMonsterPos.y
+      const distSelf = Math.sqrt(dxSelf * dxSelf + dySelf * dySelf)
+      if (distSelf < minDistance) {
+        minDistance = distSelf
+        targetPlayerPos = currentPlayerPos
+      }
+    }
+
+    // 计算目标玩家和怪物之间的距离
+    const dx = targetPlayerPos.x - currentMonsterPos.x
+    const dy = targetPlayerPos.y - currentMonsterPos.y
     const distance = Math.sqrt(dx * dx + dy * dy)
 
     // 计算怪物与初始位置的距离
@@ -157,6 +237,11 @@ function Monster({
           setIsAttacking(true)
           setShowHealthBar(true) // 显示血条
           
+          // 主机：广播攻击状态
+          if (isHost && onStateChange) {
+            onStateChange(id, { isAttacking: true, showHealthBar: true })
+          }
+          
           // 检查是否可以攻击玩家（攻击间隔）
           const now = Date.now()
           if (now - lastAttackTimeRef.current >= MONSTER_ATTACK_INTERVAL) {
@@ -170,6 +255,10 @@ function Monster({
           // 攻击持续1秒
           setTimeout(() => {
             setIsAttacking(false)
+            // 主机：广播攻击结束状态
+            if (isHost && onStateChange) {
+              onStateChange(id, { isAttacking: false })
+            }
           }, 1000)
         }
       }
@@ -214,14 +303,16 @@ function Monster({
   }
 
   // 当玩家位置改变时，立即更新怪物行为（实时响应玩家移动）
+  // 只有主机执行AI
   useEffect(() => {
-    if (isDead) return
+    if (isDead || !isHost) return
     updateMonsterBehavior()
-  }, [playerPos]) // 监听玩家位置变化
+  }, [playerPos, isHost]) // 监听玩家位置变化
 
   // 定时器循环（作为备用，确保怪物持续更新）
+  // 只有主机执行AI
   useEffect(() => {
-    if (isDead) return
+    if (isDead || !isHost) return
 
     const moveAndAttackLoop = setInterval(() => {
       updateMonsterBehavior()
@@ -233,7 +324,7 @@ function Monster({
         clearTimeout(returnTimerRef.current)
       }
     }
-  }, [isDead, isAttacking, isActivated])
+  }, [isDead, isAttacking, isActivated, isHost])
 
   // 处理玩家攻击怪物
   useEffect(() => {
@@ -302,6 +393,11 @@ function Monster({
       console.log(`💔 [Monster ${id}] HP: ${currentHp} → ${newHp} (-${damage})`)
       setCurrentHp(newHp)
       
+      // 如果是主机，通过回调更新父组件的怪物HP（用于同步）
+      if (isHost && onPositionUpdateRef.current && monsterWorldPosRef.current) {
+        onPositionUpdateRef.current(id, monsterWorldPosRef.current.x, monsterWorldPosRef.current.y, newHp)
+      }
+      
       // 显示伤害数字
       setShowDamage(damage)
       setTimeout(() => setShowDamage(null), 800)
@@ -310,8 +406,19 @@ function Monster({
       setShowHealthBar(true)
       
       // 激活怪物
+      const wasActivated = isActivated
       if (!isActivated) {
         setIsActivated(true)
+      }
+      
+      // 主机：广播状态变化（HP、伤害、血条、激活状态）
+      if (isHost && onStateChange) {
+        onStateChange(id, {
+          hp: newHp,
+          damage: damage,
+          showHealthBar: true,
+          isActivated: !wasActivated ? true : undefined
+        })
       }
       
       // 检查是否死亡
@@ -344,7 +451,7 @@ function Monster({
       // 只为主目标输出超出范围的信息
       console.log(`📏 [Monster ${id}] Out of range: ${distance.toFixed(1)}px > ${attackRange}px`)
     }
-  }, [playerAttackTrigger, isDead, playerPos, monsterWorldPos, currentHp, maxHp, isActivated, isMainTarget, isInSplashRange, ATTACK_RANGE, onDeath, id])
+  }, [playerAttackTrigger, isDead, playerPos, monsterWorldPos, currentHp, maxHp, isActivated, isMainTarget, isInSplashRange, ATTACK_RANGE, onDeath, id, isHost])
 
   // 血条显示逻辑：攻击时显示，攻击结束后3秒隐藏
   useEffect(() => {

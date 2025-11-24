@@ -31,19 +31,16 @@ function LootBox({
       return
     }
     
+    // 标记为正在开启（防止重复点击）
     setIsOpening(true)
     
-    // 触发开箱动画和逻辑
+    // 触发开箱逻辑
     if (onOpen) {
       onOpen()
     }
     
-    // 3秒后关闭宝箱（动画结束）
-    setTimeout(() => {
-      if (onClose) {
-        onClose()
-      }
-    }, 3000)
+    // 不调用 onClose，让服务器的 lootbox_picked 事件统一移除宝箱
+    // 这样可以确保所有玩家同步移除
   }
 
   return (

@@ -161,6 +161,11 @@ class WebSocketClient {
   reportMonsterDeath(monsterId, killerId, killerName, position) {
     this.send('monster_death', { monsterId, killerId, killerName, position });
   }
+
+  // 野怪状态更新（主机广播攻击动作、血条变化等）
+  sendMonsterStateUpdate(monsterId, state) {
+    this.send('monster_state_update', { monsterId, state });
+  }
 }
 
 export default new WebSocketClient();

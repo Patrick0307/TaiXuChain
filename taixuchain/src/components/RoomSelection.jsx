@@ -44,7 +44,15 @@ function RoomSelection({ character, onRoomJoined, onBack }) {
 
     // 监听错误
     websocketClient.on('error', (data) => {
-      setError(data?.message || '发生未知错误')
+      const message = data?.message || '发生未知错误'
+      // 友好的错误提示
+      if (message.includes('Room is full')) {
+        setError('房间已满（最多2人）')
+      } else if (message.includes('Room not found')) {
+        setError('房间不存在，请检查房间号')
+      } else {
+        setError(message)
+      }
       setIsConnecting(false)
     })
 

@@ -24,7 +24,7 @@ class RoomService {
         lastUpdate: Date.now()
       },
       createdAt: Date.now(),
-      maxPlayers: 10
+      maxPlayers: 2 // 限制为双人模式
     };
 
     this.rooms.set(roomId, room);
@@ -220,6 +220,10 @@ class RoomService {
     // 标记为已拾取
     lootBox.pickedBy = playerId;
     lootBox.pickedAt = Date.now();
+
+    // 从房间中移除宝箱（已拾取的宝箱不再需要保留）
+    room.lootBoxes.splice(lootBoxIndex, 1);
+    console.log(`📦 Removed loot box ${lootBoxId} from room ${roomId}, remaining: ${room.lootBoxes.length}`);
 
     return { success: true, lootBox };
   }

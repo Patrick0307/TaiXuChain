@@ -95,6 +95,10 @@ class WebSocketService {
         this.handleMonsterDeath(ws, data);
         break;
 
+      case 'monster_state_update':
+        this.handleMonsterStateUpdate(ws, data);
+        break;
+
       default:
         console.warn('⚠️ Unknown message type:', type);
     }
@@ -314,7 +318,10 @@ class WebSocketService {
     const result = roomService.pickupLootBox(roomId, lootBoxId, playerId);
 
     if (result.success) {
-      // 广播宝箱被拾取
+      console.log(`📦 Loot box ${lootBoxId} picked by ${playerId}, broadcasting to room ${roomId}`);
+      
+      // 广播宝箱被拾取给房间内所有玩家（包括发起者）
+      // 注意：不要排除发起者，因为他也需要收到事件来移除UI
       this.broadcastToRoom(roomId, {
         type: 'lootbox_picked',
         data: {
@@ -323,11 +330,16 @@ class WebSocketService {
           lootBox: result.lootBox
         }
       });
+      
+      // 不需要再单独发送给发起者，broadcastToRoom 已经包含了所有人
     } else {
       // 通知玩家拾取失败
       ws.send(JSON.stringify({
         type: 'lootbox_pickup_failed',
-        data: { message: result.message }
+        data: { 
+          lootBoxId,
+          message: result.message 
+        }
       }));
     }
   }
@@ -378,6 +390,28 @@ class WebSocketService {
     this.broadcastToRoom(roomId, {
       type: 'player_hp_updated',
       data: { playerId, hp }
+    }, playerId);
+  }
+
+  handleMonsterStateUpdate(ws, data) {
+    const client = this.clients.get(ws);
+    
+    if (!client) return;
+
+    const { roomId, playerId } = client;
+
+    // 只有主机可以广播野怪状态
+    if (!roomService.isHost(roomId, playerId)) {
+      console.warn(`⚠️ Non-host ${playerId} tried to update monster state`);
+      return;
+    }
+
+    const { monsterId, state } = data;
+
+    // 广播野怪状态给房间内其他玩家
+    this.broadcastToRoom(roomId, {
+      type: 'monster_state_updated',
+      data: { monsterId, state }
     }, playerId);
   }
 
