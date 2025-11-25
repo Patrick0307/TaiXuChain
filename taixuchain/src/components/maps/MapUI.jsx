@@ -13,7 +13,7 @@ function MapUI({ character, playerPos, tileSize, onExit, playerCurrentHp, player
       <div className="top-bar">
         <div className="character-info">
           <span className="info-item">
-            ⚔️ Lv.{character.level || 1} {character.name}
+            ⚔️ {character.name}
           </span>
           <span className="info-separator">|</span>
           <span className="info-item">

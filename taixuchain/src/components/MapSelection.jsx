@@ -109,7 +109,7 @@ function MapSelection({ character, onMapSelected }) {
               marginBottom: '8px',
               letterSpacing: '1px'
             }}>
-              {character.class} • Lv.{character.level || 1}
+              {character.class}
             </div>
             {character.playerObjectId && (
               <div style={{ 
