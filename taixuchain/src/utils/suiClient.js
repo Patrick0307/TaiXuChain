@@ -11,10 +11,11 @@ export const MARKETPLACE_ID = import.meta.env.VITE_MARKETPLACE_ID || '0x3b18f7a9
 export const WEAPON_MINT_CAP = import.meta.env.VITE_WEAPON_MINT_CAP || '0xb7bd7f2b0f7f1a93a71e52a380345f930c2010997a7fccee27b70f59a66e5c95'
 
 // 职业映射（与后端和合约保持一致）
+// Move 合约定义: CLASS_MAGE=1, CLASS_WARRIOR=2, CLASS_ARCHER=3
 export const CLASS_MAP = {
-  'Warrior': 1,
-  'Archer': 2,
-  'Mage': 3
+  'Mage': 1,      // 术士
+  'Warrior': 2,   // 武者
+  'Archer': 3     // 射手
 }
 
 /**

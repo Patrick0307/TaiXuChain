@@ -155,7 +155,7 @@ export async function sponsorCreatePlayer(playerAddress, name, classId, customiz
 }
 
 /**
- * 查询玩家是否已有角色
+ * 查询玩家是否已有角色（只查询当前 PACKAGE_ID 版本的角色）
  * @param {string} playerAddress - 玩家钱包地址
  * @returns {Promise<object|null>} 玩家角色信息或 null
  */
@@ -175,29 +175,41 @@ export async function getPlayerByAddress(playerAddress) {
     
     console.log(`[Query] Total objects found: ${objects.data.length}`);
     
-    // 打印所有对象类型以便调试
-    objects.data.forEach((obj, index) => {
-      if (obj.data?.type?.includes('::player::Player')) {
-        console.log(`[Query] Found Player object ${index}: ${obj.data.type}`);
-      }
-    });
-    
-    // 查找 Player 类型的对象（支持新旧版本的 Package ID）
-    // 新版本: 0xd249f6f2ecf256b26025e2d8454482e05565b716d5c3ebb6cf5fd24d01f03c9f
-    // 旧版本: 0xbf08e952309ce954de4fc8b85eaa791adb2b407e2be10ebf91538f9915badb6e
-    const playerObject = objects.data.find(obj => 
+    // 打印所有 Player 对象类型以便调试
+    const allPlayerObjects = objects.data.filter(obj => 
       obj.data?.type?.includes('::player::Player')
     );
     
+    allPlayerObjects.forEach((obj, index) => {
+      const isCurrentVersion = obj.data.type.includes(PACKAGE_ID);
+      console.log(`[Query] Found Player object ${index}: ${obj.data.type}`);
+      console.log(`[Query]   -> ${isCurrentVersion ? '✅ Current version' : '⚠️ Old version (will be ignored)'}`);
+    });
+    
+    // 只查找当前 PACKAGE_ID 版本的 Player 对象
+    // 这样升级合约后，玩家需要重新创建角色
+    const playerObject = objects.data.find(obj => {
+      const objType = obj.data?.type;
+      if (!objType || !objType.includes('::player::Player')) {
+        return false;
+      }
+      // 检查是否是当前 package 的角色
+      const isCurrentPackage = objType.includes(PACKAGE_ID);
+      return isCurrentPackage;
+    });
+    
     if (!playerObject) {
-      console.log(`[Query] No player found for ${playerAddress}`);
-      console.log(`[Query] Searched for type containing: ::player::Player`);
+      console.log(`[Query] No player found for ${playerAddress} with current PACKAGE_ID`);
+      console.log(`[Query] Current PACKAGE_ID: ${PACKAGE_ID}`);
+      if (allPlayerObjects.length > 0) {
+        console.log(`[Query] ⚠️ Found ${allPlayerObjects.length} old version player(s), but they are ignored`);
+      }
       return null;
     }
     
-    console.log(`[Query] Player found with type: ${playerObject.data.type}`);
-    
-    console.log(`[Query] Player found!`, playerObject.data.objectId);
+    console.log(`[Query] ✅ Player found with current version!`);
+    console.log(`[Query] Player type: ${playerObject.data.type}`);
+    console.log(`[Query] Player ID: ${playerObject.data.objectId}`);
     
     // 返回玩家信息
     const content = playerObject.data.content.fields;
@@ -212,6 +224,7 @@ export async function getPlayerByAddress(playerAddress) {
       max_hp: parseInt(content.max_hp || 0),
       attack: parseInt(content.attack || 0),
       owner: content.owner,
+      packageId: PACKAGE_ID, // 添加 package ID 信息
       customization: {
         gender: content.gender,
         skinColor: content.skin_color,
