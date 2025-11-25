@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: taixu-backend
+    runtime: node
+    rootDir: taixu-backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SPONSOR_PRIVATE_KEY
+        sync: false
+      - key: SUI_RPC_URL
+        value: https://rpc-testnet.onelabs.cc:443
+      - key: PACKAGE_ID
+        sync: false
+      - key: REGISTRY_ID
+        sync: false
+      - key: MARKETPLACE_ID
+        sync: false
+      - key: WEAPON_MINT_CAP
+        sync: false
+      - key: LINGSTONE_PACKAGE_ID
+        sync: false
+      - key: LINGSTONE_TREASURY_CAP
+        sync: false
+      - key: WEAPON_DEPLOY_PRIVATE_KEY
+        sync: false
+    healthCheckPath: /health
+    autoDeploy: true
