@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: taixu-backend
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 18
+      - key: SPONSOR_PRIVATE_KEY
+        sync: false
+      - key: SUI_RPC_URL
+        value: https://rpc-testnet.onelabs.cc:443
+      - key: PACKAGE_ID
+        value: 0xa79ef1da9c93429f23ce943c9d53466ede3428d4c7749bd5bc922dc4909a9282
+      - key: REGISTRY_ID
+        value: 0x0bcd52c6da276932d518a4f07d0dded8eafc17d5e99009b43a007c568ed5adea
+      - key: MARKETPLACE_ID
+        value: 0x20f8b6f5b5bfdcec1aa6063c0160b99f56bbe4f632a585147e7d774b6af176c1
+      - key: WEAPON_MINT_CAP
+        value: 0x3e676e7e000d78670a67aec6ec8e8da175a4bbfe6056a4ff5dbe905fe2501199
+      - key: LINGSTONE_PACKAGE_ID
+        value: 0xa79ef1da9c93429f23ce943c9d53466ede3428d4c7749bd5bc922dc4909a9282
+      - key: LINGSTONE_TREASURY_CAP
+        value: 0x5c39572fdaf20c9e5b1efb5afe3032724c1cc9b86438402929a6aa9e4cbe4119
+      - key: WEAPON_DEPLOY_PRIVATE_KEY
+        sync: false
+      - key: PORT
+        value: 3001
