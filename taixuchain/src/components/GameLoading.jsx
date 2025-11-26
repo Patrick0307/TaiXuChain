@@ -89,6 +89,83 @@ function GameLoading() {
       {/* 马赛克背景效果 */}
       <div className="mosaic-background"></div>
       
+      {/* 粒子特效容器 */}
+      <div className="particles-container">
+        {/* 星空闪烁 */}
+        {[...Array(50)].map((_, i) => (
+          <div 
+            key={`star-${i}`}
+            className="star"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${2 + Math.random() * 2}s`
+            }}
+          />
+        ))}
+        
+        {/* 金色粒子上升 */}
+        {[...Array(20)].map((_, i) => (
+          <div 
+            key={`particle-${i}`}
+            className="particle"
+            style={{
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${5 + Math.random() * 5}s`
+            }}
+          />
+        ))}
+        
+        {/* 能量球轨迹 */}
+        {[...Array(15)].map((_, i) => {
+          const angle = (Math.random() * 360) * Math.PI / 180;
+          const distance = 200 + Math.random() * 300;
+          return (
+            <div 
+              key={`orb-${i}`}
+              className="energy-orb"
+              style={{
+                left: '50%',
+                top: '50%',
+                '--orbit-x': `${Math.cos(angle) * distance}px`,
+                '--orbit-y': `${Math.sin(angle) * distance}px`,
+                animationDelay: `${Math.random() * 5}s`,
+                animationDuration: `${3 + Math.random() * 3}s`
+              }}
+            />
+          );
+        })}
+        
+        {/* 流星效果 */}
+        {[...Array(5)].map((_, i) => (
+          <div 
+            key={`meteor-${i}`}
+            className="meteor"
+            style={{
+              left: `${Math.random() * 50}%`,
+              top: `${Math.random() * 50}%`,
+              animationDelay: `${Math.random() * 10}s`,
+              animationDuration: `${1 + Math.random()}s`,
+              animationIterationCount: 'infinite'
+            }}
+          />
+        ))}
+        
+        {/* 光束效果 */}
+        {[...Array(4)].map((_, i) => (
+          <div 
+            key={`beam-${i}`}
+            className="light-beam"
+            style={{
+              left: `${20 + i * 25}%`,
+              animationDelay: `${i * 0.75}s`
+            }}
+          />
+        ))}
+      </div>
+      
       <div className="loading-content">
         {/* 标题 */}
         <h1 className="loading-title">
@@ -128,7 +205,7 @@ function GameLoading() {
               <div className="character-wrapper">
                 <AnimatedCharacter 
                   character={char}
-                  scale={1.5}
+                  scale={1.8}
                 />
               </div>
               <div className="character-label">{char.name}</div>

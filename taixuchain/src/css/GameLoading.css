@@ -223,14 +223,14 @@
   gap: 60px;
   align-items: flex-end;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 40px;
 }
 
 .character-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 15px;
   animation: characterFloat 3s ease-in-out infinite;
   opacity: 0;
   animation: characterAppear 0.8s ease-out forwards;
@@ -269,8 +269,8 @@
 }
 
 .character-wrapper {
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -281,6 +281,8 @@
     0 0 20px rgba(255, 215, 0, 0.3),
     inset 0 0 10px rgba(255, 215, 0, 0.1);
   transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
 }
 
 .character-wrapper:hover {
@@ -291,12 +293,165 @@
 }
 
 .character-label {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #FFD700;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 2px;
   text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+  position: relative;
+  z-index: 1;
+  margin-top: 5px;
+}
+
+/* ===== 粒子特效 ===== */
+.particles-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 星空闪烁 */
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: #FFD700;
+  border-radius: 50%;
+  box-shadow: 0 0 3px #FFD700;
+  animation: starTwinkle 3s ease-in-out infinite;
+}
+
+@keyframes starTwinkle {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.5);
+  }
+}
+
+/* 金色粒子上升 */
+.particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: #FFD700;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #FFD700;
+  animation: particleFloat linear infinite;
+  opacity: 0;
+}
+
+@keyframes particleFloat {
+  0% {
+    transform: translateY(100vh) scale(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) scale(1);
+    opacity: 0;
+  }
+}
+
+/* 能量球轨迹 */
+.energy-orb {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: radial-gradient(circle, #FFD700, transparent);
+  border-radius: 50%;
+  box-shadow: 
+    0 0 10px #FFD700,
+    0 0 20px rgba(255, 215, 0, 0.5);
+  animation: orbFloat linear infinite;
+}
+
+@keyframes orbFloat {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--orbit-x), var(--orbit-y)) scale(0.5);
+    opacity: 0;
+  }
+}
+
+/* 流星效果 */
+.meteor {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: #FFD700;
+  border-radius: 50%;
+  box-shadow: 0 0 10px 2px #FFD700;
+  animation: meteorFall linear;
+  opacity: 0;
+}
+
+@keyframes meteorFall {
+  0% {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(300px) translateY(300px);
+  }
+}
+
+.meteor::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 2px;
+  width: 50px;
+  height: 1px;
+  background: linear-gradient(90deg, #FFD700, transparent);
+}
+
+/* 光束效果 */
+.light-beam {
+  position: absolute;
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(180deg, 
+    transparent 0%, 
+    rgba(255, 215, 0, 0.2) 50%, 
+    transparent 100%
+  );
+  animation: beamPulse 3s ease-in-out infinite;
+}
+
+@keyframes beamPulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scaleY(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scaleY(1.2);
+  }
 }
 
 /* 响应式设计 */
@@ -311,15 +466,17 @@
 
   .characters-showcase {
     gap: 30px;
+    margin-top: 30px;
   }
 
   .character-wrapper {
-    width: 60px;
-    height: 60px;
+    width: 70px;
+    height: 70px;
   }
 
   .character-label {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
   }
 
   .progress-text {
@@ -328,5 +485,24 @@
 
   .stage-text {
     font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .loading-title {
+    font-size: 2rem;
+  }
+
+  .characters-showcase {
+    gap: 20px;
+  }
+
+  .character-wrapper {
+    width: 60px;
+    height: 60px;
+  }
+
+  .character-label {
+    font-size: 0.65rem;
   }
 }

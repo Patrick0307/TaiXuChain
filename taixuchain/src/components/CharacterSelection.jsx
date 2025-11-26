@@ -6,6 +6,27 @@ function CharacterSelection({ onCharacterSelected }) {
   const [selectedClass, setSelectedClass] = useState(null)
   const [hoveredClass, setHoveredClass] = useState(null)
   const [isAnimating, setIsAnimating] = useState(false)
+  const [characterScale, setCharacterScale] = useState(1.8)
+
+  // 响应式缩放
+  useEffect(() => {
+    const updateScale = () => {
+      const width = window.innerWidth
+      if (width >= 1400) {
+        setCharacterScale(2.2)
+      } else if (width >= 900) {
+        setCharacterScale(1.8)
+      } else if (width >= 480) {
+        setCharacterScale(1.5)
+      } else {
+        setCharacterScale(1.3)
+      }
+    }
+    
+    updateScale()
+    window.addEventListener('resize', updateScale)
+    return () => window.removeEventListener('resize', updateScale)
+  }, [])
 
   const classes = [
     {
@@ -63,6 +84,21 @@ function CharacterSelection({ onCharacterSelected }) {
       <div className="mosaic-bg"></div>
       <div className="mosaic-overlay"></div>
       
+      {/* 魔法圆环 */}
+      <div className="magic-circle"></div>
+      
+      {/* 星空闪烁效果 */}
+      <div className="stars-container">
+        {[...Array(50)].map((_, i) => (
+          <div key={i} className="star" style={{
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            animationDelay: `${Math.random() * 3}s`,
+            animationDuration: `${2 + Math.random() * 2}s`
+          }}></div>
+        ))}
+      </div>
+      
       {/* 金色粒子效果 */}
       <div className="particles-container">
         {[...Array(20)].map((_, i) => (
@@ -73,6 +109,45 @@ function CharacterSelection({ onCharacterSelected }) {
           }}></div>
         ))}
       </div>
+      
+      {/* 流星效果 */}
+      <div className="particles-container">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="meteor" style={{
+            left: `${Math.random() * 50}%`,
+            top: `${Math.random() * 50}%`,
+            animationDelay: `${Math.random() * 10}s`,
+            animationDuration: `${1 + Math.random()}s`,
+            animationIterationCount: 'infinite'
+          }}></div>
+        ))}
+      </div>
+      
+      {/* 能量球轨迹 */}
+      <div className="particles-container">
+        {[...Array(15)].map((_, i) => {
+          const angle = (Math.random() * 360) * Math.PI / 180;
+          const distance = 200 + Math.random() * 300;
+          return (
+            <div key={i} className="energy-orb" style={{
+              left: '50%',
+              top: '50%',
+              '--orbit-x': `${Math.cos(angle) * distance}px`,
+              '--orbit-y': `${Math.sin(angle) * distance}px`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${3 + Math.random() * 3}s`
+            }}></div>
+          );
+        })}
+      </div>
+      
+      {/* 光束效果 */}
+      {[...Array(3)].map((_, i) => (
+        <div key={i} className="light-beam" style={{
+          left: `${20 + i * 30}%`,
+          animationDelay: `${i * 1}s`
+        }}></div>
+      ))}
 
       <div className="selection-content">
         {/* 标题区域 */}
@@ -98,6 +173,9 @@ function CharacterSelection({ onCharacterSelected }) {
               onMouseLeave={() => setHoveredClass(null)}
               style={{ animationDelay: `${index * 0.15}s` }}
             >
+              {/* 光环效果 */}
+              <div className="card-aura"></div>
+              
               {/* 卡片光效 */}
               <div className="card-glow"></div>
               <div className="card-shine"></div>
@@ -124,7 +202,7 @@ function CharacterSelection({ onCharacterSelected }) {
                         shoesColor: '#4a4a4a'
                       }
                     }}
-                    scale={1.8}
+                    scale={characterScale}
                   />
                 </div>
               </div>
@@ -169,13 +247,9 @@ function CharacterSelection({ onCharacterSelected }) {
 
         {/* 确认按钮 */}
         {selectedClass && (
-          <div className="action-section">
-            <button className="confirm-button" onClick={handleConfirm}>
-              <span className="button-bg"></span>
-              <span className="button-text">Begin Your Journey</span>
-              <span className="button-shine"></span>
-            </button>
-          </div>
+          <button className="selection-confirm-btn" onClick={handleConfirm}>
+            <span className="button-text">Begin Your Journey</span>
+          </button>
         )}
       </div>
     </div>

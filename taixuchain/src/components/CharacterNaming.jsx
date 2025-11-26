@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import '../css/CharacterNaming.css'
 import AnimatedCharacter from './AnimatedCharacter'
 import { createPlayerOnChain } from '../utils/suiClient'
@@ -7,6 +7,29 @@ function CharacterNaming({ character, onNamingComplete, onBack }) {
   const [name, setName] = useState('')
   const [error, setError] = useState('')
   const [isRegistering, setIsRegistering] = useState(false)
+  const [characterScale, setCharacterScale] = useState(2.5)
+
+  // 响应式缩放
+  useEffect(() => {
+    const updateScale = () => {
+      const width = window.innerWidth
+      const isLandscape = window.innerWidth > window.innerHeight
+      
+      if (width >= 1400) {
+        setCharacterScale(3)
+      } else if (width >= 768 && isLandscape) {
+        setCharacterScale(1.8)
+      } else if (width >= 480) {
+        setCharacterScale(2.5)
+      } else {
+        setCharacterScale(2)
+      }
+    }
+    
+    updateScale()
+    window.addEventListener('resize', updateScale)
+    return () => window.removeEventListener('resize', updateScale)
+  }, [])
 
   const handleNameChange = (e) => {
     const value = e.target.value
@@ -85,21 +108,97 @@ function CharacterNaming({ character, onNamingComplete, onBack }) {
 
   return (
     <div className="character-naming">
+      {/* 粒子特效容器 */}
+      <div className="particles-container">
+        {/* 星空闪烁 */}
+        {[...Array(40)].map((_, i) => (
+          <div 
+            key={`star-${i}`}
+            className="star"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              animationDuration: `${2 + Math.random() * 2}s`
+            }}
+          />
+        ))}
+        
+        {/* 金色粒子上升 */}
+        {[...Array(15)].map((_, i) => (
+          <div 
+            key={`particle-${i}`}
+            className="particle"
+            style={{
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${5 + Math.random() * 5}s`
+            }}
+          />
+        ))}
+        
+        {/* 能量球轨迹 */}
+        {[...Array(12)].map((_, i) => {
+          const angle = (Math.random() * 360) * Math.PI / 180;
+          const distance = 200 + Math.random() * 300;
+          return (
+            <div 
+              key={`orb-${i}`}
+              className="energy-orb"
+              style={{
+                left: '50%',
+                top: '50%',
+                '--orbit-x': `${Math.cos(angle) * distance}px`,
+                '--orbit-y': `${Math.sin(angle) * distance}px`,
+                animationDelay: `${Math.random() * 5}s`,
+                animationDuration: `${3 + Math.random() * 3}s`
+              }}
+            />
+          );
+        })}
+        
+        {/* 流星效果 */}
+        {[...Array(4)].map((_, i) => (
+          <div 
+            key={`meteor-${i}`}
+            className="meteor"
+            style={{
+              left: `${Math.random() * 50}%`,
+              top: `${Math.random() * 50}%`,
+              animationDelay: `${Math.random() * 10}s`,
+              animationDuration: `${1 + Math.random()}s`,
+              animationIterationCount: 'infinite'
+            }}
+          />
+        ))}
+        
+        {/* 魔法圆环 */}
+        {[800, 600, 400].map((size, i) => (
+          <div 
+            key={`circle-${i}`}
+            className="magic-circle"
+            style={{
+              width: `${size}px`,
+              height: `${size}px`,
+              animationDuration: `${20 - i * 5}s`,
+              animationDirection: i % 2 === 0 ? 'normal' : 'reverse'
+            }}
+          />
+        ))}
+      </div>
+
       <h1 className="naming-title">Name Your Hero</h1>
       
       <div className="naming-container">
         <div className="character-preview">
           <div style={{ 
-            background: 'rgba(0,0,0,0.3)', 
-            padding: '30px', 
-            borderRadius: '15px',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center'
           }}>
             <AnimatedCharacter 
               character={character}
-              scale={2.5}
+              scale={characterScale}
             />
           </div>
           
@@ -114,6 +213,20 @@ function CharacterNaming({ character, onNamingComplete, onBack }) {
         </div>
 
         <div className="naming-form">
+          <div className="class-description-box">
+            <h3 className="description-title">{character.name}</h3>
+            <p className="description-text">{character.description}</p>
+          </div>
+
+          <div className="naming-rules">
+            <h4 className="rules-title">Naming Rules</h4>
+            <ul className="rules-list">
+              <li>3-20 characters</li>
+              <li>Letters & numbers</li>
+              <li>Cannot Change!</li>
+            </ul>
+          </div>
+
           <label htmlFor="character-name">Character Name</label>
           <input
             id="character-name"
@@ -138,14 +251,14 @@ function CharacterNaming({ character, onNamingComplete, onBack }) {
               onClick={onBack}
               disabled={isRegistering}
             >
-              ← Back
+              Back
             </button>
             <button 
               className="start-button" 
               onClick={handleSubmit}
               disabled={!name.trim() || isRegistering}
             >
-              {isRegistering ? 'Registering...' : 'Register & Start Adventure →'}
+              {isRegistering ? 'Registering...' : 'Start Adventure'}
             </button>
           </div>
         </div>
