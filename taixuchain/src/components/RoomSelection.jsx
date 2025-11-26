@@ -44,12 +44,12 @@ function RoomSelection({ character, onRoomJoined, onBack }) {
 
     // 监听错误
     websocketClient.on('error', (data) => {
-      const message = data?.message || '发生未知错误'
-      // 友好的错误提示
+      const message = data?.message || 'Unknown error occurred'
+      // Friendly error messages
       if (message.includes('Room is full')) {
-        setError('房间已满（最多2人）')
+        setError('Room is full (Max 2 players)')
       } else if (message.includes('Room not found')) {
-        setError('房间不存在，请检查房间号')
+        setError('Room not found, check room ID')
       } else {
         setError(message)
       }
@@ -88,7 +88,7 @@ function RoomSelection({ character, onRoomJoined, onBack }) {
     const finalRoomId = targetRoomId || roomId.trim()
     
     if (!finalRoomId) {
-      setError('请输入房间号')
+      setError('Please enter room ID')
       return
     }
 
@@ -114,7 +114,7 @@ function RoomSelection({ character, onRoomJoined, onBack }) {
 
   const renderMenu = () => (
     <div className="room-menu">
-      <h2>🎮 多人游戏</h2>
+      <h2>🎮 MULTIPLAYER</h2>
       
       <div className="menu-buttons">
         <button 
@@ -122,7 +122,7 @@ function RoomSelection({ character, onRoomJoined, onBack }) {
           onClick={() => setMode('create')}
         >
           <span className="button-icon">🏠</span>
-          <span className="button-text">创建房间</span>
+          <span className="button-text">CREATE ROOM</span>
         </button>
 
         <button 
@@ -130,7 +130,7 @@ function RoomSelection({ character, onRoomJoined, onBack }) {
           onClick={() => setMode('join')}
         >
           <span className="button-icon">🔑</span>
-          <span className="button-text">加入房间</span>
+          <span className="button-text">JOIN ROOM</span>
         </button>
 
         <button 
@@ -138,7 +138,7 @@ function RoomSelection({ character, onRoomJoined, onBack }) {
           onClick={handleShowPublicRooms}
         >
           <span className="button-icon">🌐</span>
-          <span className="button-text">公开房间</span>
+          <span className="button-text">PUBLIC ROOMS</span>
         </button>
 
         <button 
@@ -146,7 +146,7 @@ function RoomSelection({ character, onRoomJoined, onBack }) {
           onClick={onBack}
         >
           <span className="button-icon">⬅️</span>
-          <span className="button-text">返回</span>
+          <span className="button-text">BACK</span>
         </button>
       </div>
     </div>
@@ -154,11 +154,11 @@ function RoomSelection({ character, onRoomJoined, onBack }) {
 
   const renderCreate = () => (
     <div className="room-create">
-      <h2>🏠 创建房间</h2>
+      <h2>🏠 CREATE ROOM</h2>
       
       <div className="create-options">
         <div className="option-group">
-          <label>房间类型：</label>
+          <label>ROOM TYPE:</label>
           <div className="radio-group">
             <label className="radio-label">
               <input 
@@ -166,7 +166,7 @@ function RoomSelection({ character, onRoomJoined, onBack }) {
                 checked={isPublic} 
                 onChange={() => setIsPublic(true)}
               />
-              <span>公开（所有人可见）</span>
+              <span>PUBLIC (Visible to all)</span>
             </label>
             <label className="radio-label">
               <input 
@@ -174,14 +174,14 @@ function RoomSelection({ character, onRoomJoined, onBack }) {
                 checked={!isPublic} 
                 onChange={() => setIsPublic(false)}
               />
-              <span>私密（需要房间号）</span>
+              <span>PRIVATE (Requires room ID)</span>
             </label>
           </div>
         </div>
 
         <div className="option-info">
-          <p>地图：🌲 森林地图</p>
-          <p>角色：{character.name} ({character.id})</p>
+          <p>MAP: 🌲 Misty Forest</p>
+          <p>CHARACTER: {character.name} ({character.id})</p>
         </div>
       </div>
 
@@ -193,14 +193,14 @@ function RoomSelection({ character, onRoomJoined, onBack }) {
           onClick={handleCreateRoom}
           disabled={isConnecting}
         >
-          {isConnecting ? '创建中...' : '创建并进入'}
+          {isConnecting ? 'CREATING...' : 'CREATE & ENTER'}
         </button>
         <button 
           className="action-button secondary"
           onClick={() => setMode('menu')}
           disabled={isConnecting}
         >
-          返回
+          BACK
         </button>
       </div>
     </div>
@@ -208,14 +208,14 @@ function RoomSelection({ character, onRoomJoined, onBack }) {
 
   const renderJoin = () => (
     <div className="room-join">
-      <h2>🔑 加入房间</h2>
+      <h2>🔑 JOIN ROOM</h2>
       
       <div className="join-form">
-        <label>房间号：</label>
+        <label>ROOM ID:</label>
         <input 
           type="text"
           className="room-input"
-          placeholder="输入8位房间号"
+          placeholder="ENTER 8-DIGIT ROOM ID"
           value={roomId}
           onChange={(e) => setRoomId(e.target.value.toUpperCase())}
           maxLength={8}
@@ -231,14 +231,14 @@ function RoomSelection({ character, onRoomJoined, onBack }) {
           onClick={() => handleJoinRoom()}
           disabled={isConnecting || !roomId.trim()}
         >
-          {isConnecting ? '加入中...' : '加入房间'}
+          {isConnecting ? 'JOINING...' : 'JOIN ROOM'}
         </button>
         <button 
           className="action-button secondary"
           onClick={() => setMode('menu')}
           disabled={isConnecting}
         >
-          返回
+          BACK
         </button>
       </div>
     </div>
@@ -246,22 +246,22 @@ function RoomSelection({ character, onRoomJoined, onBack }) {
 
   const renderPublic = () => (
     <div className="room-public">
-      <h2>🌐 公开房间</h2>
+      <h2>🌐 PUBLIC ROOMS</h2>
       
       <div className="rooms-list">
         {publicRooms.length === 0 ? (
           <div className="no-rooms">
-            <p>暂无公开房间</p>
-            <p>创建一个新房间吧！</p>
+            <p>NO PUBLIC ROOMS AVAILABLE</p>
+            <p>CREATE A NEW ROOM!</p>
           </div>
         ) : (
           publicRooms.map(room => (
             <div key={room.id} className="room-card">
               <div className="room-info">
-                <div className="room-id">房间号: {room.id}</div>
-                <div className="room-map">地图: 🌲 {room.mapName}</div>
+                <div className="room-id">ROOM ID: {room.id}</div>
+                <div className="room-map">MAP: 🌲 {room.mapName}</div>
                 <div className="room-players">
-                  玩家: {room.playerCount}/{room.maxPlayers}
+                  PLAYERS: {room.playerCount}/{room.maxPlayers}
                 </div>
               </div>
               <button 
@@ -269,7 +269,7 @@ function RoomSelection({ character, onRoomJoined, onBack }) {
                 onClick={() => handleJoinRoom(room.id)}
                 disabled={isConnecting || room.playerCount >= room.maxPlayers}
               >
-                {room.playerCount >= room.maxPlayers ? '已满' : '加入'}
+                {room.playerCount >= room.maxPlayers ? 'FULL' : 'JOIN'}
               </button>
             </div>
           ))
@@ -284,7 +284,7 @@ function RoomSelection({ character, onRoomJoined, onBack }) {
           onClick={() => setMode('menu')}
           disabled={isConnecting}
         >
-          返回
+          BACK
         </button>
       </div>
     </div>
@@ -292,6 +292,77 @@ function RoomSelection({ character, onRoomJoined, onBack }) {
 
   return (
     <div className="room-selection-container">
+      {/* 粒子特效容器 */}
+      <div className="particles-container">
+        {/* 星空 */}
+        {[...Array(50)].map((_, i) => (
+          <div
+            key={`star-${i}`}
+            className="star"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`
+            }}
+          />
+        ))}
+        
+        {/* 金色粒子 */}
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={`particle-${i}`}
+            className="particle"
+            style={{
+              left: `${Math.random() * 100}%`,
+              animationDuration: `${8 + Math.random() * 4}s`,
+              animationDelay: `${Math.random() * 5}s`
+            }}
+          />
+        ))}
+        
+        {/* 能量球 */}
+        {[...Array(10)].map((_, i) => (
+          <div
+            key={`orb-${i}`}
+            className="energy-orb"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              '--orbit-x': `${(Math.random() - 0.5) * 400}px`,
+              '--orbit-y': `${(Math.random() - 0.5) * 400}px`,
+              animationDuration: `${6 + Math.random() * 4}s`,
+              animationDelay: `${Math.random() * 5}s`
+            }}
+          />
+        ))}
+        
+        {/* 流星 */}
+        {[...Array(5)].map((_, i) => (
+          <div
+            key={`meteor-${i}`}
+            className="meteor"
+            style={{
+              left: `${Math.random() * 50}%`,
+              top: `${Math.random() * 50}%`,
+              animationDuration: `${1 + Math.random()}s`,
+              animationDelay: `${Math.random() * 10}s`
+            }}
+          />
+        ))}
+        
+        {/* 光束 */}
+        {[...Array(5)].map((_, i) => (
+          <div
+            key={`beam-${i}`}
+            className="light-beam"
+            style={{
+              left: `${20 + i * 15}%`,
+              animationDelay: `${i * 0.5}s`
+            }}
+          />
+        ))}
+      </div>
+
       <div className="room-selection-content">
         {mode === 'menu' && renderMenu()}
         {mode === 'create' && renderCreate()}
