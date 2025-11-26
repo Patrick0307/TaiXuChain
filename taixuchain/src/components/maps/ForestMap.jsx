@@ -632,6 +632,16 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
       try {
         setIsCheckingWeapon(true)
         
+        // 立即设置一个默认武器，确保玩家可以攻击
+        // 这个默认武器会在真实武器加载后被替换
+        const defaultWeapon = {
+          name: 'Loading...',
+          attack: 0,
+          level: 1,
+          rarity: 1
+        }
+        setPlayerWeapon(defaultWeapon)
+        
         // 获取玩家钱包地址
         // 优先使用 window.currentWalletAddress（实际的玩家钱包）
         const walletAddress = window.currentWalletAddress || character.owner

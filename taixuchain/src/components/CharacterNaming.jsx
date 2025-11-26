@@ -54,12 +54,21 @@ function CharacterNaming({ character, onNamingComplete, onBack }) {
       // 提取玩家对象 ID
       const playerObjectId = result.effects?.created?.[0]?.reference?.objectId
 
-      onNamingComplete({
+      // 将stats展开到顶层，确保与已有角色的数据结构一致
+      const finalCharacter = {
         ...character,
         name: name.trim(),
+        hp: character.stats.hp,
+        max_hp: character.stats.hp,
+        attack: character.stats.attack,
+        defense: character.stats.defense,
+        level: 1,
+        exp: 0,
         playerObjectId, // 保存玩家对象 ID
         txDigest: result.digest // 保存交易哈希
-      })
+      }
+      
+      onNamingComplete(finalCharacter)
     } catch (err) {
       console.error('Registration failed:', err)
       setError(err.message || 'Registration failed, please try again')

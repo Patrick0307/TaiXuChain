@@ -46,8 +46,7 @@
   max-width: 700px;
   width: 90%;
   max-height: 85vh;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   box-shadow: 
     inset 0 0 0 2px #d4af37,
     inset 0 0 0 5px #1a1a18,
@@ -58,7 +57,8 @@
   position: relative;
   animation: slideUp 0.4s ease;
   font-family: 'Orbitron', sans-serif;
-  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
 }
 
 .tutorial-language-toggle {
@@ -136,6 +136,7 @@
   border-bottom: 2px solid rgba(212, 175, 55, 0.3);
   padding-bottom: 20px;
   width: 100%;
+  flex-shrink: 0;
 }
 
 .tutorial-header h2 {
@@ -167,6 +168,10 @@
   overflow-wrap: break-word;
   word-wrap: break-word;
   width: 100%;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .tutorial-content h3 {
@@ -265,6 +270,7 @@
   padding-top: 20px;
   border-top: 2px solid rgba(212, 175, 55, 0.3);
   width: 100%;
+  flex-shrink: 0;
 }
 
 .tutorial-btn {
@@ -391,32 +397,32 @@
 }
 
 /* 滚动条样式 */
-.tutorial-modal::-webkit-scrollbar {
+.tutorial-content::-webkit-scrollbar {
   width: 8px;
 }
 
-.tutorial-modal::-webkit-scrollbar-track {
+.tutorial-content::-webkit-scrollbar-track {
   background: rgba(10, 10, 8, 0.5);
   border-radius: 4px;
 }
 
-.tutorial-modal::-webkit-scrollbar-thumb {
+.tutorial-content::-webkit-scrollbar-thumb {
   background: rgba(212, 175, 55, 0.4);
   border-radius: 4px;
   border: 1px solid rgba(184, 134, 11, 0.6);
 }
 
-.tutorial-modal::-webkit-scrollbar-thumb:hover {
+.tutorial-content::-webkit-scrollbar-thumb:hover {
   background: rgba(212, 175, 55, 0.6);
 }
 
 /* 手机端隐藏滚动条但保持功能 */
 @media (max-width: 768px) {
-  .tutorial-modal::-webkit-scrollbar {
+  .tutorial-content::-webkit-scrollbar {
     width: 4px;
   }
   
-  .tutorial-modal {
+  .tutorial-content {
     scrollbar-width: thin;
     scrollbar-color: rgba(212, 175, 55, 0.4) transparent;
   }
