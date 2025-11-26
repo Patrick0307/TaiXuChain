@@ -1,476 +1,806 @@
-/* 复古 MMORPG 角色自定义风格 */
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 .character-customization {
   width: 100%;
   height: 100vh;
-  background: 
-    repeating-linear-gradient(
-      0deg,
-      rgba(0, 0, 0, 0.15) 0px,
-      transparent 1px,
-      transparent 2px,
-      rgba(0, 0, 0, 0.15) 3px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      rgba(0, 0, 0, 0.15) 0px,
-      transparent 1px,
-      transparent 2px,
-      rgba(0, 0, 0, 0.15) 3px
-    ),
-    linear-gradient(180deg, #0a0e27 0%, #1a1a3e 50%, #2a1a4a 100%);
   display: flex;
   flex-direction: column;
   font-family: 'Press Start 2P', cursive;
-  image-rendering: pixelated;
-  image-rendering: -moz-crisp-edges;
-  image-rendering: crisp-edges;
-  overflow: hidden;
-}
-
-.customization-title {
-  color: #ffd700;
-  font-size: 1.2rem;
-  padding: 25px 20px;
-  text-shadow: 
-    4px 4px 0 #8b4513,
-    -2px -2px 0 #000,
-    2px -2px 0 #000,
-    -2px 2px 0 #000,
-    2px 2px 0 #000,
-    0 0 20px #ffd700;
-  letter-spacing: 2px;
-  line-height: 1.8;
-  text-align: center;
-  background: rgba(0, 0, 0, 0.5);
-  border-bottom: 4px solid #8b7355;
-  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.5);
-}
-
-.customization-container {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-}
-
-.preview-section {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px;
-  background: 
-    repeating-linear-gradient(
-      45deg,
-      rgba(0, 0, 0, 0.2) 0px,
-      rgba(0, 0, 0, 0.2) 20px,
-      rgba(0, 0, 0, 0.3) 20px,
-      rgba(0, 0, 0, 0.3) 40px
-    );
-  border-right: 4px solid #8b7355;
-  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.8);
   position: relative;
+  overflow: hidden;
+  background: #0a0a0a;
 }
 
-.preview-section::before {
-  content: 'PREVIEW';
-  position: absolute;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  color: #d4af37;
-  font-size: 0.7rem;
-  letter-spacing: 3px;
-  text-shadow: 2px 2px 0 #000;
-  opacity: 0.7;
-}
-
-.preview-section > div {
-  background: 
-    repeating-linear-gradient(
-      0deg,
-      #2a1a4a 0px,
-      #2a1a4a 4px,
-      #3a2a5a 4px,
-      #3a2a5a 8px
-    ) !important;
-  border: none !important;
-  border-radius: 0 !important;
-  padding: 50px !important;
-  box-shadow: 
-    0 0 0 4px #8b7355,
-    0 0 0 8px #4a4a4a,
-    0 0 0 12px #8b7355,
-    inset 0 0 30px rgba(0, 0, 0, 0.5) !important;
-}
-
-.layered-character {
-  width: 300px;
-  height: 400px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.character-layer {
+/* 完全马赛克背景 - 黑金配色 */
+.mosaic-bg {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  image-rendering: crisp-edges;
-  image-rendering: -webkit-optimize-contrast;
+  background-image: 
+    /* 金色高光点 */
+    radial-gradient(circle at 20% 30%, rgba(255, 215, 0, 0.15) 0%, transparent 3%),
+    radial-gradient(circle at 80% 70%, rgba(255, 215, 0, 0.12) 0%, transparent 3%),
+    radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 4%),
+    /* 马赛克网格 */
+    repeating-linear-gradient(
+      0deg,
+      #0a0a0a 0px,
+      #0a0a0a 8px,
+      #1a1a1a 8px,
+      #1a1a1a 16px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      #0a0a0a 0px,
+      #0a0a0a 8px,
+      #151515 8px,
+      #151515 16px
+    );
+  background-size: 100% 100%, 100% 100%, 100% 100%, 16px 16px, 16px 16px;
+  z-index: 0;
+  animation: mosaicShift 20s linear infinite;
 }
 
-.character-placeholder-large {
+@keyframes mosaicShift {
+  0% { background-position: 0 0, 0 0, 0 0, 0 0, 0 0; }
+  100% { background-position: 0 0, 0 0, 0 0, 16px 16px, 16px 16px; }
+}
+
+.mosaic-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
+  background: 
+    radial-gradient(ellipse at 30% 20%, rgba(255, 215, 0, 0.08) 0%, transparent 40%),
+    radial-gradient(ellipse at 70% 80%, rgba(255, 215, 0, 0.06) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, transparent 30%, rgba(0, 0, 0, 0.7) 100%);
+  z-index: 0;
+}
+
+/* 标题区域 - 黑金马赛克风格 */
+.title-section {
+  position: relative;
+  z-index: 1;
+  padding: 20px 30px 15px;
+  text-align: center;
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.8) 0px,
+      rgba(0, 0, 0, 0.8) 4px,
+      rgba(20, 20, 20, 0.8) 4px,
+      rgba(20, 20, 20, 0.8) 8px
+    );
+  border-bottom: 3px solid #1a1a1a;
+  box-shadow: 
+    inset 0 -2px 0 #ffd700,
+    0 4px 20px rgba(0, 0, 0, 0.8);
+}
+
+.customization-title {
+  margin: 0;
+  padding: 0;
+}
+
+.title-main {
+  display: block;
+  color: #ffd700;
+  font-size: 1rem;
+  text-shadow: 
+    2px 2px 0 #000,
+    4px 4px 0 rgba(139, 69, 19, 0.5),
+    0 0 20px rgba(255, 215, 0, 0.8),
+    0 0 40px rgba(255, 215, 0, 0.4);
+  letter-spacing: 3px;
+  line-height: 1.6;
+  animation: titlePulse 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px #ffd700);
+}
+
+@keyframes titlePulse {
+  0%, 100% { 
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.95;
+    transform: scale(1.02);
+  }
+}
+
+.title-decoration {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-  border: 2px dashed rgba(255, 255, 255, 0.2);
+  gap: 15px;
+  margin-top: 12px;
+}
+
+.decoration-line {
+  height: 3px;
+  width: 80px;
+  background: 
+    repeating-linear-gradient(
+      90deg,
+      #ffd700 0px,
+      #ffd700 4px,
+      transparent 4px,
+      transparent 8px
+    );
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+  animation: lineShimmer 2s linear infinite;
+}
+
+@keyframes lineShimmer {
+  0% { opacity: 0.8; }
+  50% { opacity: 1; }
+  100% { opacity: 0.8; }
+}
+
+.decoration-line.left {
+  background: 
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 4px,
+      #ffd700 4px,
+      #ffd700 8px
+    );
+}
+
+.decoration-center {
+  color: #ffd700;
+  font-size: 1rem;
+  text-shadow: 
+    0 0 10px #ffd700,
+    0 0 20px rgba(255, 215, 0, 0.6);
+  animation: spin 4s linear infinite;
+  filter: drop-shadow(0 0 5px #ffd700);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 主内容区 - 马赛克布局 */
+.customization-main {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  gap: 25px;
+  padding: 25px 40px;
+  overflow: hidden;
+}
+
+/* 预览区域 - 黑金马赛克框架 */
+.preview-section {
+  flex: 0 0 38%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.preview-label {
+  color: #ffd700;
+  font-size: 0.65rem;
+  letter-spacing: 4px;
+  text-shadow: 
+    2px 2px 0 #000,
+    0 0 10px rgba(255, 215, 0, 0.8);
+  padding: 8px 20px;
+  background: 
+    repeating-linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.9) 0px,
+      rgba(0, 0, 0, 0.9) 4px,
+      rgba(20, 20, 20, 0.9) 4px,
+      rgba(20, 20, 20, 0.9) 8px
+    );
+  border: 2px solid #ffd700;
+  box-shadow: 
+    inset 0 0 20px rgba(0, 0, 0, 0.8),
+    0 0 15px rgba(255, 215, 0, 0.4);
+}
+
+.preview-frame {
+  position: relative;
+  background: 
+    /* 内部马赛克 */
+    repeating-linear-gradient(
+      45deg,
+      #0a0a0a 0px,
+      #0a0a0a 8px,
+      #1a1a1a 8px,
+      #1a1a1a 16px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      #0a0a0a 0px,
+      #0a0a0a 8px,
+      #151515 8px,
+      #151515 16px
+    );
+  padding: 50px;
+  border: 4px solid #1a1a1a;
+  box-shadow: 
+    /* 金色边框层 */
+    0 0 0 2px #ffd700,
+    0 0 0 6px #0a0a0a,
+    0 0 0 8px #ffd700,
+    /* 内阴影 */
+    inset 0 0 50px rgba(0, 0, 0, 0.9),
+    inset 0 0 20px rgba(255, 215, 0, 0.1),
+    /* 外发光 */
+    0 0 30px rgba(255, 215, 0, 0.3),
+    0 10px 40px rgba(0, 0, 0, 0.9);
+  position: relative;
+  overflow: hidden;
+}
+
+.preview-frame::before {
+  content: '';
   position: absolute;
-  z-index: -1;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 7px,
+      rgba(255, 215, 0, 0.03) 7px,
+      rgba(255, 215, 0, 0.03) 8px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 7px,
+      rgba(255, 215, 0, 0.03) 7px,
+      rgba(255, 215, 0, 0.03) 8px
+    );
+  pointer-events: none;
+  z-index: 1;
 }
 
-.placeholder-text {
-  text-align: center;
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 1.2rem;
+.frame-corners {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
 }
 
+.corner {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #ffd700;
+  box-shadow: 
+    0 0 10px rgba(255, 215, 0, 0.8),
+    inset 0 0 5px rgba(255, 215, 0, 0.5);
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      rgba(0, 0, 0, 0.8) 0px,
+      rgba(0, 0, 0, 0.8) 2px,
+      rgba(255, 215, 0, 0.3) 2px,
+      rgba(255, 215, 0, 0.3) 4px
+    );
+}
+
+.corner.tl {
+  top: -4px;
+  left: -4px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.corner.tr {
+  top: -4px;
+  right: -4px;
+  border-left: none;
+  border-bottom: none;
+}
+
+.corner.bl {
+  bottom: -4px;
+  left: -4px;
+  border-right: none;
+  border-top: none;
+}
+
+.corner.br {
+  bottom: -4px;
+  right: -4px;
+  border-left: none;
+  border-top: none;
+}
+
+/* 选项区域 - 黑金马赛克滚动 */
 .options-section {
-  width: 450px;
-  background: rgba(0, 0, 0, 0.6);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 30px 25px;
-  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8);
-  border-left: 4px solid #4a4a4a;
+  padding-right: 10px;
 }
 
 .options-section::-webkit-scrollbar {
-  width: 16px;
+  width: 14px;
 }
 
 .options-section::-webkit-scrollbar-track {
-  background: #1a1a1a;
-  border: 3px solid #4a4a4a;
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      #0a0a0a 0px,
+      #0a0a0a 8px,
+      #1a1a1a 8px,
+      #1a1a1a 16px
+    );
+  border: 2px solid #1a1a1a;
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
 }
 
 .options-section::-webkit-scrollbar-thumb {
   background: 
-    linear-gradient(180deg, #8b7355 0%, #6a5335 50%, #4a3315 100%);
-  border: 3px solid #4a4a4a;
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+    repeating-linear-gradient(
+      0deg,
+      #ffd700 0px,
+      #ffd700 4px,
+      #d4af37 4px,
+      #d4af37 8px
+    );
+  border: 2px solid #1a1a1a;
+  box-shadow: 
+    0 0 10px rgba(255, 215, 0, 0.5),
+    inset 0 0 5px rgba(0, 0, 0, 0.5);
 }
 
 .options-section::-webkit-scrollbar-thumb:hover {
   background: 
-    linear-gradient(180deg, #d4af37 0%, #b4923f 50%, #947527 100%);
+    repeating-linear-gradient(
+      0deg,
+      #ffed4e 0px,
+      #ffed4e 4px,
+      #ffd700 4px,
+      #ffd700 8px
+    );
+  box-shadow: 
+    0 0 15px rgba(255, 215, 0, 0.8),
+    inset 0 0 5px rgba(0, 0, 0, 0.3);
 }
 
-.color-group {
-  margin-bottom: 25px;
-  padding: 18px;
+/* 选项卡片 - 黑金马赛克 */
+.option-card {
   background: 
     repeating-linear-gradient(
       0deg,
-      rgba(42, 26, 74, 0.6) 0px,
-      rgba(42, 26, 74, 0.6) 2px,
-      rgba(58, 42, 90, 0.6) 2px,
-      rgba(58, 42, 90, 0.6) 4px
+      rgba(0, 0, 0, 0.95) 0px,
+      rgba(0, 0, 0, 0.95) 4px,
+      rgba(20, 20, 20, 0.95) 4px,
+      rgba(20, 20, 20, 0.95) 8px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.95) 0px,
+      rgba(0, 0, 0, 0.95) 4px,
+      rgba(15, 15, 15, 0.95) 4px,
+      rgba(15, 15, 15, 0.95) 8px
     );
-  border: 3px solid #8b7355;
+  border: 3px solid #1a1a1a;
+  padding: 15px;
   box-shadow: 
-    0 0 0 1px #4a4a4a,
-    inset 0 0 20px rgba(0, 0, 0, 0.8),
-    0 4px 0 rgba(0, 0, 0, 0.4);
+    0 0 0 1px #ffd700,
+    0 0 0 4px #0a0a0a,
+    inset 0 0 30px rgba(0, 0, 0, 0.9),
+    inset 0 0 10px rgba(255, 215, 0, 0.05),
+    0 5px 20px rgba(0, 0, 0, 0.8),
+    0 0 20px rgba(255, 215, 0, 0.15);
+  transition: all 0.3s ease;
 }
 
-.color-group h3 {
+.option-card:hover {
+  box-shadow: 
+    0 0 0 1px #ffd700,
+    0 0 0 4px #0a0a0a,
+    inset 0 0 30px rgba(0, 0, 0, 0.9),
+    inset 0 0 15px rgba(255, 215, 0, 0.1),
+    0 5px 20px rgba(0, 0, 0, 0.8),
+    0 0 30px rgba(255, 215, 0, 0.3);
+}
+
+.option-title {
   color: #ffd700;
-  font-size: 0.7rem;
-  margin-bottom: 15px;
+  font-size: 0.65rem;
+  margin: 0 0 12px 0;
   padding-bottom: 10px;
-  border-bottom: 2px solid #4a4a4a;
+  border-bottom: 2px solid #1a1a1a;
+  box-shadow: 0 2px 0 rgba(255, 215, 0, 0.3);
   text-shadow: 
-    2px 2px 0 #8b4513,
-    -1px -1px 0 #000,
-    1px -1px 0 #000,
-    -1px 1px 0 #000,
-    1px 1px 0 #000;
-  letter-spacing: 1px;
+    2px 2px 0 #000,
+    0 0 10px rgba(255, 215, 0, 0.8);
+  letter-spacing: 2px;
   line-height: 1.5;
 }
 
-.color-palette {
+.button-row {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
 }
 
-.color-option {
-  width: 40px;
-  height: 40px;
-  cursor: pointer;
-  border: 3px solid #4a4a4a;
-  transition: all 0.1s;
-  position: relative;
-  box-shadow: 
-    inset 0 0 10px rgba(0, 0, 0, 0.5),
-    0 3px 0 rgba(0, 0, 0, 0.4);
-  image-rendering: pixelated;
-  flex-shrink: 0;
-}
-
-.color-option:hover {
-  transform: translateY(-2px);
-  border-color: #8b7355;
-  box-shadow: 
-    inset 0 0 10px rgba(0, 0, 0, 0.5),
-    0 5px 0 rgba(0, 0, 0, 0.4),
-    0 0 15px rgba(212, 175, 55, 0.5);
-}
-
-.color-option.selected {
-  border-color: #ffd700;
-  box-shadow: 
-    0 0 0 2px #ff4500,
-    0 0 0 5px #ffd700,
-    inset 0 0 10px rgba(0, 0, 0, 0.5),
-    0 3px 0 rgba(0, 0, 0, 0.4),
-    0 0 20px rgba(255, 215, 0, 0.8);
-  transform: scale(1.1);
-}
-
-.color-option.selected::after {
-  content: '✓';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: white;
-  font-size: 20px;
-  font-weight: bold;
-  text-shadow: 
-    2px 2px 0 #000,
-    -1px -1px 0 #000,
-    1px -1px 0 #000,
-    -1px 1px 0 #000,
-    1px 1px 0 #000;
-}
-
-.confirm-button {
+/* 选项按钮 - 黑金马赛克 */
+.option-btn {
   background: 
-    linear-gradient(180deg, #ff4500 0%, #cc3700 50%, #992900 100%);
-  color: #fff;
-  border: none;
-  padding: 18px 35px;
-  font-size: 0.75rem;
-  cursor: pointer;
-  font-family: 'Press Start 2P', cursive;
-  transition: all 0.1s;
-  box-shadow: 
-    0 0 0 4px #992900,
-    0 0 0 8px #ffd700,
-    0 0 0 12px #992900,
-    0 8px 0 rgba(0, 0, 0, 0.5),
-    inset 0 3px 0 rgba(255, 255, 255, 0.3),
-    0 0 30px rgba(255, 69, 0, 0.6);
-  text-shadow: 
-    3px 3px 0 #000,
-    0 0 10px #ffd700;
-  letter-spacing: 1px;
-  line-height: 1.5;
-  animation: confirmGlow 2s ease-in-out infinite;
-}
-
-@keyframes confirmGlow {
-  0%, 100% {
-    filter: brightness(1);
-  }
-  50% {
-    filter: brightness(1.2);
-  }
-}
-
-.confirm-button:hover {
-  background: 
-    linear-gradient(180deg, #ff5722 0%, #dd4411 50%, #aa3311 100%);
-  transform: translateY(-3px);
-  box-shadow: 
-    0 0 0 4px #aa3311,
-    0 0 0 8px #ffd700,
-    0 0 0 12px #aa3311,
-    0 11px 0 rgba(0, 0, 0, 0.5),
-    inset 0 3px 0 rgba(255, 255, 255, 0.4),
-    0 0 40px rgba(255, 69, 0, 0.8);
-}
-
-.confirm-button:active {
-  transform: translateY(3px);
-  box-shadow: 
-    0 0 0 4px #992900,
-    0 0 0 8px #ffd700,
-    0 0 0 12px #992900,
-    0 3px 0 rgba(0, 0, 0, 0.5),
-    inset 0 3px 0 rgba(0, 0, 0, 0.3),
-    0 0 20px rgba(255, 69, 0, 0.6);
-}
-
-.style-options {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.style-btn {
-  background: 
-    linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 50%, #1a1a1a 100%);
-  color: #e0e0e0;
-  border: none;
+    repeating-linear-gradient(
+      45deg,
+      #1a1a1a 0px,
+      #1a1a1a 4px,
+      #2a2a2a 4px,
+      #2a2a2a 8px
+    );
+  color: #d4af37;
+  border: 2px solid #0a0a0a;
   padding: 10px 16px;
   cursor: pointer;
-  transition: all 0.1s;
-  font-size: 0.6rem;
+  transition: all 0.3s ease;
+  font-size: 0.5rem;
   font-family: 'Press Start 2P', cursive;
   box-shadow: 
-    0 0 0 3px #1a1a1a,
-    0 0 0 6px #8b7355,
-    0 4px 0 rgba(0, 0, 0, 0.5),
-    inset 0 2px 0 rgba(255, 255, 255, 0.2);
-  text-shadow: 1px 1px 0 #000;
-  letter-spacing: 0.5px;
+    0 0 0 1px #ffd700,
+    0 0 0 3px #0a0a0a,
+    0 4px 0 #0a0a0a,
+    inset 0 0 10px rgba(0, 0, 0, 0.8),
+    0 0 10px rgba(255, 215, 0, 0.2);
+  text-shadow: 
+    1px 1px 0 #000,
+    0 0 5px rgba(212, 175, 55, 0.5);
+  letter-spacing: 1px;
   line-height: 1.4;
+  flex: 1;
+  min-width: 90px;
+  position: relative;
+  overflow: hidden;
 }
 
-.style-btn:hover {
+.option-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.option-btn:hover {
   background: 
-    linear-gradient(180deg, #5a5a5a 0%, #3a3a3a 50%, #2a2a2a 100%);
+    repeating-linear-gradient(
+      45deg,
+      #2a2a2a 0px,
+      #2a2a2a 4px,
+      #3a3a3a 4px,
+      #3a3a3a 8px
+    );
+  color: #ffd700;
   transform: translateY(-2px);
   box-shadow: 
-    0 0 0 3px #2a2a2a,
-    0 0 0 6px #d4af37,
-    0 6px 0 rgba(0, 0, 0, 0.5),
-    inset 0 2px 0 rgba(255, 255, 255, 0.3);
+    0 0 0 1px #ffd700,
+    0 0 0 3px #0a0a0a,
+    0 6px 0 #0a0a0a,
+    inset 0 0 15px rgba(0, 0, 0, 0.8),
+    0 0 20px rgba(255, 215, 0, 0.4);
+  text-shadow: 
+    1px 1px 0 #000,
+    0 0 8px rgba(255, 215, 0, 0.8);
 }
 
-.style-btn:active {
-  transform: translateY(1px);
+.option-btn:hover::before {
+  left: 100%;
+}
+
+.option-btn:active {
+  transform: translateY(2px);
   box-shadow: 
-    0 0 0 3px #1a1a1a,
-    0 0 0 6px #8b7355,
-    0 2px 0 rgba(0, 0, 0, 0.5),
-    inset 0 2px 0 rgba(0, 0, 0, 0.3);
+    0 0 0 1px #ffd700,
+    0 0 0 3px #0a0a0a,
+    0 1px 0 #0a0a0a,
+    inset 0 0 10px rgba(0, 0, 0, 0.9);
 }
 
-.style-btn.selected {
+.option-btn.selected {
   background: 
-    linear-gradient(180deg, #4a90e2 0%, #2e5c8a 50%, #1a3a5a 100%);
-  color: #fff;
+    repeating-linear-gradient(
+      45deg,
+      #ffd700 0px,
+      #ffd700 4px,
+      #d4af37 4px,
+      #d4af37 8px
+    );
+  color: #000;
+  border: 2px solid #ffd700;
   box-shadow: 
-    0 0 0 3px #1a3a5a,
-    0 0 0 6px #ffd700,
-    0 4px 0 rgba(0, 0, 0, 0.5),
-    inset 0 2px 0 rgba(255, 255, 255, 0.3),
-    0 0 20px rgba(255, 215, 0, 0.6);
-  text-shadow: 2px 2px 0 #000;
+    0 0 0 1px #000,
+    0 0 0 3px #ffd700,
+    0 4px 0 #0a0a0a,
+    inset 0 0 20px rgba(0, 0, 0, 0.3),
+    0 0 25px rgba(255, 215, 0, 0.6),
+    0 0 40px rgba(255, 215, 0, 0.3);
+  text-shadow: 
+    1px 1px 0 rgba(255, 255, 255, 0.5),
+    0 0 10px rgba(0, 0, 0, 0.5);
+  animation: selectedPulse 2s ease-in-out infinite;
+}
+
+@keyframes selectedPulse {
+  0%, 100% { 
+    box-shadow: 
+      0 0 0 1px #000,
+      0 0 0 3px #ffd700,
+      0 4px 0 #0a0a0a,
+      inset 0 0 20px rgba(0, 0, 0, 0.3),
+      0 0 25px rgba(255, 215, 0, 0.6),
+      0 0 40px rgba(255, 215, 0, 0.3);
+  }
+  50% { 
+    box-shadow: 
+      0 0 0 1px #000,
+      0 0 0 3px #ffd700,
+      0 4px 0 #0a0a0a,
+      inset 0 0 20px rgba(0, 0, 0, 0.3),
+      0 0 30px rgba(255, 215, 0, 0.8),
+      0 0 50px rgba(255, 215, 0, 0.5);
+  }
+}
+
+/* 颜色网格 - 黑金马赛克 */
+.colors-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.color-card {
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.95) 0px,
+      rgba(0, 0, 0, 0.95) 4px,
+      rgba(20, 20, 20, 0.95) 4px,
+      rgba(20, 20, 20, 0.95) 8px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.95) 0px,
+      rgba(0, 0, 0, 0.95) 4px,
+      rgba(15, 15, 15, 0.95) 4px,
+      rgba(15, 15, 15, 0.95) 8px
+    );
+  border: 3px solid #1a1a1a;
+  padding: 12px;
+  box-shadow: 
+    0 0 0 1px #ffd700,
+    0 0 0 4px #0a0a0a,
+    inset 0 0 30px rgba(0, 0, 0, 0.9),
+    inset 0 0 10px rgba(255, 215, 0, 0.05),
+    0 5px 20px rgba(0, 0, 0, 0.8),
+    0 0 20px rgba(255, 215, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all 0.3s ease;
+}
+
+.color-card:hover {
+  box-shadow: 
+    0 0 0 1px #ffd700,
+    0 0 0 4px #0a0a0a,
+    inset 0 0 30px rgba(0, 0, 0, 0.9),
+    inset 0 0 15px rgba(255, 215, 0, 0.1),
+    0 5px 20px rgba(0, 0, 0, 0.8),
+    0 0 30px rgba(255, 215, 0, 0.3);
+}
+
+.color-title {
+  color: #ffd700;
+  font-size: 0.55rem;
+  margin: 0;
+  text-shadow: 
+    2px 2px 0 #000,
+    0 0 8px rgba(255, 215, 0, 0.8);
+  letter-spacing: 1.5px;
+  line-height: 1.5;
 }
 
 .color-picker {
-  width: 40px;
-  height: 40px;
-  border: 3px solid #8b7355;
+  width: 100%;
+  height: 45px;
+  border: 3px solid #1a1a1a;
   cursor: pointer;
-  transition: all 0.1s;
-  background: none;
+  transition: all 0.3s ease;
+  background: 
+    repeating-linear-gradient(
+      45deg,
+      #0a0a0a 0px,
+      #0a0a0a 2px,
+      #1a1a1a 2px,
+      #1a1a1a 4px
+    );
   padding: 0;
   box-shadow: 
-    inset 0 0 10px rgba(0, 0, 0, 0.5),
-    0 3px 0 rgba(0, 0, 0, 0.4);
-  flex-shrink: 0;
+    0 0 0 1px #ffd700,
+    0 0 0 4px #0a0a0a,
+    inset 0 0 15px rgba(0, 0, 0, 0.8),
+    0 4px 0 #0a0a0a,
+    0 0 15px rgba(255, 215, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.color-picker::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 3px,
+      rgba(255, 215, 0, 0.05) 3px,
+      rgba(255, 215, 0, 0.05) 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 3px,
+      rgba(255, 215, 0, 0.05) 3px,
+      rgba(255, 215, 0, 0.05) 4px
+    );
+  pointer-events: none;
+  z-index: 1;
 }
 
 .color-picker::-webkit-color-swatch-wrapper {
-  padding: 0;
+  padding: 4px;
 }
 
 .color-picker::-webkit-color-swatch {
-  border: none;
+  border: 2px solid #0a0a0a;
+  box-shadow: 
+    inset 0 0 10px rgba(0, 0, 0, 0.5),
+    0 0 5px rgba(255, 215, 0, 0.3);
 }
 
 .color-picker::-moz-color-swatch {
-  border: none;
+  border: 2px solid #0a0a0a;
 }
 
 .color-picker:hover {
   transform: translateY(-2px);
-  border-color: #d4af37;
+  border-color: #ffd700;
   box-shadow: 
-    inset 0 0 10px rgba(0, 0, 0, 0.5),
-    0 5px 0 rgba(0, 0, 0, 0.4),
-    0 0 15px rgba(212, 175, 55, 0.5);
+    0 0 0 1px #ffd700,
+    0 0 0 4px #0a0a0a,
+    inset 0 0 15px rgba(0, 0, 0, 0.8),
+    0 6px 0 #0a0a0a,
+    0 0 25px rgba(255, 215, 0, 0.5);
 }
 
-.preview-section canvas {
-  display: block;
-  margin: 0 auto;
+.color-picker:active {
+  transform: translateY(2px);
+  box-shadow: 
+    0 0 0 1px #ffd700,
+    0 0 0 4px #0a0a0a,
+    inset 0 0 15px rgba(0, 0, 0, 0.9),
+    0 1px 0 #0a0a0a;
 }
 
-.button-group {
+/* 底部按钮区 */
+.action-section {
+  position: relative;
+  z-index: 1;
   display: flex;
-  gap: 20px;
+  gap: 30px;
   justify-content: center;
   align-items: center;
-  padding: 25px 20px;
-  background: rgba(0, 0, 0, 0.5);
-  border-top: 4px solid #8b7355;
-  box-shadow: 0 -4px 0 rgba(0, 0, 0, 0.5);
+  padding: 12px 30px;
+  background: #0a0a0a;
+  border-top: 2px solid #ffd700;
 }
 
-.back-button {
-  background: 
-    linear-gradient(180deg, #6a6a6a 0%, #4a4a4a 50%, #2a2a2a 100%);
-  color: #e0e0e0;
-  border: none;
-  padding: 18px 35px;
-  font-size: 0.75rem;
-  cursor: pointer;
+/* 统一按钮样式 */
+.back-button,
+.confirm-button {
+  padding: 6px 12px;
+  font-size: 0.4rem;
   font-family: 'Press Start 2P', cursive;
-  transition: all 0.1s;
-  box-shadow: 
-    0 0 0 3px #2a2a2a,
-    0 0 0 6px #8b7355,
-    0 6px 0 rgba(0, 0, 0, 0.5),
-    inset 0 2px 0 rgba(255, 255, 255, 0.2);
-  text-shadow: 2px 2px 0 #000;
-  letter-spacing: 1px;
-  line-height: 1.5;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  border-radius: 4px;
+}
+
+/* Back 按钮 - 黑底金边 */
+.back-button {
+  background: #1a1a1a;
+  color: #ffd700;
+  border: 2px solid #ffd700;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
 }
 
 .back-button:hover {
-  background: 
-    linear-gradient(180deg, #7a7a7a 0%, #5a5a5a 50%, #3a3a3a 100%);
-  transform: translateY(-2px);
-  box-shadow: 
-    0 0 0 3px #3a3a3a,
-    0 0 0 6px #d4af37,
-    0 8px 0 rgba(0, 0, 0, 0.5),
-    inset 0 2px 0 rgba(255, 255, 255, 0.3);
+  background: #2a2a2a;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
 }
 
 .back-button:active {
-  transform: translateY(2px);
-  box-shadow: 
-    0 0 0 3px #2a2a2a,
-    0 0 0 6px #8b7355,
-    0 2px 0 rgba(0, 0, 0, 0.5),
-    inset 0 2px 0 rgba(0, 0, 0, 0.3);
+  transform: scale(0.98);
+}
+
+/* Confirm 按钮 - 金底黑字 */
+.confirm-button {
+  background: #ffd700;
+  color: #000;
+  border: 2px solid #ffd700;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.confirm-button:hover {
+  background: #ffed4e;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+}
+
+.confirm-button:active {
+  transform: scale(0.98);
+}
+
+/* 隐藏装饰元素 */
+.button-bg,
+.button-shine {
+  display: none;
+}
+
+.button-icon {
+  font-size: 0.6rem;
+}
+
+.button-text {
+  white-space: nowrap;
+}
+
+/* 响应式调整 */
+@media (max-width: 1200px) {
+  .customization-main {
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .preview-section {
+    flex: 0 0 auto;
+  }
+
+  .colors-grid {
+    grid-template-columns: 1fr;
+  }
 }

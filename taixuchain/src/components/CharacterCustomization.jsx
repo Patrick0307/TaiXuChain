@@ -14,22 +14,9 @@ function CharacterCustomization({ characterClass, onCustomizationComplete, onBac
     shoesColor: '#4a4a4a'
   })
 
-  const colorOptions = {
-    skin: ['#ffd4a3', '#f4c2a0', '#d4a574', '#c68642', '#8d5524', '#5c3317', '#4a3728', '#2d1f1a'],
-    hair: ['#000000', '#1a1a1a', '#2c1608', '#4a2511', '#8b4513', '#a0522d', '#cd853f', 
-           '#daa520', '#ffd700', '#ff6347', '#dc143c', '#9370db', '#4b0082', '#ffffff', '#e6e6e6'],
-    clothes: ['#8b0000', '#dc143c', '#ff0000', '#ff4500', '#ff8c00', '#ffd700', 
-              '#228b22', '#32cd32', '#00ced1', '#4169e1', '#4b0082', '#8b008b',
-              '#ff1493', '#ff69b4', '#c0c0c0', '#ffffff', '#000000', '#2f4f4f'],
-    shoes: ['#000000', '#1a1a1a', '#2f4f4f', '#4a4a4a', '#696969', '#8b4513', 
-            '#654321', '#a0522d', '#8b0000', '#ffffff']
-  }
-
   const hairStyles = customization.gender === 'male' 
-    ? ['short', 'long', 'topknot', 'ponytail']
-    : ['short', 'long', 'bun', 'ponytail', 'braids']
-  
-  const clothesStyles = ['default', 'robe', 'armor']
+    ? ['short', 'long', 'topknot', 'frontponytail']
+    : ['short', 'long', 'bun', 'frontponytail', 'braids']
 
   const handleChange = (key, value) => {
     setCustomization(prev => ({
@@ -47,33 +34,58 @@ function CharacterCustomization({ characterClass, onCustomizationComplete, onBac
 
   return (
     <div className="character-customization">
-      <h1 className="customization-title">Customize Your {characterClass.name}</h1>
+      {/* 马赛克背景 */}
+      <div className="mosaic-bg"></div>
+      <div className="mosaic-overlay"></div>
+
+      {/* 标题 */}
+      <div className="title-section">
+        <h1 className="customization-title">
+          <span className="title-main">Customize Your {characterClass.name}</span>
+        </h1>
+        <div className="title-decoration">
+          <div className="decoration-line left"></div>
+          <div className="decoration-center">✦</div>
+          <div className="decoration-line right"></div>
+        </div>
+      </div>
       
-      <div className="customization-container">
+      {/* 主内容区 */}
+      <div className="customization-main">
+        {/* 左侧预览 */}
         <div className="preview-section">
-          <div style={{ background: 'rgba(0,0,0,0.3)', padding: '30px', borderRadius: '15px' }}>
+          <div className="preview-label">PREVIEW</div>
+          <div className="preview-frame">
+            <div className="frame-corners">
+              <span className="corner tl"></span>
+              <span className="corner tr"></span>
+              <span className="corner bl"></span>
+              <span className="corner br"></span>
+            </div>
             <AnimatedCharacter 
               character={{
                 ...characterClass,
                 customization
               }}
-              scale={2.5}
+              scale={3}
             />
           </div>
         </div>
 
+        {/* 右侧选项 */}
         <div className="options-section">
-          <div className="color-group">
-            <h3>Gender</h3>
-            <div className="style-options">
+          {/* Gender */}
+          <div className="option-card">
+            <h3 className="option-title">Gender</h3>
+            <div className="button-row">
               <button 
-                className={`style-btn ${customization.gender === 'male' ? 'selected' : ''}`}
+                className={`option-btn ${customization.gender === 'male' ? 'selected' : ''}`}
                 onClick={() => handleChange('gender', 'male')}
               >
                 Male
               </button>
               <button 
-                className={`style-btn ${customization.gender === 'female' ? 'selected' : ''}`}
+                className={`option-btn ${customization.gender === 'female' ? 'selected' : ''}`}
                 onClick={() => handleChange('gender', 'female')}
               >
                 Female
@@ -81,126 +93,80 @@ function CharacterCustomization({ characterClass, onCustomizationComplete, onBac
             </div>
           </div>
 
-          <div className="color-group">
-            <h3>Skin Color</h3>
-            <div className="color-palette">
-              {colorOptions.skin.map(color => (
-                <div
-                  key={color}
-                  className={`color-option ${customization.skinColor === color ? 'selected' : ''}`}
-                  style={{ background: color }}
-                  onClick={() => handleChange('skinColor', color)}
-                ></div>
-              ))}
-            </div>
-          </div>
-
-          <div className="color-group">
-            <h3>Hair Style</h3>
-            <div className="style-options">
+          {/* Hair Style */}
+          <div className="option-card">
+            <h3 className="option-title">Hair Style</h3>
+            <div className="button-row">
               {hairStyles.map(style => (
                 <button 
                   key={style}
-                  className={`style-btn ${customization.hairStyle === style ? 'selected' : ''}`}
+                  className={`option-btn ${customization.hairStyle === style ? 'selected' : ''}`}
                   onClick={() => handleChange('hairStyle', style)}
                 >
                   {style === 'short' ? 'Short' : 
                    style === 'long' ? 'Long' : 
                    style === 'bun' ? 'Bun' : 
-                   style === 'ponytail' ? 'Ponytail' :
+                   style === 'frontponytail' ? 'Bald' :
                    style === 'braids' ? 'Braids' : 'Topknot'}
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="color-group">
-            <h3>Hair Color</h3>
-            <div className="color-palette">
-              {colorOptions.hair.map(color => (
-                <div
-                  key={color}
-                  className={`color-option ${customization.hairColor === color ? 'selected' : ''}`}
-                  style={{ background: color }}
-                  onClick={() => handleChange('hairColor', color)}
-                ></div>
-              ))}
+          {/* Colors Grid */}
+          <div className="colors-grid">
+            <div className="color-card">
+              <h3 className="color-title">Skin Color</h3>
+              <input 
+                type="color" 
+                value={customization.skinColor}
+                onChange={(e) => handleChange('skinColor', e.target.value)}
+                className="color-picker"
+              />
+            </div>
+
+            <div className="color-card">
+              <h3 className="color-title">Hair Color</h3>
               <input 
                 type="color" 
                 value={customization.hairColor}
                 onChange={(e) => handleChange('hairColor', e.target.value)}
                 className="color-picker"
-                title="Custom Color"
               />
             </div>
-          </div>
 
-          <div className="color-group">
-            <h3>Clothes Style</h3>
-            <div className="style-options">
-              {clothesStyles.map(style => (
-                <button 
-                  key={style}
-                  className={`style-btn ${customization.clothesStyle === style ? 'selected' : ''}`}
-                  onClick={() => handleChange('clothesStyle', style)}
-                >
-                  {style === 'default' ? 'Default' : 
-                   style === 'robe' ? 'Robe' : 'Armor'}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="color-group">
-            <h3>Clothes Color</h3>
-            <div className="color-palette">
-              {colorOptions.clothes.map(color => (
-                <div
-                  key={color}
-                  className={`color-option ${customization.clothesColor === color ? 'selected' : ''}`}
-                  style={{ background: color }}
-                  onClick={() => handleChange('clothesColor', color)}
-                ></div>
-              ))}
+            <div className="color-card">
+              <h3 className="color-title">Clothes Color</h3>
               <input 
                 type="color" 
                 value={customization.clothesColor}
                 onChange={(e) => handleChange('clothesColor', e.target.value)}
                 className="color-picker"
-                title="Custom Color"
               />
             </div>
-          </div>
 
-          <div className="color-group">
-            <h3>Shoes Color</h3>
-            <div className="color-palette">
-              {colorOptions.shoes.map(color => (
-                <div
-                  key={color}
-                  className={`color-option ${customization.shoesColor === color ? 'selected' : ''}`}
-                  style={{ background: color }}
-                  onClick={() => handleChange('shoesColor', color)}
-                ></div>
-              ))}
+            <div className="color-card">
+              <h3 className="color-title">Shoes Color</h3>
               <input 
                 type="color" 
                 value={customization.shoesColor}
                 onChange={(e) => handleChange('shoesColor', e.target.value)}
                 className="color-picker"
-                title="Custom Color"
               />
             </div>
           </div>
         </div>
       </div>
 
-      <div className="button-group">
+      {/* 底部按钮 */}
+      <div className="action-section">
         <button className="back-button" onClick={onBack}>
-          ← Back to Selection
+          <span className="button-text">Back to Selection</span>
         </button>
         <button className="confirm-button" onClick={handleConfirm}>
-          Continue to Naming →
+          <span className="button-bg"></span>
+          <span className="button-text">Continue to Naming</span>
+          <span className="button-shine"></span>
         </button>
       </div>
     </div>
