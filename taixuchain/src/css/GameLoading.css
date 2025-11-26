@@ -1,0 +1,332 @@
+.game-loading {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: #0a0a0a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 马赛克背景效果 */
+.mosaic-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    linear-gradient(45deg, #000000 25%, transparent 25%),
+    linear-gradient(-45deg, #000000 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #000000 75%),
+    linear-gradient(-45deg, transparent 75%, #000000 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  opacity: 0.3;
+  animation: mosaicMove 20s linear infinite;
+}
+
+@keyframes mosaicMove {
+  0% {
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  }
+  100% {
+    background-position: 20px 20px, 20px 30px, 30px 10px, 10px 20px;
+  }
+}
+
+.loading-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  width: 90%;
+  max-width: 800px;
+}
+
+/* 标题样式 */
+.loading-title {
+  position: relative;
+  font-size: 4rem;
+  font-weight: bold;
+  margin: 0;
+  text-align: center;
+}
+
+.title-text {
+  position: relative;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FFD700 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 
+    0 0 20px rgba(255, 215, 0, 0.5),
+    0 0 40px rgba(255, 215, 0, 0.3);
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+  animation: titlePulse 2s ease-in-out infinite;
+  letter-spacing: 8px;
+}
+
+@keyframes titlePulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 1));
+  }
+}
+
+/* 进度条容器 */
+.progress-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.progress-bar-wrapper {
+  position: relative;
+  width: 100%;
+  height: 30px;
+  background: #1a1a1a;
+  border: 3px solid #FFD700;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 
+    0 0 20px rgba(255, 215, 0, 0.3),
+    inset 0 2px 10px rgba(0, 0, 0, 0.8);
+}
+
+.progress-bar-fill {
+  position: relative;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    #FFD700 0%, 
+    #FFA500 25%, 
+    #FFD700 50%, 
+    #FFA500 75%, 
+    #FFD700 100%
+  );
+  background-size: 200% 100%;
+  animation: progressShimmer 2s linear infinite;
+  transition: width 0.3s ease-out;
+  box-shadow: 
+    0 0 20px rgba(255, 215, 0, 0.6),
+    inset 0 2px 5px rgba(255, 255, 255, 0.3);
+}
+
+@keyframes progressShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.progress-shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.4) 50%, 
+    transparent 100%
+  );
+  animation: shine 2s ease-in-out infinite;
+}
+
+@keyframes shine {
+  0% {
+    left: -100%;
+  }
+  50%, 100% {
+    left: 200%;
+  }
+}
+
+.progress-border {
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border-radius: 15px;
+  background: linear-gradient(45deg, 
+    #FFD700, 
+    #FFA500, 
+    #FFD700, 
+    #FFA500
+  );
+  background-size: 400% 400%;
+  animation: borderGlow 3s ease infinite;
+  z-index: -1;
+}
+
+@keyframes borderGlow {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.progress-text {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #FFD700;
+  text-shadow: 
+    0 0 10px rgba(255, 215, 0, 0.8),
+    0 0 20px rgba(255, 215, 0, 0.5);
+  font-family: 'Courier New', monospace;
+}
+
+/* 加载状态文字 */
+.loading-stage {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stage-text {
+  font-size: 1.2rem;
+  color: #FFD700;
+  text-align: center;
+  margin: 0;
+  animation: textFade 0.5s ease-in;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  letter-spacing: 2px;
+}
+
+@keyframes textFade {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 底部角色展示 */
+.characters-showcase {
+  display: flex;
+  gap: 60px;
+  align-items: flex-end;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.character-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  animation: characterFloat 3s ease-in-out infinite;
+  opacity: 0;
+  animation: characterAppear 0.8s ease-out forwards;
+}
+
+@keyframes characterAppear {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes characterFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.character-item:nth-child(1) {
+  animation-delay: 0s, 0s;
+}
+
+.character-item:nth-child(2) {
+  animation-delay: 0.2s, 1s;
+}
+
+.character-item:nth-child(3) {
+  animation-delay: 0.4s, 2s;
+}
+
+.character-wrapper {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 215, 0, 0.1);
+  border: 2px solid #FFD700;
+  border-radius: 10px;
+  box-shadow: 
+    0 0 20px rgba(255, 215, 0, 0.3),
+    inset 0 0 10px rgba(255, 215, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.character-wrapper:hover {
+  transform: scale(1.1);
+  box-shadow: 
+    0 0 30px rgba(255, 215, 0, 0.5),
+    inset 0 0 15px rgba(255, 215, 0, 0.2);
+}
+
+.character-label {
+  font-size: 0.9rem;
+  color: #FFD700;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .loading-title {
+    font-size: 2.5rem;
+  }
+
+  .title-text {
+    letter-spacing: 4px;
+  }
+
+  .characters-showcase {
+    gap: 30px;
+  }
+
+  .character-wrapper {
+    width: 60px;
+    height: 60px;
+  }
+
+  .character-label {
+    font-size: 0.7rem;
+  }
+
+  .progress-text {
+    font-size: 1.2rem;
+  }
+
+  .stage-text {
+    font-size: 1rem;
+  }
+}

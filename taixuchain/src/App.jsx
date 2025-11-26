@@ -7,6 +7,7 @@ import MapSelection from './components/MapSelection'
 import CharacterWithWeapon from './components/CharacterWithWeapon'
 import UIDDisplay from './components/UIDDisplay'
 import ForestMap from './components/maps/ForestMap'
+import GameLoading from './components/GameLoading'
 import { checkExistingPlayer } from './utils/suiClient'
 
 function App() {
@@ -140,22 +141,7 @@ function App() {
 
   return (
     <>
-      {isCheckingPlayer && (
-        <div style={{ 
-          width: '100%', 
-          height: '100vh', 
-          display: 'flex', 
-          flexDirection: 'column',
-          alignItems: 'center', 
-          justifyContent: 'center',
-          background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
-          color: 'white',
-          gap: '20px'
-        }}>
-          <div style={{ fontSize: '1.5rem' }}>🔍 Checking for existing character...</div>
-          <div style={{ fontSize: '1rem', opacity: 0.7 }}>Please wait...</div>
-        </div>
-      )}
+      {isCheckingPlayer && <GameLoading />}
       
       {!isCheckingPlayer && gameStage === 'story' && (
         <BackgroundStory onWalletConnected={handleWalletConnected} />
