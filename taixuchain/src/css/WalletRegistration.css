@@ -1,5 +1,5 @@
-/* 复古 MMORPG 马赛克风格 */
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+/* 80年代黑金风格 - 赛博朋克马赛克 */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 
 .wallet-registration-overlay {
   position: fixed;
@@ -8,241 +8,557 @@
   width: 100%;
   height: 100%;
   background: 
+    /* 马赛克网格 */
     repeating-linear-gradient(
       0deg,
-      rgba(0, 0, 0, 0.15) 0px,
-      transparent 1px,
+      rgba(212, 175, 55, 0.04) 0px,
       transparent 2px,
-      rgba(0, 0, 0, 0.15) 3px
+      transparent 4px,
+      rgba(212, 175, 55, 0.04) 6px
     ),
     repeating-linear-gradient(
       90deg,
-      rgba(0, 0, 0, 0.15) 0px,
-      transparent 1px,
+      rgba(212, 175, 55, 0.04) 0px,
       transparent 2px,
-      rgba(0, 0, 0, 0.15) 3px
+      transparent 4px,
+      rgba(212, 175, 55, 0.04) 6px
     ),
-    linear-gradient(180deg, #0a0e27 0%, #1a1a3e 100%);
+    /* 渐变背景 */
+    radial-gradient(ellipse at top, #1a1410 0%, #0a0a08 50%),
+    linear-gradient(180deg, #151510 0%, #0a0a08 100%);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  image-rendering: pixelated;
-  image-rendering: -moz-crisp-edges;
-  image-rendering: crisp-edges;
+  overflow: hidden;
+  animation: scanlines 8s linear infinite;
+}
+
+/* 扫描线效果 + 80年代网格地板 */
+.wallet-registration-overlay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    /* 扫描线 */
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.15) 0px,
+      rgba(0, 0, 0, 0.15) 1px,
+      transparent 1px,
+      transparent 2px
+    ),
+    /* 底部网格 */
+    linear-gradient(
+      to bottom,
+      transparent 0%,
+      transparent 50%,
+      rgba(255, 215, 0, 0.05) 50%,
+      rgba(255, 215, 0, 0.05) 100%
+    );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* 金色光晕动画 */
+.wallet-registration-overlay::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 215, 0, 0.1) 0%,
+    transparent 50%
+  );
+  animation: rotate 20s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes scanlines {
+  0% {
+    background-position: 0 0, 0 0, 0 0, 0 0;
+  }
+  100% {
+    background-position: 0 100px, 0 100px, 0 0, 0 0;
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .wallet-registration-box {
-  background: 
-    linear-gradient(135deg, transparent 10px, #2a1a4a 10px),
-    linear-gradient(225deg, transparent 10px, #2a1a4a 10px),
-    linear-gradient(315deg, transparent 10px, #2a1a4a 10px),
-    linear-gradient(45deg, transparent 10px, #2a1a4a 10px);
-  background-position: top left, top right, bottom right, bottom left;
-  background-size: 51% 51%;
-  background-repeat: no-repeat;
-  padding: 50px 40px;
-  box-shadow: 
-    0 0 0 4px #8b7355,
-    0 0 0 8px #d4af37,
-    0 0 0 12px #8b7355,
-    inset 0 0 30px rgba(0, 0, 0, 0.5),
-    0 8px 0 rgba(0, 0, 0, 0.4);
+  background: transparent;
+  padding: 0;
+  border: none;
+  box-shadow: none;
   text-align: center;
-  max-width: 600px;
+  max-width: 800px;
   width: 90%;
+  height: auto;
   position: relative;
-  font-family: 'Press Start 2P', cursive;
+  z-index: 2;
+  font-family: 'Orbitron', sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 50px;
 }
 
-/* 马赛克装饰角 */
-.wallet-registration-box::before,
-.wallet-registration-box::after {
-  content: '';
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  background: #d4af37;
-  box-shadow: 
-    0 0 0 4px #8b7355,
-    inset 0 0 8px rgba(0, 0, 0, 0.5);
-}
-
+/* 移除伪元素 */
 .wallet-registration-box::before {
-  top: -10px;
-  left: 50%;
-  transform: translateX(-50%) rotate(45deg);
+  display: none;
 }
 
+/* 火焰粒子效果容器 */
 .wallet-registration-box::after {
-  bottom: -10px;
-  left: 50%;
-  transform: translateX(-50%) rotate(45deg);
+  display: none;
+}
+
+@keyframes cornerPulse {
+  0%, 100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 0.7;
+    filter: brightness(1.5);
+  }
+}
+
+@keyframes flameFlicker {
+  0% {
+    transform: translateX(-50%) scaleY(1) scaleX(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(-50%) scaleY(1.1) scaleX(0.95);
+    opacity: 1;
+  }
 }
 
 .wallet-registration-box h2 {
-  color: #ffd700;
-  font-size: 1.5rem;
-  margin-bottom: 25px;
+  color: #ffed4e;
+  font-size: 3.5rem;
+  font-weight: 900;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 12px;
+  line-height: 1.3;
   text-shadow: 
-    3px 3px 0 #8b4513,
-    -1px -1px 0 #000,
-    1px -1px 0 #000,
-    -1px 1px 0 #000,
-    1px 1px 0 #000;
-  letter-spacing: 2px;
-  line-height: 1.8;
+    0 0 30px rgba(255, 237, 78, 1),
+    0 0 50px rgba(255, 215, 0, 0.8),
+    0 0 70px rgba(255, 215, 0, 0.6),
+    0 0 90px rgba(212, 175, 55, 0.4),
+    3px 3px 0 #000,
+    6px 6px 0 rgba(0, 0, 0, 0.5);
+  animation: titleGlow 3s ease-in-out infinite alternate;
+  position: relative;
+  width: 100%;
+  filter: brightness(1.3);
+}
+
+@keyframes titleGlow {
+  0% {
+    filter: brightness(1.2);
+    text-shadow: 
+      0 0 25px rgba(255, 237, 78, 1),
+      0 0 45px rgba(255, 215, 0, 0.8),
+      0 0 65px rgba(255, 215, 0, 0.6),
+      0 0 85px rgba(212, 175, 55, 0.4),
+      3px 3px 0 #000,
+      6px 6px 0 rgba(0, 0, 0, 0.5);
+  }
+  100% {
+    filter: brightness(1.5);
+    text-shadow: 
+      0 0 40px rgba(255, 237, 78, 1),
+      0 0 60px rgba(255, 215, 0, 1),
+      0 0 80px rgba(255, 215, 0, 0.8),
+      0 0 100px rgba(212, 175, 55, 0.6),
+      3px 3px 0 #000,
+      6px 6px 0 rgba(0, 0, 0, 0.5);
+  }
 }
 
 .wallet-registration-box p {
-  color: #e0e0e0;
-  font-size: 0.75rem;
-  margin-bottom: 30px;
-  line-height: 1.8;
-  text-shadow: 2px 2px 0 #000;
+  color: #aaa;
+  font-size: 1rem;
+  margin: 0;
+  line-height: 1.6;
+  text-shadow: 
+    0 0 6px rgba(170, 170, 170, 0.4),
+    1px 1px 2px rgba(0, 0, 0, 0.8);
+  letter-spacing: 2px;
+  font-weight: 400;
+  position: relative;
+  width: 100%;
+  max-width: 600px;
 }
 
 .connect-button {
   background: 
-    linear-gradient(180deg, #4a90e2 0%, #2e5c8a 50%, #1a3a5a 100%);
-  color: #fff;
-  border: none;
-  padding: 18px 35px;
-  font-size: 0.85rem;
+    linear-gradient(135deg, #d4af37 0%, #f0e68c 50%, #d4af37 100%);
+  color: #1a1a1a;
+  border: 3px solid #1a1a1a;
+  padding: 18px 50px;
+  font-size: 1.1rem;
+  font-weight: 700;
   cursor: pointer;
-  font-family: 'Press Start 2P', cursive;
+  font-family: 'Orbitron', sans-serif;
   position: relative;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  border-radius: 12px;
   box-shadow: 
-    0 0 0 3px #1a3a5a,
-    0 0 0 6px #d4af37,
-    0 6px 0 #1a1a3e,
-    inset 0 2px 0 rgba(255, 255, 255, 0.3);
-  text-shadow: 2px 2px 0 #000;
-  transition: all 0.1s;
-  letter-spacing: 1px;
+    inset 0 0 0 2px #1a1a1a,
+    inset 0 0 0 4px rgba(212, 175, 55, 0.6),
+    0 0 20px rgba(212, 175, 55, 0.4),
+    0 0 35px rgba(212, 175, 55, 0.2),
+    0 6px 0 #0a0a08,
+    0 10px 20px rgba(0, 0, 0, 0.8);
+  text-shadow: 
+    0 0 6px rgba(255, 255, 255, 0.4),
+    1px 1px 0 rgba(0, 0, 0, 0.6);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  width: 100%;
+  max-width: 450px;
+  clip-path: polygon(
+    8px 0, calc(100% - 8px) 0,
+    100% 8px, 100% calc(100% - 8px),
+    calc(100% - 8px) 100%, 8px 100%,
+    0 calc(100% - 8px), 0 8px
+  );
+}
+
+.connect-button::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 70%
+  );
+  animation: buttonShine 3s linear infinite;
+}
+
+@keyframes buttonShine {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(45deg);
+  }
 }
 
 .connect-button:hover:not(:disabled) {
   background: 
-    linear-gradient(180deg, #5aa0f2 0%, #3e6c9a 50%, #2a4a6a 100%);
-  transform: translateY(-2px);
+    linear-gradient(135deg, #f0e68c 0%, #fff8dc 50%, #f0e68c 100%);
+  transform: translateY(-3px);
   box-shadow: 
-    0 0 0 3px #2a4a6a,
-    0 0 0 6px #ffd700,
-    0 8px 0 #1a1a3e,
-    inset 0 2px 0 rgba(255, 255, 255, 0.4);
+    inset 0 0 0 2px #1a1a1a,
+    inset 0 0 0 4px rgba(240, 230, 140, 0.7),
+    0 0 30px rgba(212, 175, 55, 0.6),
+    0 0 50px rgba(212, 175, 55, 0.4),
+    0 9px 0 #0a0a08,
+    0 14px 30px rgba(0, 0, 0, 0.9);
+}
+
+@keyframes buttonPulse {
+  0% {
+    filter: brightness(1);
+  }
+  100% {
+    filter: brightness(1.2);
+  }
 }
 
 .connect-button:active:not(:disabled) {
-  transform: translateY(2px);
+  transform: translateY(3px);
   box-shadow: 
-    0 0 0 3px #1a3a5a,
-    0 0 0 6px #d4af37,
-    0 2px 0 #1a1a3e,
-    inset 0 2px 0 rgba(0, 0, 0, 0.3);
+    inset 0 0 0 2px #000,
+    inset 0 0 0 4px rgba(139, 105, 20, 0.5),
+    0 0 10px rgba(184, 134, 11, 0.3),
+    0 3px 0 #0a0a0a,
+    0 6px 15px rgba(0, 0, 0, 0.7);
 }
 
 .connect-button:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
-  filter: grayscale(0.5);
+  filter: grayscale(1);
+  animation: none;
+}
+
+.tutorial-button {
+  background: 
+    linear-gradient(135deg, #2a2a28 0%, #3a3a35 50%, #2a2a28 100%);
+  color: #d4af37;
+  border: 2px solid #d4af37;
+  padding: 14px 40px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Orbitron', sans-serif;
+  position: relative;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  border-radius: 10px;
+  box-shadow: 
+    inset 0 0 0 1px #1a1a18,
+    0 0 15px rgba(212, 175, 55, 0.3),
+    0 5px 0 #0a0a08,
+    0 9px 18px rgba(0, 0, 0, 0.7);
+  text-shadow: 
+    0 0 6px rgba(212, 175, 55, 0.5),
+    1px 1px 2px rgba(0, 0, 0, 0.8);
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 450px;
+  clip-path: polygon(
+    6px 0, calc(100% - 6px) 0,
+    100% 6px, 100% calc(100% - 6px),
+    calc(100% - 6px) 100%, 6px 100%,
+    0 calc(100% - 6px), 0 6px
+  );
+}
+
+.tutorial-button:hover {
+  background: 
+    linear-gradient(135deg, #3a3a35 0%, #4a4a42 50%, #3a3a35 100%);
+  border-color: #f0e68c;
+  color: #f0e68c;
+  transform: translateY(-3px);
+  box-shadow: 
+    inset 0 0 0 1px #1a1a18,
+    0 0 25px rgba(212, 175, 55, 0.5),
+    0 0 40px rgba(212, 175, 55, 0.3),
+    0 8px 0 #0a0a08,
+    0 13px 25px rgba(0, 0, 0, 0.8);
+}
+
+.tutorial-button:active {
+  transform: translateY(2px);
+  box-shadow: 
+    inset 0 0 0 1px #000,
+    0 0 8px rgba(184, 134, 11, 0.2),
+    0 3px 0 #0a0a0a,
+    0 6px 12px rgba(0, 0, 0, 0.6);
 }
 
 .error-message {
-  margin-top: 25px;
-  padding: 20px;
+  margin: 0;
+  padding: 30px 50px;
   background: 
     repeating-linear-gradient(
       45deg,
-      #4a0000,
-      #4a0000 10px,
-      #3a0000 10px,
-      #3a0000 20px
+      #1a0000,
+      #1a0000 10px,
+      #0a0000 10px,
+      #0a0000 20px
     );
-  border: 4px solid #8b0000;
+  border: 3px solid #ff0000;
+  border-radius: 15px;
   box-shadow: 
-    inset 0 0 20px rgba(0, 0, 0, 0.5),
-    0 4px 0 rgba(0, 0, 0, 0.3);
-  color: #ff6b6b;
-  font-size: 0.65rem;
-  line-height: 1.6;
-  text-shadow: 1px 1px 0 #000;
+    inset 0 0 0 2px #000,
+    inset 0 0 40px rgba(255, 0, 0, 0.4),
+    0 0 40px rgba(255, 0, 0, 0.7),
+    0 8px 0 #0a0a0a,
+    0 14px 30px rgba(0, 0, 0, 0.9);
+  color: #ff6666;
+  font-size: 1.1rem;
+  line-height: 2;
+  text-shadow: 
+    0 0 10px rgba(255, 0, 0, 0.8),
+    2px 2px 4px #000;
+  animation: errorPulse 1.5s ease-in-out infinite;
+  position: absolute;
+  bottom: 25%;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 500px;
+  max-width: 700px;
+  letter-spacing: 2px;
+}
+
+@keyframes errorPulse {
+  0%, 100% {
+    border-color: #ff0000;
+    box-shadow: 
+      inset 0 0 0 2px #000,
+      inset 0 0 30px rgba(255, 0, 0, 0.3),
+      0 0 20px rgba(255, 0, 0, 0.5),
+      0 6px 0 #0a0a0a,
+      0 10px 20px rgba(0, 0, 0, 0.8);
+  }
+  50% {
+    border-color: #ff4444;
+    box-shadow: 
+      inset 0 0 0 2px #000,
+      inset 0 0 30px rgba(255, 0, 0, 0.5),
+      0 0 30px rgba(255, 0, 0, 0.7),
+      0 6px 0 #0a0a0a,
+      0 10px 20px rgba(0, 0, 0, 0.8);
+  }
 }
 
 .error-message p {
-  color: #ff6b6b;
-  font-size: 0.65rem;
-  margin-bottom: 15px;
+  color: #ff6666;
+  font-size: 1.1rem;
+  margin-bottom: 25px;
+  letter-spacing: 2px;
 }
 
 .install-link {
   display: inline-block;
-  margin-top: 15px;
-  padding: 12px 20px;
-  background: #8b0000;
+  margin-top: 25px;
+  padding: 18px 40px;
+  background: 
+    linear-gradient(135deg, #1a0000 0%, #3a0000 50%, #1a0000 100%);
   color: #ffd700;
   text-decoration: none;
-  font-size: 0.6rem;
-  border: 3px solid #ff6b6b;
-  box-shadow: 0 4px 0 #4a0000;
-  transition: all 0.1s;
-  text-shadow: 1px 1px 0 #000;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  border: 3px solid #ff0000;
+  border-radius: 10px;
+  box-shadow: 
+    inset 0 0 0 2px #000,
+    0 0 25px rgba(255, 0, 0, 0.7),
+    0 8px 0 #0a0000,
+    0 14px 25px rgba(0, 0, 0, 0.8);
+  transition: all 0.3s ease;
+  text-shadow: 
+    0 0 10px rgba(255, 215, 0, 0.8),
+    2px 2px 4px #000;
 }
 
 .install-link:hover {
-  background: #a00000;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 0 #4a0000;
+  background: 
+    linear-gradient(135deg, #3a0000 0%, #5a0000 50%, #3a0000 100%);
+  border-color: #ff4444;
+  color: #ffed4e;
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 
+    inset 0 0 0 2px #000,
+    0 0 40px rgba(255, 0, 0, 0.9),
+    0 0 60px rgba(255, 0, 0, 0.6),
+    0 12px 0 #0a0000,
+    0 18px 30px rgba(0, 0, 0, 0.9);
 }
 
 .install-link:active {
-  transform: translateY(2px);
-  box-shadow: 0 2px 0 #4a0000;
+  transform: translateY(4px);
+  box-shadow: 
+    inset 0 0 0 2px #000,
+    0 0 15px rgba(255, 0, 0, 0.5),
+    0 4px 0 #0a0000,
+    0 8px 15px rgba(0, 0, 0, 0.7);
 }
 
 .success-message {
-  color: #7fff00;
-  font-size: 0.85rem;
+  color: #00ff00;
+  font-size: 1.1rem;
   text-shadow: 
-    2px 2px 0 #000,
-    0 0 10px #7fff00;
+    0 0 10px #00ff00,
+    0 0 20px #00ff00,
+    2px 2px 0 #000;
   line-height: 2;
+  animation: successGlow 1s ease-in-out infinite alternate;
+}
+
+@keyframes successGlow {
+  0% {
+    filter: brightness(1);
+  }
+  100% {
+    filter: brightness(1.5);
+  }
 }
 
 .success-message p {
-  color: #7fff00;
-  margin-bottom: 20px;
+  color: #00ff00;
+  margin-bottom: 25px;
+  font-size: 1.1rem;
 }
 
 .wallet-address {
-  font-family: 'Press Start 2P', cursive;
-  font-size: 0.6rem;
-  color: #d4af37;
-  margin-top: 15px;
-  padding: 15px;
-  background: rgba(0, 0, 0, 0.5);
-  border: 2px solid #8b7355;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
-  text-shadow: 1px 1px 0 #000;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ffd700;
+  margin-top: 20px;
+  padding: 20px;
+  background: 
+    repeating-conic-gradient(
+      from 0deg at 2px 2px,
+      #000 0deg 90deg,
+      #0a0a0a 90deg 180deg,
+      #000 180deg 270deg,
+      #0a0a0a 270deg 360deg
+    ),
+    #000;
+  background-size: 4px 4px, 100% 100%;
+  border: 2px solid #ffd700;
+  box-shadow: 
+    inset 0 0 0 1px #000,
+    inset 0 0 20px rgba(255, 215, 0, 0.2),
+    0 0 15px rgba(255, 215, 0, 0.4),
+    0 4px 0 #0a0a0a,
+    0 8px 15px rgba(0, 0, 0, 0.7);
+  text-shadow: 
+    0 0 5px rgba(255, 215, 0, 0.5),
+    1px 1px 2px #000;
+  letter-spacing: 2px;
 }
 
 .waiting-message {
-  margin-top: 20px;
-  color: #87ceeb;
-  font-size: 0.65rem;
-  line-height: 1.8;
-  text-shadow: 1px 1px 0 #000;
-  animation: blink 1.5s step-start infinite;
+  margin: 0;
+  color: #00ffff;
+  font-size: 1.3rem;
+  line-height: 2;
+  text-shadow: 
+    0 0 15px #00ffff,
+    0 0 30px #00ffff,
+    2px 2px 4px #000;
+  animation: blink 1.5s ease-in-out infinite;
+  position: absolute;
+  bottom: 25%;
+  left: 50%;
+  transform: translateX(-50%);
+  letter-spacing: 3px;
 }
 
 .loading-message {
-  margin-top: 20px;
+  margin-top: 25px;
   color: #ffd700;
-  font-size: 0.7rem;
+  font-size: 1rem;
+  font-weight: 700;
   text-shadow: 
-    2px 2px 0 #000,
-    0 0 10px #ffd700;
-  animation: pixelPulse 1s steps(2) infinite;
+    0 0 10px #ffd700,
+    0 0 20px #ffd700,
+    2px 2px 0 #000;
+  animation: loadingPulse 1s ease-in-out infinite;
   line-height: 1.8;
 }
 
@@ -251,17 +567,502 @@
     opacity: 1;
   }
   50%, 100% {
-    opacity: 0.3;
+    opacity: 0.4;
   }
 }
 
-@keyframes pixelPulse {
+@keyframes loadingPulse {
   0%, 100% {
     transform: scale(1);
     filter: brightness(1);
   }
   50% {
     transform: scale(1.05);
+    filter: brightness(1.5);
+  }
+}
+
+/* 火焰粒子效果 */
+.flame-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.flame-particle {
+  position: absolute;
+  bottom: -20px;
+  width: 3px;
+  height: 15px;
+  background: linear-gradient(
+    to top,
+    rgba(212, 175, 55, 0.7) 0%,
+    rgba(184, 134, 11, 0.5) 50%,
+    transparent 100%
+  );
+  border-radius: 50%;
+  filter: blur(2px);
+  animation: flameRise 4s ease-in infinite;
+  box-shadow: 
+    0 0 8px rgba(212, 175, 55, 0.4),
+    0 0 15px rgba(184, 134, 11, 0.3);
+  opacity: 0.6;
+}
+
+@keyframes flameRise {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-50vh) scale(1.5);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-100vh) scale(0.5);
+    opacity: 0;
+  }
+}
+
+/* 标题火焰效果 */
+.title-fire {
+  position: relative;
+  display: inline-block;
+}
+
+.title-fire::before {
+  display: none;
+}
+
+@keyframes fireFlicker {
+  0% {
+    opacity: 0.8;
+    transform: translateY(0px) scaleY(1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(-3px) scaleY(1.05);
+  }
+}
+
+/* 马赛克边框装饰 - 屏幕四角 */
+.wallet-registration-box .mosaic-corner {
+  position: fixed;
+  width: 80px;
+  height: 80px;
+  background: 
+    repeating-conic-gradient(
+      from 0deg at 2px 2px,
+      #d4af37 0deg 90deg,
+      #1a1a18 90deg 180deg,
+      #d4af37 180deg 270deg,
+      #1a1a18 270deg 360deg
+    );
+  background-size: 8px 8px;
+  box-shadow: 
+    0 0 25px rgba(212, 175, 55, 0.5),
+    inset 0 0 20px rgba(0, 0, 0, 0.6);
+  animation: mosaicPulse 3s ease-in-out infinite;
+  z-index: 10;
+  opacity: 0.8;
+  border-radius: 50%;
+}
+
+.mosaic-corner.top-left {
+  top: 10px;
+  left: 10px;
+  clip-path: ellipse(80% 80% at 0% 0%);
+}
+
+.mosaic-corner.top-right {
+  top: 10px;
+  right: 10px;
+  clip-path: ellipse(80% 80% at 100% 0%);
+}
+
+.mosaic-corner.bottom-left {
+  bottom: 10px;
+  left: 10px;
+  clip-path: ellipse(80% 80% at 0% 100%);
+}
+
+.mosaic-corner.bottom-right {
+  bottom: 10px;
+  right: 10px;
+  clip-path: ellipse(80% 80% at 100% 100%);
+}
+
+@keyframes mosaicPulse {
+  0%, 100% {
+    filter: brightness(1);
+    transform: scale(1);
+  }
+  50% {
+    filter: brightness(1.5);
+    transform: scale(1.1);
+  }
+}
+
+
+
+/* 扫描线动画增强 */
+@media (prefers-reduced-motion: no-preference) {
+  .wallet-registration-overlay {
+    animation: scanlines 8s linear infinite, backgroundShift 20s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes backgroundShift {
+  0% {
+    background-position: 0 0, 0 0, 0 0, 0 0;
+  }
+  100% {
+    background-position: 100px 100px, 100px 100px, 0 0, 0 0;
+  }
+}
+
+
+
+/* 增强的火焰光晕 */
+.wallet-registration-box::after {
+  animation: flameFlicker 0.3s ease-in-out infinite alternate, flamePulse 2s ease-in-out infinite;
+}
+
+@keyframes flamePulse {
+  0%, 100% {
+    filter: blur(20px);
+    opacity: 0.6;
+  }
+  50% {
+    filter: blur(30px);
+    opacity: 0.9;
+  }
+}
+
+/* 按钮按下时的火花效果 */
+.connect-button:active:not(:disabled)::before {
+  animation: none;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 215, 0, 0.6) 30%,
+    transparent 60%
+  );
+}
+
+
+
+/* 数字雨效果（可选） */
+.digital-rain {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.1;
+}
+
+.digital-rain span {
+  position: absolute;
+  top: -100px;
+  font-family: 'Courier New', monospace;
+  font-size: 20px;
+  color: #ffd700;
+  animation: rainFall 5s linear infinite;
+}
+
+@keyframes rainFall {
+  0% {
+    top: -100px;
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+/* 80年代扫描线边框 */
+.screen-border {
+  position: fixed;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0.6;
+}
+
+.screen-border.top,
+.screen-border.bottom {
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    #d4af37 20%,
+    #d4af37 80%,
+    transparent 100%
+  );
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+}
+
+.screen-border.top {
+  top: 0;
+}
+
+.screen-border.bottom {
+  bottom: 0;
+}
+
+.screen-border.left,
+.screen-border.right {
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    #d4af37 20%,
+    #d4af37 80%,
+    transparent 100%
+  );
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+}
+
+.screen-border.left {
+  left: 0;
+}
+
+.screen-border.right {
+  right: 0;
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  .wallet-registration-box {
+    max-width: 700px;
+    gap: 40px;
+  }
+  
+  .wallet-registration-box h2 {
+    font-size: 3rem;
+    letter-spacing: 10px;
+  }
+  
+  .connect-button {
+    padding: 16px 45px;
+    font-size: 1rem;
+    max-width: 400px;
+  }
+  
+  .tutorial-button {
+    padding: 13px 35px;
+    font-size: 0.85rem;
+    max-width: 350px;
+  }
+}
+
+@media (max-width: 768px) {
+  .wallet-registration-box {
+    max-width: 90%;
+    gap: 35px;
+  }
+  
+  .wallet-registration-box h2 {
+    font-size: 2.5rem;
+    letter-spacing: 8px;
+  }
+  
+  .wallet-registration-box p {
+    font-size: 0.9rem;
+    letter-spacing: 1.5px;
+  }
+  
+  .connect-button {
+    padding: 15px 40px;
+    font-size: 0.95rem;
+    letter-spacing: 2px;
+  }
+  
+  .tutorial-button {
+    padding: 12px 30px;
+    font-size: 0.8rem;
+    letter-spacing: 1.5px;
+  }
+  
+  .flame-particle {
+    width: 2px;
+    height: 12px;
+  }
+  
+  .mosaic-corner {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .error-message {
+    min-width: auto;
+    width: 85%;
+    padding: 20px 30px;
+    font-size: 0.9rem;
+  }
+  
+  .waiting-message {
+    font-size: 1rem;
+    width: 85%;
+  }
+}
+
+@media (max-width: 480px) {
+  .wallet-registration-box {
+    gap: 30px;
+  }
+  
+  .wallet-registration-box h2 {
+    font-size: 1.8rem;
+    letter-spacing: 4px;
+  }
+  
+  .wallet-registration-box p {
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+  }
+  
+  .connect-button {
+    padding: 14px 30px;
+    font-size: 0.85rem;
+    letter-spacing: 1.5px;
+  }
+  
+  .tutorial-button {
+    padding: 11px 25px;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+  }
+  
+  .mosaic-corner {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .error-message {
+    width: 90%;
+    padding: 18px 25px;
+    font-size: 0.75rem;
+  }
+  
+  .error-message p {
+    font-size: 0.75rem;
+  }
+  
+  .install-link {
+    padding: 14px 30px;
+    font-size: 0.8rem;
+    letter-spacing: 1.5px;
+  }
+  
+  .waiting-message {
+    font-size: 0.85rem;
+    width: 90%;
+  }
+  
+  .screen-border {
+    opacity: 0.3;
+  }
+}
+
+
+
+/* 成功消息样式优化 */
+.success-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  max-width: 800px;
+}
+
+.success-message .wallet-address {
+  position: static;
+  transform: none;
+  margin: 30px auto 0;
+  max-width: 600px;
+}
+
+.success-message .loading-message {
+  position: static;
+  transform: none;
+  margin-top: 30px;
+}
+
+
+
+/* 按钮连接状态 */
+.connect-button.connecting {
+  animation: connectingPulse 1s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes connectingPulse {
+  0%, 100% {
+    box-shadow: 
+      inset 0 0 0 3px #000,
+      inset 0 0 0 6px #ffd700,
+      0 0 40px rgba(255, 215, 0, 0.8),
+      0 0 80px rgba(255, 215, 0, 0.6),
+      0 12px 0 #0a0a0a,
+      0 20px 40px rgba(0, 0, 0, 0.9);
+  }
+  50% {
+    box-shadow: 
+      inset 0 0 0 3px #000,
+      inset 0 0 0 6px #ffed4e,
+      0 0 60px rgba(255, 215, 0, 1),
+      0 0 120px rgba(255, 215, 0, 0.8),
+      0 12px 0 #0a0a0a,
+      0 20px 40px rgba(0, 0, 0, 0.9);
+  }
+}
+
+/* 增强马赛克角的动画 */
+@keyframes mosaicPulse {
+  0%, 100% {
+    opacity: 0.7;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 0.9;
     filter: brightness(1.3);
   }
+}
+
+/* 屏幕边框动画 */
+.screen-border {
+  animation: borderGlow 4s ease-in-out infinite alternate;
+}
+
+@keyframes borderGlow {
+  0% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0.8;
+  }
+}
+
+
+
+/* 禁用状态优化 */
+.connect-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: grayscale(1) brightness(0.5);
 }

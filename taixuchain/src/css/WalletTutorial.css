@@ -1,0 +1,999 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+.tutorial-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      rgba(212, 175, 55, 0.02) 0px,
+      transparent 2px,
+      transparent 4px,
+      rgba(212, 175, 55, 0.02) 6px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(212, 175, 55, 0.02) 0px,
+      transparent 2px,
+      transparent 4px,
+      rgba(212, 175, 55, 0.02) 6px
+    ),
+    rgba(10, 10, 8, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+.tutorial-modal {
+  background: 
+    repeating-conic-gradient(
+      from 0deg at 2px 2px,
+      #1a1a18 0deg 90deg,
+      #0a0a08 90deg 180deg,
+      #1a1a18 180deg 270deg,
+      #0a0a08 270deg 360deg
+    ),
+    linear-gradient(135deg, #1a1a18 0%, #0a0a08 100%);
+  background-size: 4px 4px, 100% 100%;
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 700px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: 
+    inset 0 0 0 2px #d4af37,
+    inset 0 0 0 5px #1a1a18,
+    0 0 35px rgba(212, 175, 55, 0.5),
+    0 0 70px rgba(212, 175, 55, 0.3),
+    0 15px 50px rgba(0, 0, 0, 0.9);
+  border: 3px solid #d4af37;
+  position: relative;
+  animation: slideUp 0.4s ease;
+  font-family: 'Orbitron', sans-serif;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tutorial-language-toggle {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background: linear-gradient(135deg, #2a2a28 0%, #1a1a18 100%);
+  border: 2px solid #b8860b;
+  color: #d4af37;
+  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  font-family: 'Orbitron', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 
+    inset 0 0 0 1px #1a1a18,
+    0 0 10px rgba(184, 134, 11, 0.3),
+    0 4px 8px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
+}
+
+.tutorial-language-toggle:hover {
+  background: linear-gradient(135deg, #3a3a35 0%, #2a2a28 100%);
+  border-color: #d4af37;
+  color: #f0e68c;
+  transform: translateY(-2px);
+  box-shadow: 
+    inset 0 0 0 1px #1a1a18,
+    0 0 12px rgba(212, 175, 55, 0.5),
+    0 5px 0 #0a0a08;
+}
+
+.tutorial-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: linear-gradient(135deg, #2a2a28 0%, #1a1a18 100%);
+  border: 2px solid #d4af37;
+  color: #d4af37;
+  font-size: 28px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 
+    inset 0 0 0 1px #1a1a18,
+    0 0 12px rgba(212, 175, 55, 0.4),
+    0 4px 8px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 0 6px rgba(212, 175, 55, 0.6);
+}
+
+.tutorial-close:hover {
+  background: linear-gradient(135deg, #3a3a35 0%, #2a2a28 100%);
+  border-color: #f0e68c;
+  color: #f0e68c;
+  transform: rotate(90deg);
+  box-shadow: 
+    inset 0 0 0 1px #1a1a18,
+    0 0 15px rgba(240, 230, 140, 0.5),
+    0 5px 0 #0a0a08;
+}
+
+.tutorial-header {
+  text-align: center;
+  margin-bottom: 30px;
+  border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+  padding-bottom: 20px;
+  width: 100%;
+}
+
+.tutorial-header h2 {
+  color: #ffed4e;
+  font-size: 2rem;
+  margin: 0 0 10px 0;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 6px;
+  text-shadow: 
+    0 0 15px rgba(255, 237, 78, 0.8),
+    0 0 25px rgba(255, 215, 0, 0.6),
+    0 0 35px rgba(212, 175, 55, 0.4),
+    2px 2px 0 #000;
+  filter: brightness(1.2);
+}
+
+.tutorial-progress {
+  color: #d4af37;
+  font-size: 16px;
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
+  letter-spacing: 2px;
+}
+
+.tutorial-content {
+  margin-bottom: 30px;
+  min-height: 300px;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  width: 100%;
+}
+
+.tutorial-content h3 {
+  color: #f0e68c;
+  font-size: 1.3rem;
+  margin-bottom: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  text-shadow: 
+    0 0 10px rgba(240, 230, 140, 0.5),
+    1px 1px 2px #000;
+}
+
+.tutorial-content p {
+  color: #aaa;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  margin-bottom: 20px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  letter-spacing: 1px;
+}
+
+.tutorial-image-placeholder {
+  background: 
+    repeating-conic-gradient(
+      from 0deg at 1px 1px,
+      rgba(184, 134, 11, 0.1) 0deg 90deg,
+      rgba(10, 10, 8, 0.5) 90deg 180deg,
+      rgba(184, 134, 11, 0.1) 180deg 270deg,
+      rgba(10, 10, 8, 0.5) 270deg 360deg
+    ),
+    rgba(10, 10, 8, 0.3);
+  background-size: 3px 3px, 100% 100%;
+  border: 2px dashed rgba(212, 175, 55, 0.4);
+  border-radius: 15px;
+  padding: 60px 20px;
+  text-align: center;
+  margin: 20px 0;
+  box-shadow: 
+    inset 0 0 25px rgba(0, 0, 0, 0.6),
+    0 0 10px rgba(212, 175, 55, 0.1);
+}
+
+.tutorial-image-placeholder span {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 10px;
+  filter: grayscale(0.5) brightness(0.8);
+}
+
+.tutorial-image-placeholder p {
+  color: rgba(170, 170, 170, 0.6);
+  font-size: 13px;
+  margin: 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  letter-spacing: 1px;
+}
+
+.tutorial-link {
+  display: inline-block;
+  background: linear-gradient(135deg, #d4af37 0%, #f0e68c 50%, #d4af37 100%);
+  color: #1a1a1a;
+  padding: 12px 24px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+  border: 2px solid #1a1a1a;
+  box-shadow: 
+    inset 0 0 0 1px #1a1a1a,
+    0 0 15px rgba(212, 175, 55, 0.4),
+    0 5px 12px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
+  font-family: 'Orbitron', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 13px;
+}
+
+.tutorial-link:hover {
+  background: linear-gradient(135deg, #f0e68c 0%, #fff8dc 50%, #f0e68c 100%);
+  transform: translateY(-2px);
+  box-shadow: 
+    inset 0 0 0 1px #1a1a1a,
+    0 0 20px rgba(212, 175, 55, 0.5),
+    0 6px 0 #0a0a08;
+}
+
+.tutorial-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding-top: 20px;
+  border-top: 2px solid rgba(212, 175, 55, 0.3);
+  width: 100%;
+}
+
+.tutorial-btn {
+  padding: 12px 28px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  min-width: 120px;
+}
+
+.tutorial-btn-prev {
+  background: linear-gradient(135deg, #2a2a28 0%, #1a1a18 100%);
+  color: #b8860b;
+  border: 2px solid #b8860b;
+  box-shadow: 
+    inset 0 0 0 1px #1a1a18,
+    0 0 10px rgba(184, 134, 11, 0.2),
+    0 4px 0 #0a0a08;
+  text-shadow: 0 0 4px rgba(184, 134, 11, 0.3);
+  font-family: 'Orbitron', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.tutorial-btn-prev:hover:not(:disabled) {
+  background: linear-gradient(135deg, #3a3a35 0%, #2a2a28 100%);
+  border-color: #d4af37;
+  color: #d4af37;
+  transform: translateX(-3px);
+  box-shadow: 
+    inset 0 0 0 1px #1a1a18,
+    0 0 15px rgba(212, 175, 55, 0.4),
+    0 6px 0 #0a0a08;
+}
+
+.tutorial-btn-prev:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
+.tutorial-btn-next {
+  background: linear-gradient(135deg, #d4af37 0%, #f0e68c 50%, #d4af37 100%);
+  color: #1a1a1a;
+  border: 2px solid #1a1a1a;
+  box-shadow: 
+    inset 0 0 0 1px #1a1a1a,
+    inset 0 0 0 3px rgba(212, 175, 55, 0.5),
+    0 0 15px rgba(212, 175, 55, 0.3),
+    0 4px 0 #0a0a08;
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
+  font-family: 'Orbitron', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 700;
+}
+
+.tutorial-btn-next:hover {
+  background: linear-gradient(135deg, #f0e68c 0%, #fff8dc 50%, #f0e68c 100%);
+  transform: translateX(3px);
+  box-shadow: 
+    inset 0 0 0 1px #1a1a1a,
+    inset 0 0 0 3px rgba(240, 230, 140, 0.6),
+    0 0 25px rgba(212, 175, 55, 0.5),
+    0 6px 0 #0a0a08;
+}
+
+.tutorial-dots {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.tutorial-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(184, 134, 11, 0.4);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid rgba(184, 134, 11, 0.6);
+  box-shadow: 0 0 5px rgba(184, 134, 11, 0.2);
+}
+
+.tutorial-dot.active {
+  background: #d4af37;
+  width: 14px;
+  height: 14px;
+  box-shadow: 
+    0 0 12px rgba(212, 175, 55, 0.7),
+    inset 0 0 6px rgba(255, 237, 78, 0.5);
+  border-color: #f0e68c;
+  border-width: 3px;
+}
+
+.tutorial-dot:hover {
+  background: rgba(212, 175, 55, 0.6);
+  transform: scale(1.15);
+  border-color: #d4af37;
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 滚动条样式 */
+.tutorial-modal::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tutorial-modal::-webkit-scrollbar-track {
+  background: rgba(10, 10, 8, 0.5);
+  border-radius: 4px;
+}
+
+.tutorial-modal::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.4);
+  border-radius: 4px;
+  border: 1px solid rgba(184, 134, 11, 0.6);
+}
+
+.tutorial-modal::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 55, 0.6);
+}
+
+/* 手机端隐藏滚动条但保持功能 */
+@media (max-width: 768px) {
+  .tutorial-modal::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .tutorial-modal {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(212, 175, 55, 0.4) transparent;
+  }
+}
+
+/* 确认关闭对话框 */
+.tutorial-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 10, 8, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10001;
+  animation: fadeIn 0.2s ease;
+  backdrop-filter: blur(3px);
+}
+
+.tutorial-confirm-box {
+  background: 
+    repeating-conic-gradient(
+      from 0deg at 2px 2px,
+      #1a1a18 0deg 90deg,
+      #0a0a08 90deg 180deg,
+      #1a1a18 180deg 270deg,
+      #0a0a08 270deg 360deg
+    ),
+    linear-gradient(135deg, #1a1a18 0%, #0a0a08 100%);
+  background-size: 4px 4px, 100% 100%;
+  border-radius: 20px;
+  padding: 35px;
+  max-width: 450px;
+  width: 85%;
+  box-shadow: 
+    inset 0 0 0 2px #d4af37,
+    inset 0 0 0 5px #1a1a18,
+    0 0 30px rgba(212, 175, 55, 0.5),
+    0 15px 50px rgba(0, 0, 0, 0.9);
+  border: 3px solid #d4af37;
+  animation: slideUp 0.3s ease;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.tutorial-confirm-box h3 {
+  color: #f0e68c;
+  font-size: 1.1rem;
+  margin: 0 0 25px 0;
+  text-align: center;
+  line-height: 1.6;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 
+    0 0 10px rgba(240, 230, 140, 0.5),
+    1px 1px 2px #000;
+}
+
+.tutorial-confirm-box h3 {
+  color: #fff;
+  font-size: 18px;
+  margin: 0 0 25px 0;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.tutorial-confirm-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.tutorial-confirm-btn {
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  flex: 1;
+}
+
+.tutorial-confirm-yes {
+  background: linear-gradient(135deg, #3a1010 0%, #2a0808 100%);
+  color: #ff6666;
+  border: 2px solid #8b0000;
+  box-shadow: 
+    inset 0 0 0 1px #1a0000,
+    0 0 12px rgba(139, 0, 0, 0.3),
+    0 4px 0 #0a0000;
+  text-shadow: 0 0 5px rgba(255, 102, 102, 0.5);
+  font-family: 'Orbitron', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.tutorial-confirm-yes:hover {
+  background: linear-gradient(135deg, #4a1818 0%, #3a1010 100%);
+  border-color: #a00000;
+  color: #ff8888;
+  transform: translateY(-2px);
+  box-shadow: 
+    inset 0 0 0 1px #1a0000,
+    0 0 18px rgba(160, 0, 0, 0.5),
+    0 6px 0 #0a0000;
+}
+
+.tutorial-confirm-no {
+  background: linear-gradient(135deg, #d4af37 0%, #f0e68c 50%, #d4af37 100%);
+  color: #1a1a1a;
+  border: 2px solid #1a1a1a;
+  box-shadow: 
+    inset 0 0 0 1px #1a1a1a,
+    0 0 12px rgba(212, 175, 55, 0.3),
+    0 4px 0 #0a0a08;
+  text-shadow: 0 0 3px rgba(255, 255, 255, 0.3);
+  font-family: 'Orbitron', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+.tutorial-confirm-no:hover {
+  background: linear-gradient(135deg, #f0e68c 0%, #fff8dc 50%, #f0e68c 100%);
+  transform: translateY(-2px);
+  box-shadow: 
+    inset 0 0 0 1px #1a1a1a,
+    0 0 20px rgba(212, 175, 55, 0.5),
+    0 6px 0 #0a0a08;
+}
+
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  .tutorial-modal {
+    max-width: 650px;
+    padding: 35px;
+  }
+
+  .tutorial-header h2 {
+    font-size: 1.8rem;
+    letter-spacing: 5px;
+  }
+
+  .tutorial-content h3 {
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+  }
+}
+
+@media (max-width: 768px) {
+  .tutorial-modal {
+    padding: 55px 20px 25px 20px;
+    width: 95%;
+    max-height: 90vh;
+    border-radius: 15px;
+  }
+
+  .tutorial-language-toggle {
+    font-size: 11px;
+    padding: 6px 12px;
+    top: 10px;
+    left: 10px;
+    border-radius: 15px;
+    z-index: 10;
+  }
+
+  .tutorial-close {
+    width: 36px;
+    height: 36px;
+    font-size: 24px;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+  }
+
+  .tutorial-header {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+  }
+
+  .tutorial-header h2 {
+    font-size: 1.5rem;
+    letter-spacing: 4px;
+    margin-bottom: 8px;
+  }
+
+  .tutorial-progress {
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+
+  .tutorial-content {
+    min-height: 250px;
+    margin-bottom: 25px;
+  }
+
+  .tutorial-content h3 {
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+
+  .tutorial-content p {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    letter-spacing: 0.5px;
+  }
+
+  .tutorial-image-placeholder {
+    padding: 50px 15px;
+    margin: 15px 0;
+    border-radius: 12px;
+  }
+
+  .tutorial-image-placeholder span {
+    font-size: 40px;
+  }
+
+  .tutorial-image-placeholder p {
+    font-size: 12px;
+  }
+
+  .tutorial-link {
+    padding: 11px 20px;
+    font-size: 12px;
+    border-radius: 8px;
+    display: block;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .tutorial-navigation {
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 15px;
+  }
+
+  .tutorial-btn {
+    width: 100%;
+    padding: 12px 24px;
+    font-size: 13px;
+    min-width: auto;
+    border-radius: 8px;
+  }
+
+  .tutorial-dots {
+    order: -1;
+    gap: 6px;
+  }
+
+  .tutorial-dot {
+    width: 8px;
+    height: 8px;
+  }
+
+  .tutorial-dot.active {
+    width: 12px;
+    height: 12px;
+  }
+
+  .tutorial-confirm-box {
+    padding: 25px 20px;
+    width: 90%;
+    border-radius: 15px;
+  }
+
+  .tutorial-confirm-box h3 {
+    font-size: 1rem;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+  }
+
+  .tutorial-confirm-buttons {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .tutorial-confirm-btn {
+    width: 100%;
+    padding: 11px 20px;
+    font-size: 12px;
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tutorial-modal {
+    padding: 50px 18px 22px 18px;
+    width: 96%;
+    border-radius: 12px;
+  }
+
+  .tutorial-language-toggle {
+    font-size: 10px;
+    padding: 5px 10px;
+    top: 8px;
+    left: 8px;
+  }
+
+  .tutorial-close {
+    width: 32px;
+    height: 32px;
+    font-size: 22px;
+    top: 8px;
+    right: 8px;
+  }
+
+  .tutorial-header {
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    margin-top: 0;
+  }
+
+  .tutorial-header h2 {
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    margin: 0 0 8px 0;
+    padding: 0 5px;
+  }
+
+  .tutorial-progress {
+    font-size: 12px;
+    padding: 0 5px;
+  }
+
+  .tutorial-content {
+    min-height: 200px;
+    margin-bottom: 20px;
+  }
+
+  .tutorial-content h3 {
+    font-size: 1rem;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    padding: 0 2px;
+  }
+
+  .tutorial-content p {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    padding: 0 2px;
+  }
+
+  .tutorial-image-placeholder {
+    padding: 40px 10px;
+    margin: 12px 0;
+    border-radius: 10px;
+  }
+
+  .tutorial-image-placeholder span {
+    font-size: 36px;
+    margin-bottom: 8px;
+  }
+
+  .tutorial-image-placeholder p {
+    font-size: 11px;
+  }
+
+  .tutorial-link {
+    padding: 10px 18px;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    border-radius: 6px;
+  }
+
+  .tutorial-navigation {
+    gap: 10px;
+    padding-top: 12px;
+    width: 100%;
+  }
+
+  .tutorial-btn {
+    padding: 12px 20px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    border-radius: 8px;
+    width: 100%;
+  }
+
+  .tutorial-dots {
+    gap: 6px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .tutorial-dot {
+    width: 7px;
+    height: 7px;
+    border-width: 1px;
+  }
+
+  .tutorial-dot.active {
+    width: 10px;
+    height: 10px;
+    border-width: 2px;
+  }
+
+  .tutorial-confirm-box {
+    padding: 20px 18px;
+    width: 92%;
+    border-radius: 12px;
+  }
+
+  .tutorial-confirm-box h3 {
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    margin-bottom: 18px;
+    line-height: 1.5;
+  }
+
+  .tutorial-confirm-buttons {
+    gap: 10px;
+  }
+
+  .tutorial-confirm-btn {
+    padding: 10px 18px;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    border-radius: 6px;
+  }
+}
+
+@media (max-width: 360px) {
+  .tutorial-modal {
+    padding: 20px 15px;
+  }
+
+  .tutorial-header h2 {
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+  }
+
+  .tutorial-content h3 {
+    font-size: 0.95rem;
+  }
+
+  .tutorial-content p {
+    font-size: 0.8rem;
+  }
+
+  .tutorial-btn {
+    padding: 10px 16px;
+    font-size: 11px;
+  }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+  .tutorial-btn,
+  .tutorial-link,
+  .tutorial-close,
+  .tutorial-language-toggle,
+  .tutorial-dot,
+  .tutorial-confirm-btn {
+    -webkit-tap-highlight-color: rgba(212, 175, 55, 0.2);
+    touch-action: manipulation;
+  }
+
+  .tutorial-btn:active,
+  .tutorial-link:active,
+  .tutorial-close:active,
+  .tutorial-language-toggle:active,
+  .tutorial-confirm-btn:active {
+    transform: scale(0.98);
+  }
+}
+
+/* 防止手机端文字选择 */
+.tutorial-header h2,
+.tutorial-progress,
+.tutorial-btn,
+.tutorial-link,
+.tutorial-close,
+.tutorial-language-toggle {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* 确保内容可选择 */
+.tutorial-content p,
+.tutorial-content h3 {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* 横屏模式优化 */
+@media (max-height: 500px) and (orientation: landscape) {
+  .tutorial-modal {
+    max-height: 95vh;
+    padding: 20px 30px;
+  }
+
+  .tutorial-header {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+  }
+
+  .tutorial-header h2 {
+    font-size: 1.3rem;
+    margin-bottom: 5px;
+  }
+
+  .tutorial-content {
+    min-height: 150px;
+    margin-bottom: 15px;
+  }
+
+  .tutorial-content h3 {
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+
+  .tutorial-content p {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  .tutorial-image-placeholder {
+    padding: 30px 15px;
+    margin: 10px 0;
+  }
+
+  .tutorial-navigation {
+    padding-top: 10px;
+  }
+}
+
+/* 超小屏幕优化 */
+@media (max-width: 320px) {
+  .tutorial-modal {
+    padding: 48px 12px 20px 12px;
+  }
+
+  .tutorial-header h2 {
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    padding: 0 3px;
+  }
+
+  .tutorial-content h3 {
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    padding: 0 3px;
+  }
+
+  .tutorial-content p {
+    font-size: 0.75rem;
+    padding: 0 3px;
+  }
+
+  .tutorial-btn {
+    padding: 10px 16px;
+    font-size: 10px;
+  }
+
+  .tutorial-language-toggle,
+  .tutorial-close {
+    top: 6px;
+  }
+
+  .tutorial-language-toggle {
+    left: 6px;
+    font-size: 9px;
+    padding: 4px 8px;
+  }
+
+  .tutorial-close {
+    right: 6px;
+    width: 28px;
+    height: 28px;
+    font-size: 20px;
+  }
+}

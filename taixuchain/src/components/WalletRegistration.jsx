@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import WalletTutorial from './WalletTutorial'
 import '../css/WalletRegistration.css'
 
 function WalletRegistration({ onRegistrationSuccess }) {
@@ -6,6 +7,7 @@ function WalletRegistration({ onRegistrationSuccess }) {
   const [error, setError] = useState('')
   const [isConnecting, setIsConnecting] = useState(false)
   const [providerReady, setProviderReady] = useState(false)
+  const [showTutorial, setShowTutorial] = useState(false)
 
   // 等待钱包扩展注入
   useEffect(() => {
@@ -174,50 +176,96 @@ function WalletRegistration({ onRegistrationSuccess }) {
   }
 
   return (
-    <div className="wallet-registration-overlay">
-      <div className="wallet-registration-box">
-        <h2>Welcome to Taixu Chain</h2>
-        <p>Please connect your OneChain wallet to start the game</p>
+    <>
+      <div className="wallet-registration-overlay">
+        {/* 80年代屏幕边框 */}
+        <div className="screen-border top"></div>
+        <div className="screen-border bottom"></div>
+        <div className="screen-border left"></div>
+        <div className="screen-border right"></div>
         
-        {!walletAddress ? (
-          <>
-            <button 
-              onClick={connectWallet} 
-              disabled={isConnecting}
-              className="connect-button"
-            >
-              {isConnecting ? 'Connecting...' : 'Connect OneChain Wallet'}
-            </button>
-            
-            {error && (
-              <div className="error-message">
-                <p>{error}</p>
-                {error.includes('install') && (
-                  <a 
-                    href="https://chromewebstore.google.com/detail/onechain/gclmcgmpkgblaglfokkaclneihpnbkli"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="install-link"
-                  >
-                    Install OneChain Wallet Extension
-                  </a>
-                )}
-              </div>
-            )}
-            
-            {!providerReady && !error && (
-              <p className="waiting-message">Detecting wallet extension...</p>
-            )}
-          </>
-        ) : (
-          <div className="success-message">
-            <p>✓ Connected Successfully!</p>
-            <p className="wallet-address">Wallet Address: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</p>
-            <p className="loading-message">Loading next scene...</p>
-          </div>
-        )}
+        {/* 火焰粒子效果 */}
+        <div className="flame-particles">
+          {[...Array(30)].map((_, i) => (
+            <div 
+              key={i} 
+              className="flame-particle"
+              style={{
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 4}s`,
+                animationDuration: `${2 + Math.random() * 3}s`
+              }}
+            />
+          ))}
+        </div>
+        
+        <div className="wallet-registration-box">
+          {/* 马赛克装饰角 */}
+          <div className="mosaic-corner top-left"></div>
+          <div className="mosaic-corner top-right"></div>
+          <div className="mosaic-corner bottom-left"></div>
+          <div className="mosaic-corner bottom-right"></div>
+          
+          <h2>
+            <span className="title-fire">TAIXUCHAIN</span>
+          </h2>
+          <p>Connect your OneChain wallet to enter the metaverse</p>
+          
+          {!walletAddress ? (
+            <>
+              <button 
+                onClick={connectWallet} 
+                disabled={isConnecting}
+                className="connect-button"
+              >
+                {isConnecting ? 'Connecting...' : 'Connect OneChain Wallet'}
+              </button>
+              
+              <button 
+                onClick={() => setShowTutorial(true)}
+                className="tutorial-button"
+              >
+                📖 Beginner Tutorial
+              </button>
+              
+              {error && (
+                <div className="error-message">
+                  <p>{error}</p>
+                  {error.includes('install') && (
+                    <a 
+                      href="https://chromewebstore.google.com/detail/onechain/gclmcgmpkgblaglfokkaclneihpnbkli"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="install-link"
+                      onClick={(e) => {
+                        // 点击下载链接时也打开教程
+                        setTimeout(() => setShowTutorial(true), 500)
+                      }}
+                    >
+                      Install OneChain Wallet Extension
+                    </a>
+                  )}
+                </div>
+              )}
+              
+              {!providerReady && !error && (
+                <p className="waiting-message">Detecting wallet extension...</p>
+              )}
+            </>
+          ) : (
+            <div className="success-message">
+              <p>✓ Connected Successfully!</p>
+              <p className="wallet-address">Wallet Address: {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</p>
+              <p className="loading-message">Loading next scene...</p>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+
+      {showTutorial && (
+        <WalletTutorial onClose={() => setShowTutorial(false)} />
+      )}
+    </>
   )
 }
 
