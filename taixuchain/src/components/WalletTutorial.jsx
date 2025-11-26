@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import '../css/WalletTutorial.css'
 
-function WalletTutorial({ onClose }) {
+function WalletTutorial({ onClose, isForced = false, onComplete }) {
   const [currentStep, setCurrentStep] = useState(0)
   const [language, setLanguage] = useState('en') // 'en' or 'zh'
   const [showConfirmClose, setShowConfirmClose] = useState(false)
@@ -114,7 +114,12 @@ function WalletTutorial({ onClose }) {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1)
     } else {
-      onClose()
+      // 到达最后一步
+      if (isForced && onComplete) {
+        onComplete() // 强制模式下调用 onComplete
+      } else {
+        onClose()
+      }
     }
   }
 
@@ -125,6 +130,10 @@ function WalletTutorial({ onClose }) {
   }
 
   const handleCloseClick = () => {
+    // 如果是强制模式，不允许关闭
+    if (isForced) {
+      return
+    }
     setShowConfirmClose(true)
   }
 
@@ -149,7 +158,9 @@ function WalletTutorial({ onClose }) {
         <button className="tutorial-language-toggle" onClick={toggleLanguage}>
           🌐 {t.languageSwitch}
         </button>
-        <button className="tutorial-close" onClick={handleCloseClick}>×</button>
+        {!isForced && (
+          <button className="tutorial-close" onClick={handleCloseClick}>×</button>
+        )}
         
         <div className="tutorial-header">
           <h2>{t.title}</h2>

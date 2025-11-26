@@ -8,6 +8,18 @@ function WalletRegistration({ onRegistrationSuccess }) {
   const [isConnecting, setIsConnecting] = useState(false)
   const [providerReady, setProviderReady] = useState(false)
   const [showTutorial, setShowTutorial] = useState(false)
+  const [isForcedTutorial, setIsForcedTutorial] = useState(false)
+
+  // 检查是否第一次访问
+  useEffect(() => {
+    const hasSeenTutorial = localStorage.getItem('taixuchain_tutorial_completed')
+    if (!hasSeenTutorial) {
+      // 第一次访问，强制显示 tutorial
+      setShowTutorial(true)
+      setIsForcedTutorial(true)
+      console.log('🎓 First time visitor - showing mandatory tutorial')
+    }
+  }, [])
 
   // 等待钱包扩展注入
   useEffect(() => {
@@ -222,7 +234,10 @@ function WalletRegistration({ onRegistrationSuccess }) {
               </button>
               
               <button 
-                onClick={() => setShowTutorial(true)}
+                onClick={() => {
+                  setShowTutorial(true)
+                  setIsForcedTutorial(false) // 手动打开的不强制
+                }}
                 className="tutorial-button"
               >
                 📖 Beginner Tutorial
@@ -263,7 +278,17 @@ function WalletRegistration({ onRegistrationSuccess }) {
       </div>
 
       {showTutorial && (
-        <WalletTutorial onClose={() => setShowTutorial(false)} />
+        <WalletTutorial 
+          onClose={() => setShowTutorial(false)} 
+          isForced={isForcedTutorial}
+          onComplete={() => {
+            // 完成教程后记录到 localStorage
+            localStorage.setItem('taixuchain_tutorial_completed', 'true')
+            setShowTutorial(false)
+            setIsForcedTutorial(false)
+            console.log('✅ Tutorial completed and saved to localStorage')
+          }}
+        />
       )}
     </>
   )
