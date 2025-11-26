@@ -65,9 +65,10 @@ function CharacterNaming({ character, onNamingComplete, onBack }) {
       // Register to blockchain
       console.log('Registering character to blockchain...')
       console.log('Character customization:', character.customization)
+      console.log('Character class name:', character.name)
       const result = await createPlayerOnChain(
         name.trim(),
-        character.nameEn, // className (Mage, Warrior, Archer)
+        character.name, // className (Mage, Warrior, Archer)
         window.suiWallet,
         character.customization // 传递角色自定义数据
       )
