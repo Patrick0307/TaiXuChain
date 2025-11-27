@@ -6,6 +6,7 @@ import Inventory from '../Inventory'
 import Marketplace from '../Marketplace'
 import LootBox from './LootBox'
 import WeaponReward from './WeaponReward'
+import MintingLoader from './MintingLoader'
 import { checkPlayerWeapon, mintWeaponForPlayer, mintRandomWeaponForPlayer, getAllPlayerWeapons } from '../../utils/suiClient'
 import websocketClient from '../../services/websocketClient'
 import '../../css/maps/ForestMap.css'
@@ -38,8 +39,10 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
   const [playerCurrentHp, setPlayerCurrentHp] = useState(character.hp) // 玩家当前生命值
   const [lootBoxes, setLootBoxes] = useState([]) // 宝箱列表
   const [showWeaponReward, setShowWeaponReward] = useState(null) // 显示武器奖励弹窗
+  const [isMintingWeapon, setIsMintingWeapon] = useState(false) // 是否正在mint武器
   const lootBoxIdCounter = useRef(0) // 宝箱ID计数器
   const pickingLootBox = useRef(new Set()) // 正在拾取的宝箱ID（防止重复点击）
+  const lastLootBoxOpenTime = useRef(0) // 上次打开宝箱的时间
   const animationFrameRef = useRef(null)
   const walkAnimationRef = useRef(null)
   const playerPosRef = useRef(null) // 用 ref 存储实时位置，初始为null
@@ -401,6 +404,9 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
         
         console.log('🎁 I picked the loot box, minting weapon in background...')
         
+        // 显示loading
+        setIsMintingWeapon(true)
+        
         // 在后台异步执行，不阻塞主线程
         ;(async () => {
           try {
@@ -451,6 +457,9 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
             console.error('❌ Failed to mint weapon:', error)
             console.error('Error details:', error.message)
             alert('铸造武器失败：' + error.message + '\n请查看背包或稍后重试')
+          } finally {
+            // 隐藏loading
+            setIsMintingWeapon(false)
           }
         })() // 立即执行异步函数，但不等待结果
       }
@@ -1797,21 +1806,30 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
         
         const currentPlayerId = window.currentWalletAddress || character.owner
         const isOwner = !lootBox.ownerId || lootBox.ownerId === currentPlayerId
+        const canOpen = Date.now() - lastLootBoxOpenTime.current >= 4000
         
         return (
           <LootBox
             key={lootBox.id}
             screenPosition={boxScreenPos}
-            boxSize={40 * MAP_SCALE}
+            boxSize={25 * MAP_SCALE}
             ownerName={lootBox.ownerName}
             isOwner={isOwner}
+            canOpen={canOpen}
             onOpen={async () => {
               const currentPlayerId = window.currentWalletAddress || character.owner
+              const now = Date.now()
               
               console.log(`📦 [onOpen] Clicked loot box ${lootBox.id}`)
               console.log(`📦 [onOpen] Current loot boxes in state:`, lootBoxes.length)
               console.log(`📦 [onOpen] Current loot boxes in ref:`, lootBoxesRef.current.length)
               console.log(`📦 [onOpen] All loot box IDs:`, lootBoxes.map(b => b.id))
+              
+              // 检查4秒冷却
+              if (now - lastLootBoxOpenTime.current < 4000) {
+                console.log('⚠️ Loot box cooldown active, please wait...')
+                return
+              }
               
               // 防止重复点击
               if (pickingLootBox.current.has(lootBox.id)) {
@@ -1825,6 +1843,9 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
                 alert(`这个宝箱属于 ${lootBox.ownerName}，只有他/她可以拾取！`)
                 return
               }
+              
+              // 记录打开时间
+              lastLootBoxOpenTime.current = now
               
               console.log(`📦 [onOpen] Opening loot box ${lootBox.id}...`)
               console.log(`📦 [onOpen] Current picking set:`, Array.from(pickingLootBox.current))
@@ -1861,6 +1882,9 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
               
               // 单人模式：直接处理
               try {
+                // 显示loading
+                setIsMintingWeapon(true)
+                
                 // 获取玩家钱包地址
                 const walletAddress = window.currentWalletAddress || character.owner
                 
@@ -1974,6 +1998,9 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
               } catch (error) {
                 console.error('❌ Failed to open loot box:', error)
                 alert('开箱失败，请稍后重试')
+              } finally {
+                // 隐藏loading
+                setIsMintingWeapon(false)
               }
             }}
             onClose={() => {
@@ -2341,6 +2368,9 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
         isOpen={isMarketplaceOpen}
         onClose={() => setIsMarketplaceOpen(false)}
       />
+      
+      {/* Minting Loading */}
+      {isMintingWeapon && <MintingLoader />}
       
       {/* 武器奖励弹窗 */}
       {showWeaponReward && (

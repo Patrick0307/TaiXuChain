@@ -31,16 +31,16 @@ function WeaponReward({ weapon, onClose }) {
 
   // 获取武器类型名称
   const getWeaponTypeName = (weaponType) => {
-    const names = { 1: '剑', 2: '弓', 3: '法杖' }
-    return names[weaponType] || '未知'
+    const names = { 1: 'Sword', 2: 'Bow', 3: 'Staff' }
+    return names[weaponType] || 'Unknown'
   }
 
   // 获取品质名称和颜色
   const getRarityInfo = (rarity) => {
     const info = {
-      1: { name: '普通', color: '#FFFFFF', glow: 'rgba(255, 255, 255, 0.5)' },
-      2: { name: '稀有', color: '#4169E1', glow: 'rgba(65, 105, 225, 0.8)' },
-      3: { name: '史诗', color: '#9370DB', glow: 'rgba(147, 112, 219, 0.8)' }
+      1: { name: 'Common', color: '#FFFFFF', glow: 'rgba(255, 255, 255, 0.5)' },
+      2: { name: 'Rare', color: '#4169E1', glow: 'rgba(65, 105, 225, 0.8)' },
+      3: { name: 'Epic', color: '#9370DB', glow: 'rgba(147, 112, 219, 0.8)' }
     }
     return info[rarity] || info[1]
   }
@@ -64,7 +64,7 @@ function WeaponReward({ weapon, onClose }) {
         
         {/* 标题 */}
         <div className="reward-title">
-          <div className="reward-title-text">🎉 恭喜获得 🎉</div>
+          <div className="reward-title-text">🎉 WEAPON ACQUIRED 🎉</div>
         </div>
         
         {/* 武器展示区 */}
@@ -111,15 +111,15 @@ function WeaponReward({ weapon, onClose }) {
           
           <div className="weapon-stats">
             <div className="stat-item">
-              <span className="stat-label">类型:</span>
+              <span className="stat-label">Type</span>
               <span className="stat-value">{getWeaponTypeName(weapon.weaponType)}</span>
             </div>
             <div className="stat-item">
-              <span className="stat-label">攻击力:</span>
+              <span className="stat-label">Attack</span>
               <span className="stat-value attack">+{weapon.attack}</span>
             </div>
             <div className="stat-item">
-              <span className="stat-label">等级:</span>
+              <span className="stat-label">Level</span>
               <span className="stat-value">Lv.{weapon.level}</span>
             </div>
           </div>
@@ -127,12 +127,12 @@ function WeaponReward({ weapon, onClose }) {
         
         {/* 提示文字 */}
         <div className="reward-hint">
-          武器已自动收入背包
+          Weapon added to inventory
         </div>
         
         {/* 关闭按钮 */}
         <button className="reward-close-btn" onClick={handleClose}>
-          确定
+          CONFIRM
         </button>
         
         {/* 粒子效果 */}

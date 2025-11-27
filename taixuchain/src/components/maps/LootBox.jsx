@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import '../../css/maps/LootBox.css'
 
 function LootBox({ 
@@ -7,24 +7,14 @@ function LootBox({
   onClose,
   boxSize = 40,
   ownerName = null, // 宝箱归属者名字
-  isOwner = true // 当前玩家是否是归属者
+  isOwner = true, // 当前玩家是否是归属者
+  canOpen = true // 是否可以打开（用于冷却控制）
 }) {
-  const [countdown, setCountdown] = useState(5) // 5秒倒计时
   const [isOpening, setIsOpening] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
 
-  // 倒计时逻辑
-  useEffect(() => {
-    if (countdown > 0) {
-      const timer = setTimeout(() => {
-        setCountdown(prev => prev - 1)
-      }, 1000)
-      return () => clearTimeout(timer)
-    }
-  }, [countdown])
-
   const handleClick = () => {
-    if (countdown > 0 || isOpening) return
+    if (isOpening || !canOpen) return
     
     // 如果不是归属者，不允许打开
     if (!isOwner) {
@@ -45,7 +35,7 @@ function LootBox({
 
   return (
     <div
-      className={`loot-box ${isOpening ? 'opening' : ''} ${isHovered ? 'hovered' : ''}`}
+      className={`loot-box ${isOpening ? 'opening' : ''} ${isHovered ? 'hovered' : ''} ${!canOpen ? 'disabled' : ''}`}
       style={{
         position: 'absolute',
         left: `${screenPosition.x}px`,
@@ -53,28 +43,30 @@ function LootBox({
         width: `${boxSize}px`,
         height: `${boxSize}px`,
         transform: 'translate(-50%, -50%)',
-        cursor: countdown === 0 && !isOpening ? 'pointer' : 'default',
+        cursor: canOpen && !isOpening && isOwner ? 'pointer' : 'default',
         zIndex: 100,
+        opacity: canOpen ? 1 : 0.5,
       }}
       onClick={handleClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* 宝箱图标 */}
-      <div className="box-icon">
-        📦
-      </div>
-      
-      {/* 倒计时显示 */}
-      {countdown > 0 && (
-        <div className="countdown-overlay">
-          <div className="countdown-number">{countdown}</div>
-          <div className="countdown-text">秒后可开启</div>
-        </div>
-      )}
+      {/* 宝箱图片 */}
+      <img 
+        src="/maps/treasure.png" 
+        alt="treasure box"
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'contain',
+          imageRendering: 'pixelated',
+          filter: isHovered && canOpen && isOwner ? 'brightness(1.2) drop-shadow(0 0 8px rgba(255, 215, 0, 0.8))' : 'none',
+          transition: 'filter 0.2s ease'
+        }}
+      />
       
       {/* 可点击提示 */}
-      {countdown === 0 && !isOpening && (
+      {canOpen && !isOpening && isOwner && (
         <div className="click-hint">
           点击开启
         </div>
@@ -98,14 +90,14 @@ function LootBox({
         </div>
       )}
       
-      {/* 光效 */}
-      {countdown === 0 && !isOpening && (
+      {/* 光效 - 只在可以打开时显示 */}
+      {canOpen && !isOpening && isOwner && (
         <>
           <div className="glow-ring" style={{ 
-            borderColor: isOwner ? '#FFD700' : '#888' 
+            borderColor: '#FFD700'
           }}></div>
           <div className="glow-pulse" style={{ 
-            background: isOwner ? 'radial-gradient(circle, rgba(255,215,0,0.6) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(136,136,136,0.4) 0%, transparent 70%)'
+            background: 'radial-gradient(circle, rgba(255,215,0,0.6) 0%, transparent 70%)'
           }}></div>
         </>
       )}
