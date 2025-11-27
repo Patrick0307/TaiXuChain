@@ -1,16 +1,93 @@
-/* 背包遮罩层 */
+/* Black & Gold Theme - Inventory UI */
+/* Black & Gold Theme - Inventory UI */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+/* 背包遮罩层 - 黑金主题 */
 .inventory-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.92);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  animation: fadeIn 0.2s ease;
+  animation: fadeIn 0.3s ease;
+  backdrop-filter: blur(8px);
+  overflow: hidden;
+}
+
+/* 呼吸粒子容器 */
+.inventory-overlay::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(2px 2px at 20% 30%, rgba(255, 215, 0, 0.4), transparent),
+    radial-gradient(2px 2px at 60% 70%, rgba(255, 215, 0, 0.3), transparent),
+    radial-gradient(1px 1px at 50% 50%, rgba(255, 215, 0, 0.5), transparent),
+    radial-gradient(1px 1px at 80% 10%, rgba(255, 215, 0, 0.4), transparent),
+    radial-gradient(2px 2px at 90% 60%, rgba(255, 215, 0, 0.3), transparent),
+    radial-gradient(1px 1px at 33% 80%, rgba(255, 215, 0, 0.4), transparent),
+    radial-gradient(2px 2px at 15% 90%, rgba(255, 215, 0, 0.3), transparent);
+  background-size: 200% 200%;
+  background-position: 0% 0%;
+  animation: particleFloat 20s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes particleFloat {
+  0%, 100% {
+    background-position: 0% 0%;
+    opacity: 0.6;
+  }
+  25% {
+    background-position: 100% 100%;
+    opacity: 1;
+  }
+  50% {
+    background-position: 0% 100%;
+    opacity: 0.8;
+  }
+  75% {
+    background-position: 100% 0%;
+    opacity: 1;
+  }
+}
+
+/* 马赛克背景效果 */
+.inventory-overlay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    linear-gradient(45deg, #1a1a1a 25%, transparent 25%),
+    linear-gradient(-45deg, #1a1a1a 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #1a1a1a 75%),
+    linear-gradient(-45deg, transparent 75%, #1a1a1a 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  opacity: 0.3;
+  animation: mosaicScroll 30s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes mosaicScroll {
+  0% {
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  }
+  100% {
+    background-position: 20px 20px, 20px 30px, 30px 10px, 10px 20px;
+  }
 }
 
 @keyframes fadeIn {
@@ -22,120 +99,386 @@
   }
 }
 
-/* 背包容器 */
+/* 背包容器 - 黑金主题 */
 .inventory-container {
-  background: linear-gradient(135deg, #2a2a3e 0%, #1a1a2e 100%);
-  border: 3px solid #4a4a6a;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 900px;
-  height: 80vh;
-  max-height: 600px;
+  position: relative;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.98) 0%, rgba(15, 15, 15, 0.95) 100%);
+  border: 3px solid rgba(255, 215, 0, 0.6);
+  border-radius: 15px;
+  width: 92%;
+  max-width: 1100px;
+  height: 85vh;
+  max-height: 700px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-  animation: slideUp 0.3s ease;
+  box-shadow: 
+    0 0 50px rgba(255, 215, 0, 0.4),
+    0 10px 60px rgba(0, 0, 0, 0.9),
+    inset 0 0 40px rgba(255, 215, 0, 0.05);
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1), borderBreathing 3s ease-in-out infinite;
+  font-family: 'Orbitron', sans-serif;
+  z-index: 10;
+  /* 像素风格边框 */
+  clip-path: polygon(
+    0 8px, 8px 8px, 8px 0,
+    calc(100% - 8px) 0, calc(100% - 8px) 8px, 100% 8px,
+    100% calc(100% - 8px), calc(100% - 8px) calc(100% - 8px), calc(100% - 8px) 100%,
+    8px 100%, 8px calc(100% - 8px), 0 calc(100% - 8px)
+  );
 }
 
-@keyframes slideUp {
-  from {
-    transform: translateY(50px);
-    opacity: 0;
+@keyframes borderBreathing {
+  0%, 100% {
+    border-color: rgba(255, 215, 0, 0.6);
+    box-shadow: 
+      0 0 60px rgba(255, 215, 0, 0.5),
+      0 0 100px rgba(255, 215, 0, 0.3),
+      0 0 140px rgba(255, 215, 0, 0.2),
+      0 10px 60px rgba(0, 0, 0, 0.9),
+      inset 0 0 50px rgba(255, 215, 0, 0.1);
   }
-  to {
-    transform: translateY(0);
+  50% {
+    border-color: rgba(255, 215, 0, 1);
+    box-shadow: 
+      0 0 100px rgba(255, 215, 0, 0.8),
+      0 0 150px rgba(255, 215, 0, 0.6),
+      0 0 200px rgba(255, 215, 0, 0.4),
+      0 0 250px rgba(255, 215, 0, 0.2),
+      0 10px 60px rgba(0, 0, 0, 0.9),
+      inset 0 0 80px rgba(255, 215, 0, 0.2);
+  }
+}
+
+/* 光辉扫描效果 */
+.inventory-container::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 40%,
+    rgba(255, 215, 0, 0.8) 50%,
+    rgba(255, 255, 255, 0.9) 52%,
+    rgba(255, 215, 0, 0.8) 54%,
+    transparent 60%,
+    transparent 100%
+  );
+  border-radius: 15px;
+  animation: borderScan 4s linear infinite;
+  pointer-events: none;
+  z-index: 11;
+  clip-path: polygon(
+    0 8px, 8px 8px, 8px 0,
+    calc(100% - 8px) 0, calc(100% - 8px) 8px, 100% 8px,
+    100% calc(100% - 8px), calc(100% - 8px) calc(100% - 8px), calc(100% - 8px) 100%,
+    8px 100%, 8px calc(100% - 8px), 0 calc(100% - 8px)
+  );
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  padding: 3px;
+}
+
+@keyframes borderScan {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* 容器光晕效果 */
+.inventory-container::before {
+  content: '';
+  position: absolute;
+  inset: -15px;
+  background: radial-gradient(ellipse, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
+  z-index: -1;
+  animation: containerGlow 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes containerGlow {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
     opacity: 1;
   }
 }
 
-/* 背包头部 */
+@keyframes slideUp {
+  from {
+    transform: translateY(60px) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* 背包头部 - 黑金主题 */
 .inventory-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 20px;
-  border-bottom: 2px solid #4a4a6a;
-  background: rgba(0, 0, 0, 0.3);
+  padding: 20px 30px;
+  border-bottom: 3px solid rgba(255, 215, 0, 0.4);
+  background: linear-gradient(90deg, rgba(255, 215, 0, 0.08) 0%, transparent 100%);
+  position: relative;
+}
+
+/* 标题装饰线 */
+.inventory-header::before,
+.inventory-header::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  width: 100px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #ffd700, transparent);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+  animation: lineGlow 2s ease-in-out infinite;
+}
+
+.inventory-header::before {
+  left: 30px;
+}
+
+.inventory-header::after {
+  right: 30px;
+}
+
+@keyframes lineGlow {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .inventory-header h2 {
   margin: 0;
-  color: #fff;
-  font-size: 1.5rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  color: #ffd700;
+  font-size: 1.8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  text-shadow: 
+    0 0 20px rgba(255, 215, 0, 0.9),
+    0 2px 4px rgba(0, 0, 0, 0.8);
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: titleShine 3s linear infinite;
+  background-size: 200% 100%;
 }
 
-/* LingStone 显示 */
+@keyframes titleShine {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+/* LingStone 显示 - 黑金主题 */
 .lingstone-display {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 8px 15px;
-  border-radius: 20px;
-  border: 2px solid #4a4a6a;
+  gap: 12px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(20, 20, 20, 0.8) 100%);
+  padding: 10px 20px;
+  border-radius: 25px;
+  border: 2px solid rgba(255, 215, 0, 0.5);
+  box-shadow: 
+    0 0 20px rgba(255, 215, 0, 0.3),
+    inset 0 2px 8px rgba(0, 0, 0, 0.6);
+  position: relative;
+}
+
+/* 货币图标 */
+.lingstone-display::before {
+  content: '💰';
+  font-size: 1.2rem;
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
 }
 
 .lingstone-label {
-  color: #aaa;
-  font-size: 0.9rem;
-  font-weight: bold;
+  color: #ffd700;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
 }
 
 .lingstone-amount {
-  color: #00d4ff;
-  font-size: 1.1rem;
-  font-weight: bold;
-  text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
-  min-width: 60px;
+  color: #ffd700;
+  font-size: 1.3rem;
+  font-weight: 900;
+  text-shadow: 
+    0 0 15px rgba(255, 215, 0, 0.9),
+    0 2px 4px rgba(0, 0, 0, 0.8);
+  min-width: 80px;
   text-align: right;
+  letter-spacing: 1px;
 }
 
 .lingstone-request-btn {
-  background: linear-gradient(135deg, #00d4ff, #0099cc);
-  border: none;
-  color: white;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  font-size: 1.2rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 212, 255, 0.4);
-}
-
-.lingstone-request-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #00ffff, #00ccff);
-  transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.6);
-}
-
-.lingstone-request-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background: linear-gradient(135deg, #666, #555);
-}
-
-.inventory-close-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  color: #fff;
+  background: linear-gradient(135deg, #ffd700 0%, #daa520 100%);
+  border: 2px solid rgba(0, 0, 0, 0.8);
+  color: #000;
   width: 35px;
   height: 35px;
   border-radius: 50%;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
+  font-weight: 900;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    0 0 20px rgba(255, 215, 0, 0.6),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4);
+  position: relative;
+}
+
+.lingstone-request-btn::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.4) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: -1;
+}
+
+.lingstone-request-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ffed4e 0%, #ffd700 100%);
+  transform: scale(1.15) rotate(90deg);
+  box-shadow: 
+    0 0 30px rgba(255, 215, 0, 0.9),
+    inset 0 2px 6px rgba(255, 255, 255, 0.6);
+}
+
+.lingstone-request-btn:hover:not(:disabled)::before {
+  opacity: 1;
+  animation: pulseGlow 1.5s ease-in-out infinite;
+}
+
+.lingstone-request-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: linear-gradient(135deg, #444, #333);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.8;
+  }
+}
+
+.inventory-close-btn {
+  position: relative;
+  background: linear-gradient(135deg, #ff4757 0%, #ff3838 100%);
+  border: none;
+  color: #fff;
+  width: 40px;
+  height: 40px;
+  font-size: 1.3rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  box-shadow: 
+    0 0 0 3px rgba(0, 0, 0, 0.3),
+    0 0 0 5px rgba(255, 71, 87, 0.4),
+    0 4px 12px rgba(255, 71, 87, 0.5),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  /* 像素风格 */
+  clip-path: polygon(
+    0 4px, 4px 4px, 4px 0,
+    calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px,
+    100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%,
+    4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px)
+  );
+  image-rendering: pixelated;
+}
+
+.inventory-close-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  clip-path: inherit;
+}
+
+.inventory-close-btn::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  background: radial-gradient(circle, rgba(255, 71, 87, 0.4) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: -1;
 }
 
 .inventory-close-btn:hover {
-  background: rgba(255, 100, 100, 0.3);
-  border-color: #ff6666;
-  transform: rotate(90deg);
+  background: linear-gradient(135deg, #ff6b7a 0%, #ff5252 100%);
+  transform: scale(1.15) rotate(90deg);
+  box-shadow: 
+    0 0 0 3px rgba(0, 0, 0, 0.4),
+    0 0 0 5px rgba(255, 71, 87, 0.6),
+    0 6px 20px rgba(255, 71, 87, 0.8),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.4),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4);
+}
+
+.inventory-close-btn:hover::before {
+  opacity: 1;
+}
+
+.inventory-close-btn:hover::after {
+  opacity: 1;
+  animation: pulseGlow 1.5s ease-in-out infinite;
+}
+
+.inventory-close-btn:active {
+  transform: scale(1.05) rotate(90deg);
+  box-shadow: 
+    0 0 0 3px rgba(0, 0, 0, 0.5),
+    0 0 0 5px rgba(255, 71, 87, 0.8),
+    0 2px 8px rgba(255, 71, 87, 0.9),
+    inset 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
 }
 
 /* 背包内容区 */
@@ -175,6 +518,15 @@
 
 .inventory-grid-section::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.5);
+}
+
+/* 合成信息面板 */
+.merge-info-panel {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  margin-bottom: 10px;
 }
 
 /* 合成模式横幅 */
@@ -232,18 +584,35 @@
   box-shadow: 0 4px 12px rgba(76, 175, 80, 0.6);
 }
 
-/* 装备栏 */
+/* 装备栏 - 黑金主题 */
 .equipped-section {
   margin-bottom: 20px;
   padding-bottom: 20px;
-  border-bottom: 2px solid #4a4a6a;
+  border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+  position: relative;
+}
+
+.equipped-section::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ffd700, transparent);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
 }
 
 .equipped-section h3 {
-  margin: 0 0 10px 0;
+  margin: 0 0 15px 0;
   color: #ffd700;
-  font-size: 1.1rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-align: center;
+  text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
 }
 
 .equipped-slot {
@@ -277,39 +646,89 @@
   padding: 5px;
 }
 
-/* 背包格子 */
+/* 背包格子 - 黑金主题 */
 .inventory-slot {
   aspect-ratio: 1;
-  background: rgba(0, 0, 0, 0.4);
-  border: 2px solid #3a3a5a;
-  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(15, 15, 15, 0.8) 100%);
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  border-radius: 12px;
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.6),
+    inset 0 2px 6px rgba(0, 0, 0, 0.8);
+  /* 像素风格边框 */
+  clip-path: polygon(
+    0 4px, 4px 4px, 4px 0,
+    calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px,
+    100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%,
+    4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px)
+  );
+}
+
+/* 格子光晕效果 */
+.inventory-slot::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  border-radius: 12px;
 }
 
 .inventory-slot:hover {
-  border-color: #7a7a9a;
-  background: rgba(255, 255, 255, 0.08);
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 4px 12px rgba(100, 100, 150, 0.4), inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 215, 0, 0.6);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(20, 20, 20, 0.9) 100%);
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 
+    0 0 25px rgba(255, 215, 0, 0.4),
+    0 8px 20px rgba(0, 0, 0, 0.8),
+    inset 0 2px 8px rgba(0, 0, 0, 0.9);
+}
+
+.inventory-slot:hover::before {
+  opacity: 1;
 }
 
 .inventory-slot.has-item {
-  border-color: #6a6a9a;
-  background: linear-gradient(135deg, rgba(100, 100, 150, 0.3), rgba(50, 50, 100, 0.3));
-  box-shadow: 0 2px 8px rgba(100, 100, 150, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 215, 0, 0.5);
+  background: linear-gradient(135deg, rgba(10, 10, 10, 0.95) 0%, rgba(25, 25, 25, 0.9) 100%);
+  box-shadow: 
+    0 0 15px rgba(255, 215, 0, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.7),
+    inset 0 2px 6px rgba(0, 0, 0, 0.8);
 }
 
 .inventory-slot.selected {
   border-color: #ffd700;
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(255, 165, 0, 0.25));
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 4px 12px rgba(255, 215, 0, 0.4), inset 0 2px 4px rgba(255, 215, 0, 0.2);
-  transform: scale(1.05);
+  background: linear-gradient(135deg, rgba(15, 15, 15, 1) 0%, rgba(30, 30, 30, 0.98) 100%);
+  box-shadow: 
+    0 0 40px rgba(255, 215, 0, 0.8),
+    0 8px 25px rgba(255, 215, 0, 0.5),
+    inset 0 0 20px rgba(255, 215, 0, 0.15);
+  transform: translateY(-4px) scale(1.08);
+  animation: selectedPulse 2s ease-in-out infinite;
+}
+
+@keyframes selectedPulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 40px rgba(255, 215, 0, 0.8),
+      0 8px 25px rgba(255, 215, 0, 0.5),
+      inset 0 0 20px rgba(255, 215, 0, 0.15);
+  }
+  50% {
+    box-shadow: 
+      0 0 60px rgba(255, 215, 0, 1),
+      0 8px 35px rgba(255, 215, 0, 0.7),
+      inset 0 0 30px rgba(255, 215, 0, 0.25);
+  }
 }
 
 .slot-content {
@@ -430,7 +849,7 @@
 
 /* 右侧：武器详情区域 */
 .inventory-details-section {
-  width: 300px;
+  width: 350px;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -467,35 +886,88 @@
   margin: 0;
 }
 
-/* 武器详情 */
+/* 武器详情 - 黑金主题 */
 .weapon-details {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 8px;
+  overflow-y: auto;
+  max-height: 100%;
+  padding-right: 5px;
+}
+
+/* 滚动条样式 */
+.weapon-details::-webkit-scrollbar {
+  width: 6px;
+}
+
+.weapon-details::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
+}
+
+.weapon-details::-webkit-scrollbar-thumb {
+  background: rgba(255, 215, 0, 0.4);
+  border-radius: 3px;
+}
+
+.weapon-details::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 215, 0, 0.6);
 }
 
 .weapon-details h3 {
   margin: 0;
   color: #ffd700;
-  font-size: 1.3rem;
+  font-size: 1rem;
+  font-weight: 900;
   text-align: center;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  text-shadow: 
+    0 0 20px rgba(255, 215, 0, 0.9),
+    0 2px 4px rgba(0, 0, 0, 0.8);
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: titleShine 3s linear infinite;
+  background-size: 200% 100%;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  padding: 0 5px;
+  line-height: 1.3;
+  max-height: 45px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+@keyframes titleShine {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
 }
 
 .weapon-icon-large {
   text-align: center;
-  padding: 20px;
+  padding: 8px;
   background: rgba(0, 0, 0, 0.3);
   border-radius: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 200px;
+  min-height: 80px;
+  max-height: 90px;
+  border: 1px solid rgba(255, 215, 0, 0.2);
 }
 
 .weapon-detail-img {
   max-width: 100%;
-  max-height: 200px;
+  max-height: 75px;
   object-fit: contain;
   image-rendering: pixelated;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
@@ -504,143 +976,283 @@
 .weapon-stats {
   background: rgba(0, 0, 0, 0.3);
   border-radius: 8px;
-  padding: 15px;
+  padding: 6px;
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 4px !important;
 }
 
 .stat-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 4px 3px !important;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  gap: 2px !important;
+  min-height: 42px !important;
+  text-align: center !important;
 }
 
 .stat-row:last-child {
   border-bottom: none;
 }
 
-.stat-label {
-  color: #aaa;
-  font-size: 0.9rem;
+.inventory-stat-label {
+  color: #ffd700 !important;
+  font-size: 0.5rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  white-space: nowrap !important;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.6) !important;
+  opacity: 1 !important;
+  line-height: 1.2 !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  height: auto !important;
+  visibility: visible !important;
 }
 
-.stat-value {
-  color: #fff;
-  font-weight: bold;
+.inventory-stat-value {
+  color: #ffffff !important;
+  font-weight: 900 !important;
+  font-size: 0.75rem !important;
+  text-align: center !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9) !important;
+  line-height: 1.3 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 2px 0 !important;
+  height: auto !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  min-height: 14px !important;
 }
 
-.stat-value.attack {
-  color: #ff6b6b;
+.inventory-stat-value.attack {
+  color: #ff6b6b !important;
+  text-shadow: 0 0 10px rgba(255, 107, 107, 0.6), 0 1px 3px rgba(0, 0, 0, 0.9) !important;
+}
+
+.inventory-stat-value.rarity {
+  color: #9c27b0 !important;
+  text-shadow: 0 0 10px rgba(156, 39, 176, 0.6), 0 1px 3px rgba(0, 0, 0, 0.9) !important;
 }
 
 .weapon-description {
   background: rgba(0, 0, 0, 0.3);
   border-radius: 8px;
-  padding: 15px;
-  color: #ccc;
-  font-size: 0.9rem;
-  line-height: 1.5;
+  padding: 8px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.6rem;
+  line-height: 1.4;
   font-style: italic;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  max-height: 50px;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 215, 0, 0.2);
+}
+
+/* 描述区域滚动条 */
+.weapon-description::-webkit-scrollbar {
+  width: 4px;
+}
+
+.weapon-description::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 2px;
+}
+
+.weapon-description::-webkit-scrollbar-thumb {
+  background: rgba(255, 215, 0, 0.3);
+  border-radius: 2px;
+}
+
+.weapon-description::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 215, 0, 0.5);
 }
 
 .weapon-actions {
   display: flex;
-  gap: 10px;
-  margin-top: 10px;
+  gap: 8px;
+  margin-top: 0;
 }
 
 .weapon-actions button {
   flex: 1;
-  padding: 12px;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: bold;
+  padding: 8px 10px;
+  border: 2px solid;
+  border-radius: 8px;
+  font-size: 0.65rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  position: relative;
+  font-family: 'Orbitron', sans-serif;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* 像素风格 */
+  clip-path: polygon(
+    0 4px, 4px 4px, 4px 0,
+    calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px,
+    100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%,
+    4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px)
+  );
+}
+
+.weapon-actions button::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  background: radial-gradient(circle, currentColor 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: -1;
+}
+
+.weapon-actions button:hover:not(:disabled)::before {
+  opacity: 0.3;
 }
 
 .btn-equip {
-  background: linear-gradient(135deg, #4CAF50, #45a049);
-  color: white;
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(76, 175, 80, 0.1) 100%);
+  border-color: rgba(76, 175, 80, 0.6);
+  color: #4CAF50;
+  box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
 }
 
 .btn-equip:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  border-color: #4CAF50;
+  color: #000;
+  transform: translateY(-3px);
+  box-shadow: 0 0 30px rgba(76, 175, 80, 0.6);
 }
 
 .btn-equip.equipped {
-  background: linear-gradient(135deg, #666, #555);
+  background: linear-gradient(135deg, rgba(100, 100, 100, 0.3) 0%, rgba(80, 80, 80, 0.2) 100%);
+  border-color: rgba(150, 150, 150, 0.5);
+  color: rgba(255, 255, 255, 0.5);
   cursor: default;
 }
 
 .btn-equip:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
-  background: linear-gradient(135deg, #666, #555);
+  background: linear-gradient(135deg, rgba(100, 100, 100, 0.2) 0%, rgba(80, 80, 80, 0.1) 100%);
+  border-color: rgba(150, 150, 150, 0.3);
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .btn-upgrade {
-  background: linear-gradient(135deg, #2196F3, #1976D2);
-  color: white;
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.2) 0%, rgba(33, 150, 243, 0.1) 100%);
+  border-color: rgba(33, 150, 243, 0.6);
+  color: #2196F3;
+  box-shadow: 0 0 20px rgba(33, 150, 243, 0.3);
 }
 
 .btn-upgrade:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  border-color: #2196F3;
+  color: #000;
+  transform: translateY(-3px);
+  box-shadow: 0 0 30px rgba(33, 150, 243, 0.6);
 }
 
 .btn-upgrade:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
+  background: linear-gradient(135deg, rgba(100, 100, 100, 0.2) 0%, rgba(80, 80, 80, 0.1) 100%);
+  border-color: rgba(150, 150, 150, 0.3);
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .btn-merge {
-  background: linear-gradient(135deg, #9c27b0, #7b1fa2);
-  color: white;
+  background: linear-gradient(135deg, rgba(156, 39, 176, 0.2) 0%, rgba(156, 39, 176, 0.1) 100%);
+  border-color: rgba(156, 39, 176, 0.6);
+  color: #9c27b0;
+  box-shadow: 0 0 20px rgba(156, 39, 176, 0.3);
 }
 
 .btn-merge:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(156, 39, 176, 0.4);
+  background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);
+  border-color: #9c27b0;
+  color: #fff;
+  transform: translateY(-3px);
+  box-shadow: 0 0 30px rgba(156, 39, 176, 0.6);
 }
 
 .btn-merge.active {
-  background: linear-gradient(135deg, #ff9800, #f57c00);
-  box-shadow: 0 0 20px rgba(255, 152, 0, 0.6);
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  border-color: #ff9800;
+  color: #000;
+  box-shadow: 0 0 40px rgba(255, 152, 0, 0.8);
+  animation: mergePulse 2s ease-in-out infinite;
+}
+
+@keyframes mergePulse {
+  0%, 100% {
+    box-shadow: 0 0 40px rgba(255, 152, 0, 0.8);
+  }
+  50% {
+    box-shadow: 0 0 60px rgba(255, 152, 0, 1);
+  }
 }
 
 .btn-merge:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
+  background: linear-gradient(135deg, rgba(100, 100, 100, 0.2) 0%, rgba(80, 80, 80, 0.1) 100%);
+  border-color: rgba(150, 150, 150, 0.3);
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .btn-burn {
-  background: linear-gradient(135deg, #ff6b6b, #ee5a52);
-  color: white;
+  background: linear-gradient(135deg, rgba(244, 67, 54, 0.2) 0%, rgba(244, 67, 54, 0.1) 100%);
+  border-color: rgba(244, 67, 54, 0.6);
+  color: #f44336;
+  box-shadow: 0 0 20px rgba(244, 67, 54, 0.3);
 }
 
 .btn-burn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+  border-color: #f44336;
+  color: #fff;
+  transform: translateY(-3px);
+  box-shadow: 0 0 30px rgba(244, 67, 54, 0.6);
 }
 
 .btn-burn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
-  background: linear-gradient(135deg, #666, #555);
+  background: linear-gradient(135deg, rgba(100, 100, 100, 0.2) 0%, rgba(80, 80, 80, 0.1) 100%);
+  border-color: rgba(150, 150, 150, 0.3);
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .weapon-warning {
   background: rgba(255, 152, 0, 0.2);
   border: 1px solid rgba(255, 152, 0, 0.5);
   border-radius: 6px;
-  padding: 10px;
+  padding: 8px;
   color: #ff9800;
-  font-size: 0.9rem;
+  font-size: 0.65rem;
   text-align: center;
-  margin-top: 10px;
+  margin-top: 0;
   animation: warningPulse 2s ease-in-out infinite;
+  line-height: 1.3;
 }
 
 @keyframes warningPulse {
@@ -679,29 +1291,63 @@
   }
 }
 
-/* 上架市场按钮 */
+/* 上架市场按钮 - 黑金主题 */
 .btn-list-market {
   width: 48%;
-  padding: 12px;
-  background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
-  border: 2px solid #FF9800;
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
+  padding: 9px 12px;
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.2) 0%, rgba(255, 152, 0, 0.1) 100%);
+  border: 2px solid rgba(255, 152, 0, 0.6);
+  color: #ff9800;
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  text-shadow: 0 0 10px rgba(255, 152, 0, 0.6);
+  box-shadow: 0 0 20px rgba(255, 152, 0, 0.3);
+  position: relative;
+  font-family: 'Orbitron', sans-serif;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* 像素风格 */
+  clip-path: polygon(
+    0 4px, 4px 4px, 4px 0,
+    calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px,
+    100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%,
+    4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px)
+  );
+}
+
+.btn-list-market::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  background: radial-gradient(circle, rgba(255, 152, 0, 0.4) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: -1;
 }
 
 .btn-list-market:hover:not(:disabled) {
-  background: linear-gradient(135deg, #F57C00 0%, #FF9800 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  border-color: #ff9800;
+  color: #000;
+  transform: translateY(-3px);
+  box-shadow: 0 0 30px rgba(255, 152, 0, 0.6);
+}
+
+.btn-list-market:hover:not(:disabled)::before {
+  opacity: 1;
 }
 
 .btn-list-market:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
+  background: linear-gradient(135deg, rgba(100, 100, 100, 0.2) 0%, rgba(80, 80, 80, 0.1) 100%);
+  border-color: rgba(150, 150, 150, 0.3);
+  color: rgba(255, 255, 255, 0.4);
   transform: none;
 }

@@ -7,6 +7,7 @@ import CharacterWithWeapon from './components/CharacterWithWeapon'
 import UIDDisplay from './components/UIDDisplay'
 import ForestMap from './components/maps/ForestMap'
 import GameLoading from './components/GameLoading'
+import { NotificationContainer } from './components/Notification'
 import { checkExistingPlayer } from './utils/suiClient'
 
 function App() {
@@ -145,6 +146,7 @@ function App() {
 
   return (
     <>
+      <NotificationContainer />
       {isCheckingPlayer && <GameLoading />}
       
       {!isCheckingPlayer && (gameStage === 'wallet' || gameStage === 'selection') && (

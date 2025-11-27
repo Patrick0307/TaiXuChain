@@ -49,6 +49,7 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
   const lastPlayerAttackTime = useRef(0) // 上次玩家攻击时间
   const lastSyncTime = useRef(0) // 上次同步时间
   const processedLootBoxes = useRef(new Set()) // 已处理的宝箱ID
+  const loadingStartTime = useRef(Date.now()) // 记录加载开始时间
 
   const TILE_SIZE = 32
   const PLAYER_SIZE = 10  // 非常小的角色
@@ -825,7 +826,14 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
         
         if (totalImages === 0) {
           console.warn('No tiles found in tilesets!')
-          setIsLoading(false)
+          
+          // 即使没有瓦片，也要等待 5 秒
+          const elapsedTime = Date.now() - loadingStartTime.current
+          const remainingTime = Math.max(0, 3000 - elapsedTime)
+          
+          setTimeout(() => {
+            setIsLoading(false)
+          }, remainingTime)
           return
         }
         
@@ -855,7 +863,19 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
               if (loadedCount === totalImages) {
                 console.log(`All ${totalImages} tiles loaded!`, Object.keys(loadedImages).length, 'unique GIDs')
                 setTileImages(loadedImages)
-                setIsLoading(false)
+                
+                // 确保至少显示 5 秒的 loading
+                const elapsedTime = Date.now() - loadingStartTime.current
+                const remainingTime = Math.max(0, 5000 - elapsedTime)
+                
+                if (remainingTime > 0) {
+                  console.log(`⏳ Waiting ${remainingTime}ms to ensure minimum loading time...`)
+                  setTimeout(() => {
+                    setIsLoading(false)
+                  }, remainingTime)
+                } else {
+                  setIsLoading(false)
+                }
               }
             }
             
@@ -867,7 +887,19 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
               if (loadedCount === totalImages) {
                 console.log(`Loaded ${Object.keys(loadedImages).length} tiles (${totalImages - Object.keys(loadedImages).length} failed)`)
                 setTileImages(loadedImages)
-                setIsLoading(false)
+                
+                // 确保至少显示 5 秒的 loading
+                const elapsedTime = Date.now() - loadingStartTime.current
+                const remainingTime = Math.max(0, 5000 - elapsedTime)
+                
+                if (remainingTime > 0) {
+                  console.log(`⏳ Waiting ${remainingTime}ms to ensure minimum loading time...`)
+                  setTimeout(() => {
+                    setIsLoading(false)
+                  }, remainingTime)
+                } else {
+                  setIsLoading(false)
+                }
               }
             }
           })
@@ -875,7 +907,14 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
       })
       .catch(err => {
         console.error('Failed to load map:', err)
-        setIsLoading(false)
+        
+        // 即使加载失败，也要等待 5 秒
+        const elapsedTime = Date.now() - loadingStartTime.current
+        const remainingTime = Math.max(0, 5000 - elapsedTime)
+        
+        setTimeout(() => {
+          setIsLoading(false)
+        }, remainingTime)
       })
   }, [])
 
@@ -1130,7 +1169,16 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
       } else {
         // 动画结束，隐藏特效
         setTimeout(() => {
+          console.log('✨ Teleport effect ending, player position:', playerPosRef.current)
           setShowTeleportEffect(false)
+          // 强制触发一次重新渲染，确保角色位置正确计算
+          if (playerPosRef.current) {
+            console.log('🔄 Forcing position update to trigger character render')
+            setPlayerPos({ ...playerPosRef.current })
+            // 额外触发一次移动状态更新，确保角色可见
+            setIsMoving(false)
+            setDirection('down')
+          }
         }, 200)
       }
     }
@@ -1148,6 +1196,9 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
     // 设置画布大小为屏幕大小
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
+    
+    console.log('🎨 Canvas initialized:', canvas.width, 'x', canvas.height)
+    console.log('🎨 Player position:', playerPosRef.current)
 
     // 禁用图像平滑以保持像素风格
     ctx.imageSmoothingEnabled = false
@@ -1300,23 +1351,126 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
   if (isLoading) {
     return (
       <div className="forest-map-loading">
-        <div className="loading-text">🌲 Loading Forest Map...</div>
-        <div style={{ 
-          width: '300px', 
-          height: '20px', 
-          background: 'rgba(255,255,255,0.2)', 
-          borderRadius: '10px',
-          overflow: 'hidden'
-        }}>
-          <div style={{
-            width: `${loadingProgress}%`,
-            height: '100%',
-            background: 'linear-gradient(90deg, #4CAF50, #8BC34A)',
-            transition: 'width 0.3s ease'
-          }} />
+        {/* 马赛克背景层 */}
+        <div className="mosaic-bg"></div>
+        <div className="mosaic-overlay"></div>
+        
+        {/* 魔法圆环 */}
+        <div className="magic-circle"></div>
+        
+        {/* 粒子特效容器 */}
+        <div className="particles-container">
+          {/* 星空 */}
+          {[...Array(50)].map((_, i) => (
+            <div
+              key={`star-${i}`}
+              className="star"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`
+              }}
+            />
+          ))}
+          
+          {/* 金色粒子 */}
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={`particle-${i}`}
+              className="particle"
+              style={{
+                left: `${Math.random() * 100}%`,
+                animationDuration: `${8 + Math.random() * 4}s`,
+                animationDelay: `${Math.random() * 5}s`
+              }}
+            />
+          ))}
+          
+          {/* 能量球 */}
+          {[...Array(15)].map((_, i) => {
+            const angle = (Math.random() * 360) * Math.PI / 180;
+            const distance = 200 + Math.random() * 300;
+            return (
+              <div
+                key={`orb-${i}`}
+                className="energy-orb"
+                style={{
+                  left: '50%',
+                  top: '50%',
+                  '--orbit-x': `${Math.cos(angle) * distance}px`,
+                  '--orbit-y': `${Math.sin(angle) * distance}px`,
+                  animationDuration: `${3 + Math.random() * 3}s`,
+                  animationDelay: `${Math.random() * 5}s`
+                }}
+              />
+            );
+          })}
+          
+          {/* 流星 */}
+          {[...Array(5)].map((_, i) => (
+            <div
+              key={`meteor-${i}`}
+              className="meteor"
+              style={{
+                left: `${Math.random() * 50}%`,
+                top: `${Math.random() * 50}%`,
+                animationDuration: `${1 + Math.random()}s`,
+                animationDelay: `${Math.random() * 10}s`
+              }}
+            />
+          ))}
+          
+          {/* 光束 */}
+          {[...Array(3)].map((_, i) => (
+            <div
+              key={`beam-${i}`}
+              className="light-beam"
+              style={{
+                left: `${20 + i * 30}%`,
+                animationDelay: `${i * 1}s`
+              }}
+            />
+          ))}
         </div>
-        <div style={{ fontSize: '1rem', opacity: 0.8 }}>
-          {loadingProgress}% - Loading tiles...
+        
+        {/* Loading 内容卡片 */}
+        <div className="loading-card">
+          {/* 马赛克装饰角 */}
+          <div className="card-corner tl"></div>
+          <div className="card-corner tr"></div>
+          <div className="card-corner bl"></div>
+          <div className="card-corner br"></div>
+          
+          {/* 地图图标 */}
+          <div className="loading-icon">🌲</div>
+          
+          {/* 标题 */}
+          <h2 className="loading-title">
+            <span className="title-line"></span>
+            <span className="title-text">LOADING FOREST</span>
+            <span className="title-line"></span>
+          </h2>
+          
+          {/* 进度条容器 */}
+          <div className="progress-container">
+            <div className="progress-bar-bg">
+              <div 
+                className="progress-bar-fill"
+                style={{ width: `${loadingProgress}%` }}
+              >
+                <div className="progress-shine"></div>
+              </div>
+            </div>
+            <div className="progress-text">{loadingProgress}%</div>
+          </div>
+          
+          {/* 加载提示 */}
+          <div className="loading-hint">
+            <span className="hint-dot"></span>
+            <span className="hint-dot"></span>
+            <span className="hint-dot"></span>
+            <span className="hint-text">Loading tiles and assets</span>
+          </div>
         </div>
       </div>
     )
@@ -1407,6 +1561,13 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
   const scaledWalkOffset = { 
     x: Math.round(walkOffset.x * MAP_SCALE), 
     y: Math.round(walkOffset.y * MAP_SCALE) 
+  }
+  
+  // 调试日志：检查角色位置
+  if (characterScreenPos.x === 0 && characterScreenPos.y === 0 && playerPosRef.current) {
+    console.warn('⚠️ Character screen position is (0, 0), but player position exists:', playerPosRef.current)
+    console.warn('Canvas:', canvasRef.current?.width, 'x', canvasRef.current?.height)
+    console.warn('MapData:', mapData?.width, 'x', mapData?.height)
   }
 
   return (
@@ -2112,7 +2273,7 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
       })}
 
       {/* 角色层 - 叠加在Canvas上，传送特效结束后才显示 */}
-      {!showTeleportEffect && (
+      {!showTeleportEffect && playerPosRef.current && (
         <MapCharacter 
           character={character}
           screenPosition={characterScreenPos}

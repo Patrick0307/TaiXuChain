@@ -9,75 +9,85 @@ function MapUI({ character, playerPos, tileSize, onExit, playerCurrentHp, player
   const hpPercentage = (currentHp / maxHp) * 100
 
   return (
-    <div className="game-ui">
-      <div className="top-bar">
-        <div className="character-info">
-          <span className="info-item">
-            ⚔️ {character.name}
-          </span>
-          <span className="info-separator">|</span>
-          <span className="info-item">
-            {character.class}
-          </span>
-          <span className="info-separator">|</span>
-          <span className="info-item">
-            Pos: ({Math.floor(playerPos.x / tileSize)}, {Math.floor(playerPos.y / tileSize)})
-          </span>
-        </div>
-
-        <div className="top-bar-buttons">
-          <button onClick={onOpenInventory} className="inventory-button" title="打开背包 (I)">
-            🎒
-          </button>
-          <button onClick={onOpenMarketplace} className="marketplace-button" title="打开市场 (M)">
-            🏪
-          </button>
-          <button onClick={onExit} className="exit-map-button">
-            ← Exit
-          </button>
-        </div>
-      </div>
-
-      {/* 玩家状态栏 */}
-      <div className="player-status">
+    <div className="mapui-game-container">
+      {/* 左上角 - 玩家信息卡片 */}
+      <div className="mapui-player-card">
+        {/* 装饰角 */}
+        <div className="mapui-corner mapui-corner-tl"></div>
+        <div className="mapui-corner mapui-corner-tr"></div>
+        <div className="mapui-corner mapui-corner-bl"></div>
+        <div className="mapui-corner mapui-corner-br"></div>
+        
         {/* 生命值条 */}
-        <div className="status-row">
-          <span className="status-label">❤️ HP</span>
-          <div className="status-bar hp-bar">
-            <div 
-              className="status-bar-fill hp-fill" 
-              style={{ width: `${hpPercentage}%` }}
-            />
-            <span className="status-text">{currentHp} / {maxHp}</span>
+        <div className="mapui-stat-row">
+          <span className="mapui-stat-icon">❤️</span>
+          <span className="mapui-stat-label">HP</span>
+          <div className="mapui-stat-bar">
+            <div className="mapui-stat-bar-fill mapui-hp-fill" style={{ width: `${hpPercentage}%` }}>
+              <div className="mapui-bar-shine"></div>
+            </div>
+            <div className="mapui-stat-value">{currentHp} / {maxHp}</div>
           </div>
         </div>
 
         {/* 攻击力 */}
-        <div className="status-row">
-          <span className="status-label">⚔️ ATK</span>
-          <div className="attack-display">
-            <span className="attack-value">{totalAttack}</span>
+        <div className="mapui-stat-row">
+          <span className="mapui-stat-icon">⚔️</span>
+          <span className="mapui-stat-label">ATK</span>
+          <div className="mapui-attack-info">
+            <span className="mapui-attack-total">{totalAttack}</span>
             {weaponAttack > 0 && (
-              <span className="attack-breakdown">
-                ({character.attack || 0} + {weaponAttack})
-              </span>
+              <span className="mapui-attack-detail">({character.attack || 0} + {weaponAttack})</span>
             )}
           </div>
         </div>
+      </div>
 
-        {/* 武器信息 */}
-        {playerWeapon && (
-          <div className="weapon-info">
-            <span className="weapon-icon">🗡️</span>
-            <span className="weapon-name">{playerWeapon.name}</span>
-            <span className="weapon-level">Lv.{playerWeapon.level}</span>
+      {/* 右上角 - 功能按钮 */}
+      <div className="mapui-action-buttons">
+        <button onClick={onOpenInventory} className="mapui-action-btn mapui-inventory-btn">
+          <div className="mapui-btn-inner">
+            <div className="mapui-btn-face mapui-btn-front">
+              <span className="mapui-btn-icon">🎒</span>
+            </div>
+            <div className="mapui-btn-face mapui-btn-back">
+              <div className="mapui-btn-label">
+                <div>BAG</div>
+                <div>(I)</div>
+              </div>
+            </div>
           </div>
-        )}
+        </button>
+        <button onClick={onOpenMarketplace} className="mapui-action-btn mapui-market-btn">
+          <div className="mapui-btn-inner">
+            <div className="mapui-btn-face mapui-btn-front">
+              <span className="mapui-btn-icon">🏪</span>
+            </div>
+            <div className="mapui-btn-face mapui-btn-back">
+              <div className="mapui-btn-label">
+                <div>SHOP</div>
+                <div>(M)</div>
+              </div>
+            </div>
+          </div>
+        </button>
+        <button onClick={onExit} className="mapui-action-btn mapui-exit-btn">
+          <div className="mapui-btn-inner">
+            <div className="mapui-btn-face mapui-btn-front">
+              <span className="mapui-btn-icon">🚪</span>
+            </div>
+            <div className="mapui-btn-face mapui-btn-back">
+              <div className="mapui-btn-label">
+                <div>EXIT</div>
+                <div>(ESC)</div>
+              </div>
+            </div>
+          </div>
+        </button>
       </div>
 
-      <div className="controls-hint">
-        🎮 WASD/Arrows | SPACE=Attack | I=Inventory | M=Market | ESC=Exit
-      </div>
+      {/* 底部 - 控制提示 */}
+      <div className="mapui-controls-hint"></div>
     </div>
   )
 }

@@ -33,7 +33,7 @@ function Marketplace({ character, isOpen, onClose }) {
       setListings(allListings)
     } catch (error) {
       console.error('Error loading marketplace listings:', error)
-      alert('⚠️ 无法加载市场数据\n\n由于链上查询限制，暂时无法显示市场挂单。\n\n解决方案：\n1. 等待链下索引服务\n2. 使用合约事件查询\n3. 直接通过武器 ID 购买')
+      alert('⚠️ Unable to load market data\n\nDue to on-chain query limitations, marketplace listings cannot be displayed temporarily.\n\nSolutions:\n1. Wait for off-chain indexing service\n2. Use contract event queries\n3. Purchase directly via weapon ID')
       setListings([])
     } finally {
       setIsLoading(false)
@@ -73,20 +73,20 @@ function Marketplace({ character, isOpen, onClose }) {
     
     // 检查余额是否足够
     if (price > lingStoneBalance) {
-      alert(`❌ LingStone 不足\n\n需要: ${price} LING\n余额: ${lingStoneBalance} LING`)
+      alert(`❌ Insufficient LingStone\n\nRequired: ${price} LING\nBalance: ${lingStoneBalance} LING`)
       return
     }
     
     // 确认对话框
     const confirmed = window.confirm(
-      `💰 确定要购买这把武器吗？\n\n` +
-      `武器: ${listing.weapon.name} (Lv.${listing.weapon.level})\n` +
-      `攻击力: +${listing.weapon.attack}\n` +
-      `品质: ${getRarityName(listing.weapon.rarity)}\n\n` +
-      `💎 价格: ${price} LingStone\n` +
-      `💰 你的余额: ${lingStoneBalance.toLocaleString()} LingStone\n\n` +
-      `你需要签名支付 ${price} LING 和 gas 费用\n\n` +
-      `此操作不可撤销！`
+      `💰 Are you sure you want to buy this weapon?\n\n` +
+      `Weapon: ${listing.weapon.name} (Lv.${listing.weapon.level})\n` +
+      `Attack: +${listing.weapon.attack}\n` +
+      `Rarity: ${getRarityName(listing.weapon.rarity)}\n\n` +
+      `💎 Price: ${price} LingStone\n` +
+      `💰 Your Balance: ${lingStoneBalance.toLocaleString()} LingStone\n\n` +
+      `You need to sign to pay ${price} LING and gas fees\n\n` +
+      `This action cannot be undone!`
     )
     
     if (!confirmed) {
@@ -106,29 +106,29 @@ function Marketplace({ character, isOpen, onClose }) {
       )
       
       console.log('✅ Transaction successful:', result.digest)
-      console.log('⏳ 等待区块链索引更新（4秒）...')
+      console.log('⏳ Waiting for blockchain indexer update (4 seconds)...')
       
-      // 等待更长时间确保区块链索引器更新（4秒）
+      // Wait longer to ensure blockchain indexer updates (4 seconds)
       await new Promise(resolve => setTimeout(resolve, 4000))
       
-      // 重新加载挂单列表和余额
-      console.log('🔄 刷新市场列表和余额...')
+      // Reload listings and balance
+      console.log('🔄 Refreshing marketplace listings and balance...')
       await loadListings()
       await loadLingStoneBalance()
       
-      // 清除选中状态
+      // Clear selection
       setSelectedListing(null)
       
-      console.log('✅ 购买完成！武器已转移到你的背包')
-      alert(`✅ 购买成功！\n\n获得: ${listing.weapon.name}\n\n💡 提示：打开背包查看你的新武器`)
+      console.log('✅ Purchase complete! Weapon transferred to your inventory')
+      alert(`✅ Purchase successful!\n\nReceived: ${listing.weapon.name}\n\n💡 Tip: Open your inventory to view your new weapon`)
     } catch (error) {
       console.error('Error buying weapon:', error)
       if (error.message.includes('User rejected') || error.message.includes('rejected')) {
-        alert(`❌ 你取消了交易`)
+        alert(`❌ You cancelled the transaction`)
       } else if (error.message.includes('Insufficient') || error.message.includes('insufficient')) {
-        alert(`❌ 余额不足\n\n请确保你有足够的 LingStone 和 OCT 代币支付 gas 费用。`)
+        alert(`❌ Insufficient balance\n\nPlease ensure you have enough LingStone and OCT tokens to pay gas fees.`)
       } else {
-        alert(`❌ 购买失败: ${error.message}`)
+        alert(`❌ Purchase failed: ${error.message}`)
       }
     } finally {
       setIsBuying(false)
@@ -141,7 +141,7 @@ function Marketplace({ character, isOpen, onClose }) {
     <div className="marketplace-overlay" onClick={onClose}>
       <div className="marketplace-container" onClick={(e) => e.stopPropagation()}>
         <div className="marketplace-header">
-          <h2>🏪 武器市场</h2>
+          <h2>🏪 Weapon Market</h2>
           <div className="lingstone-display">
             <span className="lingstone-label">💎 LingStone:</span>
             <span className="lingstone-amount">{lingStoneBalance.toLocaleString()}</span>
@@ -149,10 +149,10 @@ function Marketplace({ character, isOpen, onClose }) {
               className="lingstone-request-btn" 
               onClick={() => { loadListings(); loadLingStoneBalance(); }}
               disabled={isLoading}
-              title="刷新市场"
-              style={{ marginLeft: '10px', padding: '5px 10px' }}
+              title="Refresh Market"
+              style={{ marginLeft: '5px' }}
             >
-              {isLoading ? '⏳' : '🔄 刷新'}
+              {isLoading ? '⏳' : '↻'}
             </button>
           </div>
           <button className="marketplace-close-btn" onClick={onClose}>✕</button>
@@ -162,12 +162,12 @@ function Marketplace({ character, isOpen, onClose }) {
           {/* 左侧：市场挂单列表 */}
           <div className="marketplace-grid-section">
             {isLoading ? (
-              <div className="marketplace-loading">加载中...</div>
+              <div className="marketplace-loading">Loading...</div>
             ) : listings.length === 0 ? (
               <div className="marketplace-empty">
                 <div className="empty-icon">🏪</div>
-                <p>市场暂无商品</p>
-                <p className="empty-hint">在背包中选择武器并上架到市场</p>
+                <p>No items in market</p>
+                <p className="empty-hint">Select a weapon in your inventory and list it on the market</p>
               </div>
             ) : (
               <>
@@ -184,7 +184,7 @@ function Marketplace({ character, isOpen, onClose }) {
                   ))}
                 </div>
                 <div className="marketplace-stats">
-                  <span>商品数量: {listings.length}</span>
+                  <span>Items: {listings.length}</span>
                 </div>
               </>
             )}
@@ -193,7 +193,7 @@ function Marketplace({ character, isOpen, onClose }) {
           {/* 右侧：武器详情 */}
           <div className="marketplace-details-section">
             {isLoading ? (
-              <div className="marketplace-loading">加载中...</div>
+              <div className="marketplace-loading">Loading...</div>
             ) : selectedListing ? (
               <div className="weapon-details">
                 <h3>{selectedListing.weapon.name}</h3>
@@ -206,28 +206,25 @@ function Marketplace({ character, isOpen, onClose }) {
                 </div>
                 <div className="weapon-stats">
                   <div className="stat-row">
-                    <span className="stat-label">类型:</span>
+                    <span className="stat-label">Type:</span>
                     <span className="stat-value">{getWeaponTypeName(selectedListing.weapon.weaponType)}</span>
                   </div>
                   <div className="stat-row">
-                    <span className="stat-label">品质:</span>
+                    <span className="stat-label">Rarity:</span>
                     <span className="stat-value rarity">{getRarityName(selectedListing.weapon.rarity)}</span>
                   </div>
                   <div className="stat-row">
-                    <span className="stat-label">攻击力:</span>
+                    <span className="stat-label">Attack:</span>
                     <span className="stat-value attack">+{selectedListing.weapon.attack}</span>
                   </div>
                   <div className="stat-row">
-                    <span className="stat-label">等级:</span>
+                    <span className="stat-label">Level:</span>
                     <span className="stat-value">Lv.{selectedListing.weapon.level}</span>
                   </div>
                   <div className="stat-row">
-                    <span className="stat-label">价格:</span>
+                    <span className="stat-label">Price:</span>
                     <span className="stat-value price">💎 {(selectedListing.price / 1_000_000_000).toLocaleString()} LING</span>
                   </div>
-                </div>
-                <div className="weapon-description">
-                  {getWeaponDescription(selectedListing.weapon.weaponType)}
                 </div>
                 <div className="weapon-actions">
                   <button 
@@ -235,17 +232,17 @@ function Marketplace({ character, isOpen, onClose }) {
                     onClick={() => handleBuyWeapon(selectedListing)}
                     disabled={isBuying}
                   >
-                    {isBuying ? '⏳ 购买中...' : '💰 购买'}
+                    {isBuying ? '⏳ Purchasing...' : '💰 Buy'}
                   </button>
                 </div>
                 <div className="marketplace-notice">
-                  ℹ️ 价格由卖家设定，点击购买按钮即可按此价格购买武器。
+                  ℹ️ Price is set by the seller. Click the buy button to purchase the weapon at this price.
                 </div>
               </div>
             ) : (
               <div className="no-selection">
                 <div className="empty-icon">🏪</div>
-                <p>选择一个武器查看详情</p>
+                <p>Select a weapon to view details</p>
               </div>
             )}
           </div>
@@ -267,34 +264,34 @@ function getWeaponImage(weaponName, weaponType) {
   return `/weapons/${folder}/${weaponName}.png`
 }
 
-// 获取武器类型名称
+// Get weapon type name
 function getWeaponTypeName(weaponType) {
   const names = {
-    1: '剑',
-    2: '弓',
-    3: '法杖'
+    1: 'Sword',
+    2: 'Bow',
+    3: 'Staff'
   }
-  return names[weaponType] || '未知'
+  return names[weaponType] || 'Unknown'
 }
 
-// 获取武器描述
+// Get weapon description
 function getWeaponDescription(weaponType) {
   const descriptions = {
-    1: '锋利的剑刃，适合近战战斗。武者的首选武器。',
-    2: '精准的远程武器，可以从安全距离攻击敌人。',
-    3: '蕴含魔法力量的法杖，能够释放强大的魔法攻击。'
+    1: 'A sharp blade, suitable for close combat. The weapon of choice for warriors.',
+    2: 'A precise ranged weapon that can attack enemies from a safe distance.',
+    3: 'A staff imbued with magical power, capable of unleashing powerful magical attacks.'
   }
-  return descriptions[weaponType] || '神秘的武器'
+  return descriptions[weaponType] || 'A mysterious weapon'
 }
 
-// 获取品质名称
+// Get rarity name
 function getRarityName(rarity) {
   const names = {
-    1: '普通',
-    2: '稀有',
-    3: '史诗'
+    1: 'Common',
+    2: 'Rare',
+    3: 'Epic'
   }
-  return names[rarity] || '未知'
+  return names[rarity] || 'Unknown'
 }
 
 export default Marketplace

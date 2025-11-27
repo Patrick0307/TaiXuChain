@@ -112,6 +112,12 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
 
   // 处理合成模式下的武器选择
   const handleMergeSelection = (weapon) => {
+    // 检查是否是已装备的武器
+    if (equippedWeapon?.objectId === weapon.objectId) {
+      alert('⚠️ 无法合成已装备的武器！请先卸下装备。')
+      return
+    }
+    
     const isSelected = selectedForMerge.some(w => w.objectId === weapon.objectId)
     
     if (isSelected) {
@@ -423,15 +429,15 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
     <div className="inventory-overlay" onClick={onClose}>
       <div className="inventory-container" onClick={(e) => e.stopPropagation()}>
         <div className="inventory-header">
-          <h2>🎒 背包</h2>
+          <h2>🎒 INVENTORY</h2>
           <div className="lingstone-display">
-            <span className="lingstone-label">💎 LingStone:</span>
+            <span className="lingstone-label">LINGSTONE</span>
             <span className="lingstone-amount">{lingStoneBalance.toLocaleString()}</span>
             <button 
               className="lingstone-request-btn" 
               onClick={handleRequestLingStone}
               disabled={isRequestingLingStone}
-              title="请求 10000 LingStone"
+              title="Request 10000 LingStone"
             >
               {isRequestingLingStone ? '⏳' : '+'}
             </button>
@@ -439,10 +445,10 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
               className="lingstone-request-btn" 
               onClick={() => { loadWeapons(); loadLingStoneBalance(); }}
               disabled={isLoading}
-              title="刷新背包"
+              title="Refresh Inventory"
               style={{ marginLeft: '5px' }}
             >
-              {isLoading ? '⏳' : '🔄'}
+              {isLoading ? '⏳' : '↻'}
             </button>
           </div>
           <button className="inventory-close-btn" onClick={onClose}>✕</button>
@@ -453,7 +459,7 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
           <div className="inventory-grid-section">
             {/* 装备栏 */}
             <div className="equipped-section">
-              <h3>🗡️ 已装备</h3>
+              <h3>🗡️ EQUIPPED</h3>
               <div className="equipped-slot">
                 {equippedWeapon ? (
                   <InventorySlot
@@ -465,24 +471,11 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
                   />
                 ) : (
                   <div className="empty-equipped-slot">
-                    <span>未装备武器</span>
+                    <span>No Weapon</span>
                   </div>
                 )}
               </div>
             </div>
-            
-            {/* 合成模式提示 */}
-            {isMerging && (
-              <div className="merge-mode-banner">
-                <span>⚔️ 合成模式：选择2把相同类型、稀有度、等级的武器</span>
-                <span className="merge-count">已选择: {selectedForMerge.length}/2</span>
-                {selectedForMerge.length === 2 && (
-                  <button className="btn-confirm-merge" onClick={handleMergeWeapons}>
-                    确认合成
-                  </button>
-                )}
-              </div>
-            )}
             
             {/* 背包格子 */}
             <div className="inventory-grid">
@@ -504,15 +497,84 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
               })}
             </div>
             <div className="inventory-stats">
-              <span>武器数量: {weapons.length}</span>
-              {equippedWeapon && <span className="equipped-indicator">✓ 已装备: {equippedWeapon.name}</span>}
+              <span>Weapons: {weapons.length}</span>
+              {equippedWeapon && <span className="equipped-indicator">✓ Equipped: {equippedWeapon.name}</span>}
             </div>
           </div>
 
           {/* 右侧：武器详情 */}
           <div className="inventory-details-section">
             {isLoading ? (
-              <div className="inventory-loading">加载中...</div>
+              <div className="inventory-loading">Loading...</div>
+            ) : isMerging ? (
+              <div className="weapon-details">
+                <h3>⚔️ MERGE MODE</h3>
+                <div className="merge-info-panel">
+                  <p style={{ color: '#fff', fontSize: '0.75rem', textAlign: 'center', marginBottom: '15px' }}>
+                    Select 2 weapons with same type, rarity, and level
+                  </p>
+                  
+                  {selectedForMerge.length > 0 && (
+                    <div style={{ marginBottom: '15px' }}>
+                      <div style={{ color: '#ffd700', fontSize: '0.7rem', marginBottom: '8px', textAlign: 'center' }}>
+                        Selected: {selectedForMerge.length}/2
+                      </div>
+                      {selectedForMerge.map((weapon, index) => (
+                        <div key={weapon.objectId} style={{ 
+                          background: 'rgba(0, 0, 0, 0.3)', 
+                          padding: '8px', 
+                          borderRadius: '6px', 
+                          marginBottom: '6px',
+                          border: '1px solid rgba(255, 215, 0, 0.3)'
+                        }}>
+                          <div style={{ color: '#fff', fontSize: '0.7rem', fontWeight: 'bold' }}>
+                            {index + 1}. {weapon.name}
+                          </div>
+                          <div style={{ color: '#aaa', fontSize: '0.6rem' }}>
+                            Lv.{weapon.level} | +{weapon.attack} ATK | {getRarityName(weapon.rarity)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {selectedForMerge.length === 2 && (
+                    <div style={{ 
+                      background: 'rgba(76, 175, 80, 0.2)', 
+                      padding: '10px', 
+                      borderRadius: '6px', 
+                      marginBottom: '15px',
+                      border: '1px solid rgba(76, 175, 80, 0.5)'
+                    }}>
+                      <div style={{ color: '#4CAF50', fontSize: '0.7rem', fontWeight: 'bold', marginBottom: '5px' }}>
+                        ✓ Result:
+                      </div>
+                      <div style={{ color: '#fff', fontSize: '0.65rem' }}>
+                        {selectedForMerge[0].name} (Lv.{selectedForMerge[0].level + 1})
+                      </div>
+                      <div style={{ color: '#ffd700', fontSize: '0.6rem', marginTop: '5px' }}>
+                        💎 Cost: {100 + (selectedForMerge[0].level * 50)} LING
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="weapon-actions">
+                  <button 
+                    className="btn-equip"
+                    onClick={toggleMergeMode}
+                  >
+                    ← BACK
+                  </button>
+                  <button 
+                    className="btn-merge active"
+                    onClick={handleMergeWeapons}
+                    disabled={selectedForMerge.length !== 2 || isBurningWeapon}
+                  >
+                    {isBurningWeapon ? '⏳ MERGING...' : 'CONFIRM'}
+                  </button>
+                </div>
+              </div>
             ) : selectedWeapon ? (
               <div className="weapon-details">
                 <h3>{selectedWeapon.name}</h3>
@@ -525,28 +587,25 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
                 </div>
                 <div className="weapon-stats">
                   <div className="stat-row">
-                    <span className="stat-label">类型:</span>
-                    <span className="stat-value">{getWeaponTypeName(selectedWeapon.weaponType)}</span>
+                    <span className="inventory-stat-label">Type:</span>
+                    <span className="inventory-stat-value">{getWeaponTypeName(selectedWeapon.weaponType)}</span>
                   </div>
                   <div className="stat-row">
-                    <span className="stat-label">品质:</span>
-                    <span className="stat-value rarity">{getRarityName(selectedWeapon.rarity)}</span>
+                    <span className="inventory-stat-label">Rarity:</span>
+                    <span className="inventory-stat-value rarity">{getRarityName(selectedWeapon.rarity)}</span>
                   </div>
                   <div className="stat-row">
-                    <span className="stat-label">攻击力:</span>
-                    <span className="stat-value attack">+{selectedWeapon.attack}</span>
+                    <span className="inventory-stat-label">Attack:</span>
+                    <span className="inventory-stat-value attack">+{selectedWeapon.attack}</span>
                   </div>
                   <div className="stat-row">
-                    <span className="stat-label">等级:</span>
-                    <span className="stat-value">Lv.{selectedWeapon.level}</span>
+                    <span className="inventory-stat-label">Level:</span>
+                    <span className="inventory-stat-value">Lv.{selectedWeapon.level}</span>
                   </div>
                   <div className="stat-row">
-                    <span className="stat-label">版本:</span>
-                    <span className="stat-value">#{selectedWeapon.version}</span>
+                    <span className="inventory-stat-label">Version:</span>
+                    <span className="inventory-stat-value">#{selectedWeapon.version}</span>
                   </div>
-                </div>
-                <div className="weapon-description">
-                  {getWeaponDescription(selectedWeapon.weaponType)}
                 </div>
                 <div className="weapon-actions">
                   <button 
@@ -554,13 +613,13 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
                     onClick={() => handleEquipWeapon(selectedWeapon)}
                     disabled={!canEquipWeapon(selectedWeapon) || equippedWeapon?.objectId === selectedWeapon.objectId}
                   >
-                    {equippedWeapon?.objectId === selectedWeapon.objectId ? '✓ 已装备' : '装备'}
+                    {equippedWeapon?.objectId === selectedWeapon.objectId ? '✓ EQUIPPED' : 'EQUIP'}
                   </button>
                   <button 
                     className={`btn-merge ${isMerging ? 'active' : ''}`}
                     onClick={toggleMergeMode}
                   >
-                    {isMerging ? '取消合成' : '⚔️ 合成'}
+                    {isMerging ? 'CANCEL' : '⚔️ MERGE'}
                   </button>
                 </div>
                 <div className="weapon-actions">
@@ -569,19 +628,19 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
                     onClick={() => handleListWeapon(selectedWeapon)}
                     disabled={isListingWeapon || isMerging}
                   >
-                    {isListingWeapon ? '⏳ 上架中...' : '📦 上架市场'}
+                    {isListingWeapon ? '⏳ SELLING...' : '🏪 SHOP'}
                   </button>
                   <button 
                     className="btn-burn"
                     onClick={() => handleBurnWeapon(selectedWeapon)}
                     disabled={isBurningWeapon || isMerging}
                   >
-                    {isBurningWeapon ? '⏳ 丢弃中...' : '🔥 丢弃'}
+                    {isBurningWeapon ? '⏳ BURNING...' : '🔥 BURN'}
                   </button>
                 </div>
                 {!canEquipWeapon(selectedWeapon) && (
                   <div className="weapon-warning">
-                    ⚠️ 此武器不适合你的职业
+                    ⚠️ Wrong class for this weapon
                     <div style={{ fontSize: '0.8rem', marginTop: '5px', opacity: 0.8 }}>
                       {getClassRequirement(selectedWeapon.weaponType)}
                     </div>
@@ -591,7 +650,7 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
             ) : (
               <div className="no-selection">
                 <div className="empty-icon">🎒</div>
-                <p>选择一个武器查看详情</p>
+                <p>Select a weapon to view details</p>
               </div>
             )}
           </div>
@@ -616,41 +675,41 @@ function getWeaponImage(weaponName, weaponType) {
 // 获取武器类型名称
 function getWeaponTypeName(weaponType) {
   const names = {
-    1: '剑',
-    2: '弓',
-    3: '法杖'
+    1: 'Sword',
+    2: 'Bow',
+    3: 'Staff'
   }
-  return names[weaponType] || '未知'
+  return names[weaponType] || 'Unknown'
 }
 
 // 获取武器描述
 function getWeaponDescription(weaponType) {
   const descriptions = {
-    1: '锋利的剑刃，适合近战战斗。武者的首选武器。',
-    2: '精准的远程武器，可以从安全距离攻击敌人。',
-    3: '蕴含魔法力量的法杖，能够释放强大的魔法攻击。'
+    1: 'Sharp blade for close combat. The warrior\'s weapon of choice.',
+    2: 'Precise ranged weapon. Attack enemies from a safe distance.',
+    3: 'Magical staff imbued with arcane power. Unleash devastating spells.'
   }
-  return descriptions[weaponType] || '神秘的武器'
+  return descriptions[weaponType] || 'Mysterious weapon'
 }
 
 // 获取品质名称
 function getRarityName(rarity) {
   const names = {
-    1: '普通',
-    2: '稀有',
-    3: '史诗'
+    1: 'Common',
+    2: 'Rare',
+    3: 'Epic'
   }
-  return names[rarity] || '未知'
+  return names[rarity] || 'Unknown'
 }
 
 // 获取职业要求说明
 function getClassRequirement(weaponType) {
   const requirements = {
-    1: '需要职业: 武者 ⚔️',
-    2: '需要职业: 弓箭手 🏹',
-    3: '需要职业: 术士 🪄'
+    1: 'Required: Warrior ⚔️',
+    2: 'Required: Archer 🏹',
+    3: 'Required: Mage 🪄'
   }
-  return requirements[weaponType] || '未知职业要求'
+  return requirements[weaponType] || 'Unknown class requirement'
 }
 
 export default Inventory

@@ -1,0 +1,540 @@
+/* Black & Gold Theme - Notification System */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+/* ========== 通知容器 ========== */
+.notification-container {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  pointer-events: none;
+}
+
+/* ========== 通知卡片 ========== */
+.notification {
+  position: relative;
+  min-width: 320px;
+  max-width: 400px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.98) 0%, rgba(20, 20, 20, 0.95) 100%);
+  border: 2px solid rgba(255, 215, 0, 0.6);
+  border-radius: 12px;
+  padding: 18px 22px;
+  box-shadow: 
+    0 0 40px rgba(255, 215, 0, 0.4),
+    0 8px 30px rgba(0, 0, 0, 0.9),
+    inset 0 0 30px rgba(255, 215, 0, 0.08);
+  pointer-events: auto;
+  font-family: 'Orbitron', sans-serif;
+  animation: notificationSlideIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  /* 像素风格边框 */
+  clip-path: polygon(
+    0 6px, 6px 6px, 6px 0,
+    calc(100% - 6px) 0, calc(100% - 6px) 6px, 100% 6px,
+    100% calc(100% - 6px), calc(100% - 6px) calc(100% - 6px), calc(100% - 6px) 100%,
+    6px 100%, 6px calc(100% - 6px), 0 calc(100% - 6px)
+  );
+}
+
+/* 通知光晕效果 */
+.notification::before {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  background: radial-gradient(ellipse, rgba(255, 215, 0, 0.3) 0%, transparent 70%);
+  z-index: -1;
+  animation: notificationGlow 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes notificationGlow {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes notificationSlideIn {
+  from {
+    transform: translateX(450px) scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* 退出动画 */
+.notification.exit {
+  animation: notificationSlideOut 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+@keyframes notificationSlideOut {
+  from {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(450px) scale(0.8);
+    opacity: 0;
+  }
+}
+
+/* ========== 通知类型 ========== */
+/* 成功 */
+.notification.success {
+  border-color: rgba(76, 175, 80, 0.7);
+}
+
+.notification.success::before {
+  background: radial-gradient(ellipse, rgba(76, 175, 80, 0.3) 0%, transparent 70%);
+}
+
+/* 错误 */
+.notification.error {
+  border-color: rgba(244, 67, 54, 0.7);
+}
+
+.notification.error::before {
+  background: radial-gradient(ellipse, rgba(244, 67, 54, 0.3) 0%, transparent 70%);
+}
+
+/* 警告 */
+.notification.warning {
+  border-color: rgba(255, 152, 0, 0.7);
+}
+
+.notification.warning::before {
+  background: radial-gradient(ellipse, rgba(255, 152, 0, 0.3) 0%, transparent 70%);
+}
+
+/* 信息 */
+.notification.info {
+  border-color: rgba(33, 150, 243, 0.7);
+}
+
+.notification.info::before {
+  background: radial-gradient(ellipse, rgba(33, 150, 243, 0.3) 0%, transparent 70%);
+}
+
+/* ========== 通知内容 ========== */
+.notification-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+/* 图标 */
+.notification-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 10px currentColor);
+  animation: iconPulse 2s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.notification.success .notification-icon {
+  color: #4CAF50;
+}
+
+.notification.error .notification-icon {
+  color: #f44336;
+}
+
+.notification.warning .notification-icon {
+  color: #ff9800;
+}
+
+.notification.info .notification-icon {
+  color: #2196F3;
+}
+
+/* 文本区域 */
+.notification-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.notification-title {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #ffd700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+  margin: 0;
+}
+
+.notification.success .notification-title {
+  color: #4CAF50;
+  text-shadow: 0 0 15px rgba(76, 175, 80, 0.8);
+}
+
+.notification.error .notification-title {
+  color: #f44336;
+  text-shadow: 0 0 15px rgba(244, 67, 54, 0.8);
+}
+
+.notification.warning .notification-title {
+  color: #ff9800;
+  text-shadow: 0 0 15px rgba(255, 152, 0, 0.8);
+}
+
+.notification.info .notification-title {
+  color: #2196F3;
+  text-shadow: 0 0 15px rgba(33, 150, 243, 0.8);
+}
+
+.notification-message {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.5;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+/* 关闭按钮 */
+.notification-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 215, 0, 0.1) 100%);
+  border: 2px solid rgba(255, 215, 0, 0.4);
+  border-radius: 50%;
+  color: #ffd700;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.notification-close::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: -1;
+}
+
+.notification-close:hover {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.4) 0%, rgba(255, 215, 0, 0.3) 100%);
+  border-color: rgba(255, 215, 0, 0.8);
+  transform: scale(1.15) rotate(90deg);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+}
+
+.notification-close:hover::before {
+  opacity: 1;
+}
+
+/* 进度条 */
+.notification-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #ffd700 0%, #ffed4e 100%);
+  border-radius: 0 0 10px 10px;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+  animation: progressShrink var(--duration, 5s) linear forwards;
+}
+
+@keyframes progressShrink {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+.notification.success .notification-progress {
+  background: linear-gradient(90deg, #4CAF50 0%, #66BB6A 100%);
+  box-shadow: 0 0 15px rgba(76, 175, 80, 0.8);
+}
+
+.notification.error .notification-progress {
+  background: linear-gradient(90deg, #f44336 0%, #EF5350 100%);
+  box-shadow: 0 0 15px rgba(244, 67, 54, 0.8);
+}
+
+.notification.warning .notification-progress {
+  background: linear-gradient(90deg, #ff9800 0%, #FFA726 100%);
+  box-shadow: 0 0 15px rgba(255, 152, 0, 0.8);
+}
+
+.notification.info .notification-progress {
+  background: linear-gradient(90deg, #2196F3 0%, #42A5F5 100%);
+  box-shadow: 0 0 15px rgba(33, 150, 243, 0.8);
+}
+
+/* ========== 确认对话框 ========== */
+.confirm-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.92);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+  backdrop-filter: blur(8px);
+}
+
+/* 马赛克背景 */
+.confirm-dialog-overlay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    linear-gradient(45deg, #1a1a1a 25%, transparent 25%),
+    linear-gradient(-45deg, #1a1a1a 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #1a1a1a 75%),
+    linear-gradient(-45deg, transparent 75%, #1a1a1a 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.confirm-dialog {
+  position: relative;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.98) 0%, rgba(20, 20, 20, 0.95) 100%);
+  border: 3px solid rgba(255, 215, 0, 0.7);
+  border-radius: 15px;
+  padding: 35px 40px;
+  min-width: 400px;
+  max-width: 500px;
+  box-shadow: 
+    0 0 60px rgba(255, 215, 0, 0.5),
+    0 10px 70px rgba(0, 0, 0, 0.9),
+    inset 0 0 50px rgba(255, 215, 0, 0.08);
+  animation: dialogZoomIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  font-family: 'Orbitron', sans-serif;
+  /* 像素风格边框 */
+  clip-path: polygon(
+    0 8px, 8px 8px, 8px 0,
+    calc(100% - 8px) 0, calc(100% - 8px) 8px, 100% 8px,
+    100% calc(100% - 8px), calc(100% - 8px) calc(100% - 8px), calc(100% - 8px) 100%,
+    8px 100%, 8px calc(100% - 8px), 0 calc(100% - 8px)
+  );
+}
+
+/* 对话框光晕 */
+.confirm-dialog::before {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  background: radial-gradient(ellipse, rgba(255, 215, 0, 0.3) 0%, transparent 70%);
+  z-index: -1;
+  animation: dialogGlow 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes dialogGlow {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes dialogZoomIn {
+  from {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.confirm-dialog-icon {
+  text-align: center;
+  font-size: 4rem;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 0 20px currentColor);
+  animation: iconFloat 3s ease-in-out infinite;
+}
+
+@keyframes iconFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.confirm-dialog.warning .confirm-dialog-icon {
+  color: #ff9800;
+}
+
+.confirm-dialog.error .confirm-dialog-icon {
+  color: #f44336;
+}
+
+.confirm-dialog.info .confirm-dialog-icon {
+  color: #2196F3;
+}
+
+.confirm-dialog-title {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #ffd700;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.9);
+  margin: 0 0 15px 0;
+}
+
+.confirm-dialog-message {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  line-height: 1.6;
+  margin: 0 0 30px 0;
+  letter-spacing: 0.5px;
+}
+
+.confirm-dialog-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.confirm-dialog-btn {
+  position: relative;
+  padding: 12px 30px;
+  border: 2px solid;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  font-family: 'Orbitron', sans-serif;
+  /* 像素风格 */
+  clip-path: polygon(
+    0 4px, 4px 4px, 4px 0,
+    calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px,
+    100% calc(100% - 4px), calc(100% - 4px) calc(100% - 4px), calc(100% - 4px) 100%,
+    4px 100%, 4px calc(100% - 4px), 0 calc(100% - 4px)
+  );
+}
+
+.confirm-dialog-btn::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  background: radial-gradient(circle, currentColor 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: -1;
+}
+
+.confirm-dialog-btn:hover::before {
+  opacity: 0.3;
+}
+
+/* 确认按钮 */
+.confirm-dialog-btn.confirm {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 215, 0, 0.1) 100%);
+  border-color: rgba(255, 215, 0, 0.6);
+  color: #ffd700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+.confirm-dialog-btn.confirm:hover {
+  background: linear-gradient(135deg, #ffd700 0%, #daa520 100%);
+  border-color: #ffd700;
+  color: #000;
+  transform: translateY(-3px);
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+}
+
+/* 取消按钮 */
+.confirm-dialog-btn.cancel {
+  background: linear-gradient(135deg, rgba(100, 100, 100, 0.2) 0%, rgba(80, 80, 80, 0.1) 100%);
+  border-color: rgba(150, 150, 150, 0.5);
+  color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 15px rgba(100, 100, 100, 0.2);
+}
+
+.confirm-dialog-btn.cancel:hover {
+  background: linear-gradient(135deg, rgba(150, 150, 150, 0.4) 0%, rgba(120, 120, 120, 0.3) 100%);
+  border-color: rgba(200, 200, 200, 0.7);
+  color: #fff;
+  transform: translateY(-3px);
+  box-shadow: 0 0 25px rgba(150, 150, 150, 0.4);
+}
+
+/* ========== 响应式设计 ========== */
+@media (max-width: 768px) {
+  .notification-container {
+    top: 60px;
+    right: 10px;
+    left: 10px;
+  }
+
+  .notification {
+    min-width: auto;
+    max-width: 100%;
+  }
+
+  .confirm-dialog {
+    min-width: auto;
+    max-width: 90%;
+    padding: 25px 30px;
+  }
+
+  .confirm-dialog-buttons {
+    flex-direction: column;
+  }
+
+  .confirm-dialog-btn {
+    width: 100%;
+  }
+}
