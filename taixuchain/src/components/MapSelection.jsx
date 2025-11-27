@@ -18,7 +18,6 @@ function MapSelection({ character, onMapSelected }) {
       icon: '🌲',
       color: '#2d5016',
       locked: false,
-      story: 'A mysterious forest shrouded in eternal mist. Legends speak of ancient spirits guarding forgotten treasures deep within its twisted paths. Brave warriors venture here to prove their worth and claim legendary weapons.',
       rewards: {
         swords: ['Iron Sword', 'Azure Edge Sword', 'Dragon Roar Sword'],
         bows: ['Hunter Bow', 'Swift Wind Bow', 'Cloud Piercer Bow'],
@@ -37,8 +36,7 @@ function MapSelection({ character, onMapSelected }) {
       icon: '⛰️',
       color: '#5a4a00',
       locked: true,
-      unlockRequirement: 'Complete Misty Forest',
-      story: 'Frozen peaks where only the bravest dare to venture. The howling winds carry tales of a legendary ice dragon that once ruled these mountains. Elite weapons await those who can survive the harsh cold.',
+      unlockRequirement: 'Comming Soon',
       rewards: {
         swords: ['Iron Sword', 'Azure Edge Sword', 'Dragon Roar Sword'],
         bows: ['Hunter Bow', 'Swift Wind Bow', 'Cloud Piercer Bow'],
@@ -57,8 +55,7 @@ function MapSelection({ character, onMapSelected }) {
       icon: '🏜️',
       color: '#5a1a00',
       locked: true,
-      unlockRequirement: 'Complete Snow Peak',
-      story: 'An endless sea of burning sand concealing the ruins of a once-great civilization. Ancient curses protect the treasures buried beneath the dunes. Only the strongest warriors can claim the ultimate legendary weapons.',
+      unlockRequirement: 'Comming Soon',
       rewards: {
         swords: ['Iron Sword', 'Azure Edge Sword', 'Dragon Roar Sword'],
         bows: ['Hunter Bow', 'Swift Wind Bow', 'Cloud Piercer Bow'],
@@ -248,7 +245,6 @@ function MapSelection({ character, onMapSelected }) {
       <div className="right-content">
         {/* 地图选择区 */}
         <div className="maps-section">
-          <div className="section-label">SELECT MAP</div>
           <div className="maps-grid">
             {maps.map((map, index) => (
               <div
@@ -291,11 +287,6 @@ function MapSelection({ character, onMapSelected }) {
             <div className="details-header">
               <span className="details-icon">{selectedMapData.icon}</span>
               <span className="details-title">{selectedMapData.name}</span>
-            </div>
-            
-            <div className="details-story">
-              <div className="story-label">📜 STORY</div>
-              <div className="story-text">{selectedMapData.story}</div>
             </div>
 
             <div className="details-grid">

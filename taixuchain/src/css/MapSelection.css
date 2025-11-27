@@ -11,8 +11,8 @@
   display: grid;
   grid-template-columns: 280px 1fr;
   grid-template-rows: auto 1fr auto;
-  gap: 15px;
-  padding: 20px 25px;
+  gap: 8px;
+  padding: 10px 15px;
   overflow: hidden;
   font-family: 'Noto Sans SC', sans-serif;
 }
@@ -142,6 +142,7 @@
   margin: 0 auto;
   box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
   animation: lineGlow 2s ease-in-out infinite;
+  display: none;
 }
 
 @keyframes lineGlow {
@@ -187,14 +188,14 @@
 }
 
 .title-text {
-  font-size: 1.2rem;
+  font-size: 0.9rem;
   font-weight: 900;
   background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FFD700 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
-  letter-spacing: 4px;
+  letter-spacing: 3px;
   animation: titleGlow 3s ease-in-out infinite;
   font-family: 'Press Start 2P', cursive;
 }
@@ -214,7 +215,7 @@
   z-index: 10;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   grid-row: 2 / 3;
 }
 
@@ -226,7 +227,7 @@
   background: linear-gradient(135deg, rgba(26, 26, 26, 0.9) 0%, rgba(10, 10, 10, 0.95) 100%);
   border: 2px solid rgba(255, 215, 0, 0.3);
   border-radius: 12px;
-  padding: 20px;
+  padding: 12px;
   box-shadow: 
     0 8px 30px rgba(0, 0, 0, 0.5),
     inset 0 1px 0 rgba(255, 215, 0, 0.1);
@@ -270,7 +271,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   justify-content: center;
 }
 
@@ -321,11 +322,11 @@
 
 /* ========== 区域标签 ========== */
 .section-label {
-  font-size: 0.7rem;
+  font-size: 0.6rem;
   font-weight: 700;
   color: #ffd700;
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
   letter-spacing: 2px;
   position: relative;
@@ -343,7 +344,7 @@
 .mode-grid {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 8px;
 }
 
 .mode-tile {
@@ -351,13 +352,13 @@
   background: linear-gradient(135deg, rgba(26, 26, 26, 0.9) 0%, rgba(10, 10, 10, 0.95) 100%);
   border: 2px solid rgba(255, 215, 0, 0.3);
   border-radius: 12px;
-  padding: 15px;
+  padding: 10px;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   box-shadow: 
     0 8px 30px rgba(0, 0, 0, 0.5),
     inset 0 1px 0 rgba(255, 215, 0, 0.1);
@@ -464,7 +465,7 @@
   z-index: 10;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   grid-row: 2 / 3;
   overflow-y: auto;
   overflow-x: hidden;
@@ -492,7 +493,7 @@
 .maps-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 8px;
   height: 100%;
   align-content: start;
 }
@@ -502,7 +503,7 @@
   background: linear-gradient(135deg, rgba(26, 26, 26, 0.9) 0%, rgba(10, 10, 10, 0.95) 100%);
   border: 2px solid rgba(255, 215, 0, 0.3);
   border-radius: 12px;
-  padding: 20px 15px;
+  padding: 12px 10px;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
@@ -510,7 +511,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  min-height: 280px;
+  min-height: 220px;
   box-shadow: 
     0 8px 30px rgba(0, 0, 0, 0.5),
     inset 0 1px 0 rgba(255, 215, 0, 0.1);
@@ -576,8 +577,8 @@
 }
 
 .map-icon-large {
-  font-size: 3rem;
-  margin-bottom: 10px;
+  font-size: 2.5rem;
+  margin-bottom: 6px;
   filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.6));
   transition: all 0.3s ease;
 }
@@ -588,11 +589,11 @@
 }
 
 .map-name {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 900;
   color: #fff;
   letter-spacing: 1px;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
   transition: all 0.3s ease;
   font-family: 'Press Start 2P', cursive;
@@ -604,11 +605,11 @@
 }
 
 .map-desc {
-  font-size: 0.55rem;
+  font-size: 0.5rem;
   color: #aaa;
   text-align: center;
-  line-height: 1.6;
-  margin-bottom: 12px;
+  line-height: 1.5;
+  margin-bottom: 8px;
   flex: 1;
   font-family: 'Press Start 2P', cursive;
   display: -webkit-box;
@@ -652,7 +653,7 @@
 /* ========== 确认按钮 ========== */
 .action-section {
   position: relative;
-  z-index: 10;
+  z-index: 100;
   grid-column: 1 / -1;
   display: flex;
   justify-content: center;
@@ -674,7 +675,7 @@
   position: relative;
   width: 100%;
   max-width: 400px;
-  padding: 10px 35px;
+  padding: 8px 30px;
   background: none;
   background-color: transparent;
   border: 2px solid #FFD700;
@@ -1093,15 +1094,6 @@
     font-size: 0.9rem;
   }
 
-  .story-label {
-    font-size: 0.55rem;
-  }
-
-  .story-text {
-    font-size: 0.48rem;
-    padding: 12px;
-  }
-
   .details-grid {
     grid-template-columns: 1fr;
     gap: 12px;
@@ -1408,31 +1400,6 @@
   letter-spacing: 2px;
 }
 
-.details-story {
-  margin-bottom: 20px;
-}
-
-.story-label {
-  font-size: 0.65rem;
-  color: #ffd700;
-  font-family: 'Press Start 2P', cursive;
-  margin-bottom: 10px;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
-  letter-spacing: 1px;
-}
-
-.story-text {
-  font-size: 0.55rem;
-  color: #ccc;
-  line-height: 1.8;
-  font-family: 'Press Start 2P', cursive;
-  text-align: justify;
-  padding: 15px;
-  background: rgba(0, 0, 0, 0.5);
-  border-left: 3px solid #ffd700;
-  border-radius: 5px;
-}
-
 .details-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1610,16 +1577,6 @@
     letter-spacing: 1px;
   }
 
-  .story-label {
-    font-size: 0.5rem;
-  }
-
-  .story-text {
-    font-size: 0.42rem;
-    padding: 10px;
-    line-height: 1.7;
-  }
-
   .details-grid {
     grid-template-columns: 1fr;
   }
@@ -1694,10 +1651,6 @@
 
   .details-title {
     font-size: 0.65rem;
-  }
-
-  .story-text {
-    font-size: 0.38rem;
   }
 
   .btn-text {

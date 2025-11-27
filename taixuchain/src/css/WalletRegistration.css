@@ -115,7 +115,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 50px;
+  gap: 35px;
 }
 
 /* 移除伪元素 */
@@ -147,6 +147,36 @@
   100% {
     transform: translateX(-50%) scaleY(1.1) scaleX(0.95);
     opacity: 1;
+  }
+}
+
+.logo-image {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.6))
+          drop-shadow(0 0 40px rgba(255, 215, 0, 0.4));
+  animation: logoRotate 4s linear infinite, logoGlow 3s ease-in-out infinite alternate;
+  margin-bottom: 20px;
+}
+
+@keyframes logoRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes logoGlow {
+  0% {
+    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.6))
+            drop-shadow(0 0 40px rgba(255, 215, 0, 0.4));
+  }
+  100% {
+    filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.8))
+            drop-shadow(0 0 60px rgba(255, 215, 0, 0.6));
   }
 }
 
@@ -366,8 +396,8 @@
 }
 
 .error-message {
-  margin: 0;
-  padding: 30px 50px;
+  margin: 10px 0 0 0;
+  padding: 45px 40px 35px 40px;
   background: 
     repeating-linear-gradient(
       45deg,
@@ -385,19 +415,17 @@
     0 8px 0 #0a0a0a,
     0 14px 30px rgba(0, 0, 0, 0.9);
   color: #ff6666;
-  font-size: 1.1rem;
-  line-height: 2;
+  font-size: 1rem;
+  line-height: 1.8;
   text-shadow: 
     0 0 10px rgba(255, 0, 0, 0.8),
     2px 2px 4px #000;
   animation: errorPulse 1.5s ease-in-out infinite;
-  position: absolute;
-  bottom: 25%;
-  left: 50%;
-  transform: translateX(-50%);
-  min-width: 500px;
-  max-width: 700px;
+  position: relative;
+  width: 100%;
+  max-width: 650px;
   letter-spacing: 2px;
+  box-sizing: border-box;
 }
 
 @keyframes errorPulse {
@@ -423,23 +451,62 @@
 
 .error-message p {
   color: #ff6666;
-  font-size: 1.1rem;
-  margin-bottom: 25px;
+  font-size: 1rem;
+  margin: 0 0 15px 0;
   letter-spacing: 2px;
+  max-width: 100%;
+  line-height: 1.8;
+}
+
+.error-close-button {
+  position: absolute;
+  top: 12px;
+  right: 15px;
+  background: transparent;
+  border: none;
+  color: #ff6666;
+  font-size: 2rem;
+  font-weight: normal;
+  width: 35px;
+  height: 35px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+  transition: all 0.2s ease;
+  font-family: Arial, sans-serif;
+  text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+  opacity: 0.8;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.error-close-button:hover {
+  color: #ff8888;
+  opacity: 1;
+  transform: scale(1.2);
+  text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+}
+
+.error-close-button:active {
+  transform: scale(1);
+  opacity: 0.8;
 }
 
 .install-link {
   display: inline-block;
-  margin-top: 25px;
-  padding: 18px 40px;
+  margin-top: 15px;
+  padding: 16px 35px;
   background: 
     linear-gradient(135deg, #1a0000 0%, #3a0000 50%, #1a0000 100%);
   color: #ffd700;
   text-decoration: none;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 3px;
+  letter-spacing: 2px;
   border: 3px solid #ff0000;
   border-radius: 10px;
   box-shadow: 
@@ -535,18 +602,15 @@
 .waiting-message {
   margin: 0;
   color: #00ffff;
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   line-height: 2;
   text-shadow: 
     0 0 15px #00ffff,
     0 0 30px #00ffff,
     2px 2px 4px #000;
   animation: blink 1.5s ease-in-out infinite;
-  position: absolute;
-  bottom: 25%;
-  left: 50%;
-  transform: translateX(-50%);
-  letter-spacing: 3px;
+  letter-spacing: 2px;
+  max-width: 100%;
 }
 
 .loading-message {
@@ -1021,7 +1085,12 @@
 @media (max-width: 1024px) {
   .wallet-registration-box {
     max-width: 700px;
-    gap: 40px;
+    gap: 30px;
+  }
+  
+  .logo-image {
+    width: 150px;
+    height: 150px;
   }
   
   .wallet-registration-box h2 {
@@ -1045,7 +1114,12 @@
 @media (max-width: 768px) {
   .wallet-registration-box {
     max-width: 90%;
-    gap: 35px;
+    gap: 25px;
+  }
+  
+  .logo-image {
+    width: 120px;
+    height: 120px;
   }
   
   .wallet-registration-box h2 {
@@ -1081,21 +1155,24 @@
   }
   
   .error-message {
-    min-width: auto;
-    width: 85%;
-    padding: 20px 30px;
+    width: 90%;
+    padding: 40px 25px 30px 25px;
     font-size: 0.9rem;
   }
   
   .waiting-message {
-    font-size: 1rem;
-    width: 85%;
+    font-size: 0.95rem;
   }
 }
 
 @media (max-width: 480px) {
   .wallet-registration-box {
-    gap: 30px;
+    gap: 20px;
+  }
+  
+  .logo-image {
+    width: 90px;
+    height: 90px;
   }
   
   .wallet-registration-box h2 {
@@ -1126,24 +1203,32 @@
   }
   
   .error-message {
-    width: 90%;
-    padding: 18px 25px;
+    width: 95%;
+    padding: 35px 20px 25px 20px;
     font-size: 0.75rem;
   }
   
   .error-message p {
     font-size: 0.75rem;
+    margin-bottom: 15px;
   }
   
   .install-link {
-    padding: 14px 30px;
-    font-size: 0.8rem;
-    letter-spacing: 1.5px;
+    padding: 12px 25px;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
   }
   
   .waiting-message {
-    font-size: 0.85rem;
-    width: 90%;
+    font-size: 0.8rem;
+  }
+  
+  .error-close-button {
+    top: 8px;
+    right: 10px;
+    font-size: 1.5rem;
+    width: 30px;
+    height: 30px;
   }
   
   .screen-border {

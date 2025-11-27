@@ -195,40 +195,29 @@
   letter-spacing: 1px;
 }
 
-.tutorial-image-placeholder {
-  background: 
-    repeating-conic-gradient(
-      from 0deg at 1px 1px,
-      rgba(184, 134, 11, 0.1) 0deg 90deg,
-      rgba(10, 10, 8, 0.5) 90deg 180deg,
-      rgba(184, 134, 11, 0.1) 180deg 270deg,
-      rgba(10, 10, 8, 0.5) 270deg 360deg
-    ),
-    rgba(10, 10, 8, 0.3);
-  background-size: 3px 3px, 100% 100%;
-  border: 2px dashed rgba(212, 175, 55, 0.4);
-  border-radius: 15px;
-  padding: 60px 20px;
-  text-align: center;
+.tutorial-image-container {
+  width: 100%;
   margin: 20px 0;
+  border-radius: 15px;
+  overflow: hidden;
+  border: 3px solid rgba(212, 175, 55, 0.5);
   box-shadow: 
-    inset 0 0 25px rgba(0, 0, 0, 0.6),
-    0 0 10px rgba(212, 175, 55, 0.1);
+    inset 0 0 0 1px rgba(10, 10, 8, 0.8),
+    0 0 20px rgba(212, 175, 55, 0.3),
+    0 8px 25px rgba(0, 0, 0, 0.6);
+  background: rgba(10, 10, 8, 0.5);
 }
 
-.tutorial-image-placeholder span {
-  font-size: 48px;
+.tutorial-image {
+  width: 100%;
+  height: auto;
   display: block;
-  margin-bottom: 10px;
-  filter: grayscale(0.5) brightness(0.8);
+  object-fit: contain;
+  transition: transform 0.3s ease;
 }
 
-.tutorial-image-placeholder p {
-  color: rgba(170, 170, 170, 0.6);
-  font-size: 13px;
-  margin: 0;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-  letter-spacing: 1px;
+.tutorial-image:hover {
+  transform: scale(1.02);
 }
 
 .tutorial-link {
@@ -352,10 +341,11 @@
   height: 10px;
   border-radius: 50%;
   background: rgba(184, 134, 11, 0.4);
-  cursor: pointer;
+  cursor: default;
   transition: all 0.3s ease;
   border: 2px solid rgba(184, 134, 11, 0.6);
   box-shadow: 0 0 5px rgba(184, 134, 11, 0.2);
+  pointer-events: none;
 }
 
 .tutorial-dot.active {
@@ -367,13 +357,6 @@
     inset 0 0 6px rgba(255, 237, 78, 0.5);
   border-color: #f0e68c;
   border-width: 3px;
-}
-
-.tutorial-dot:hover {
-  background: rgba(212, 175, 55, 0.6);
-  transform: scale(1.15);
-  border-color: #d4af37;
-  box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
 }
 
 @keyframes fadeIn {
@@ -633,18 +616,10 @@
     letter-spacing: 0.5px;
   }
 
-  .tutorial-image-placeholder {
-    padding: 50px 15px;
+  .tutorial-image-container {
     margin: 15px 0;
     border-radius: 12px;
-  }
-
-  .tutorial-image-placeholder span {
-    font-size: 40px;
-  }
-
-  .tutorial-image-placeholder p {
-    font-size: 12px;
+    border-width: 2px;
   }
 
   .tutorial-link {
@@ -769,19 +744,10 @@
     padding: 0 2px;
   }
 
-  .tutorial-image-placeholder {
-    padding: 40px 10px;
+  .tutorial-image-container {
     margin: 12px 0;
     border-radius: 10px;
-  }
-
-  .tutorial-image-placeholder span {
-    font-size: 36px;
-    margin-bottom: 8px;
-  }
-
-  .tutorial-image-placeholder p {
-    font-size: 11px;
+    border-width: 2px;
   }
 
   .tutorial-link {
@@ -947,9 +913,9 @@
     line-height: 1.4;
   }
 
-  .tutorial-image-placeholder {
-    padding: 30px 15px;
+  .tutorial-image-container {
     margin: 10px 0;
+    border-radius: 8px;
   }
 
   .tutorial-navigation {

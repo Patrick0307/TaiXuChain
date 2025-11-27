@@ -1,12 +1,21 @@
 import { useState, useEffect } from 'react'
 import '../css/CharacterSelection.css'
 import AnimatedCharacter from './AnimatedCharacter'
+import WalletRegistration from './WalletRegistration'
 
-function CharacterSelection({ onCharacterSelected }) {
+function CharacterSelection({ onCharacterSelected, onWalletConnected, shouldShowSelection = false }) {
+  const [showWalletRegistration, setShowWalletRegistration] = useState(!shouldShowSelection)
   const [selectedClass, setSelectedClass] = useState(null)
   const [hoveredClass, setHoveredClass] = useState(null)
   const [isAnimating, setIsAnimating] = useState(false)
   const [characterScale, setCharacterScale] = useState(1.8)
+
+  // 监听 shouldShowSelection 变化
+  useEffect(() => {
+    if (shouldShowSelection) {
+      setShowWalletRegistration(false)
+    }
+  }, [shouldShowSelection])
 
   // 响应式缩放
   useEffect(() => {
@@ -76,6 +85,17 @@ function CharacterSelection({ onCharacterSelected }) {
       const classData = classes.find(c => c.id === selectedClass)
       onCharacterSelected(classData)
     }
+  }
+
+  const handleWalletRegistrationSuccess = async (walletAddress) => {
+    // 通知父组件钱包已连接，等待检查完成
+    await onWalletConnected(walletAddress)
+    // 检查完成后，如果还在这个组件（说明没有现有角色），则显示角色选择
+    setShowWalletRegistration(false)
+  }
+
+  if (showWalletRegistration) {
+    return <WalletRegistration onRegistrationSuccess={handleWalletRegistrationSuccess} />
   }
 
   return (

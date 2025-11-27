@@ -112,11 +112,18 @@ function WalletTutorial({ onClose, isForced = false, onComplete }) {
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1)
+      const nextStep = currentStep + 1
+      setCurrentStep(nextStep)
+      
+      // 如果进入最后一步（step 7，索引为 6），标记为已完成（但不关闭）
+      if (nextStep === steps.length - 1) {
+        localStorage.setItem('taixuchain_tutorial_completed', 'true')
+        console.log('✅ Reached final step - Tutorial marked as completed (will not auto-show next time)')
+      }
     } else {
-      // 到达最后一步
+      // 点击完成按钮时才关闭
       if (isForced && onComplete) {
-        onComplete() // 强制模式下调用 onComplete
+        onComplete()
       } else {
         onClose()
       }
@@ -173,13 +180,6 @@ function WalletTutorial({ onClose, isForced = false, onComplete }) {
           <h3>{currentStepData.title}</h3>
           <p>{currentStepData.content}</p>
           
-          {currentStepData.image && (
-            <div className="tutorial-image-placeholder">
-              <span>📱</span>
-              <p>{language === 'en' ? 'Image Placeholder' : '图片占位符'}</p>
-            </div>
-          )}
-
           {currentStepData.link && (
             <a 
               href={currentStepData.link}
@@ -189,6 +189,16 @@ function WalletTutorial({ onClose, isForced = false, onComplete }) {
             >
               {t.downloadLink}
             </a>
+          )}
+
+          {currentStepData.image && (
+            <div className="tutorial-image-container">
+              <img 
+                src={currentStepData.image} 
+                alt={currentStepData.title}
+                className="tutorial-image"
+              />
+            </div>
           )}
         </div>
 
@@ -206,7 +216,6 @@ function WalletTutorial({ onClose, isForced = false, onComplete }) {
               <span 
                 key={index}
                 className={`tutorial-dot ${index === currentStep ? 'active' : ''}`}
-                onClick={() => setCurrentStep(index)}
               />
             ))}
           </div>

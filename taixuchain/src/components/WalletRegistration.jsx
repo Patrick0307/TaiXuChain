@@ -303,10 +303,12 @@ function WalletRegistration({ onRegistrationSuccess }) {
           <div className="mosaic-corner bottom-left"></div>
           <div className="mosaic-corner bottom-right"></div>
           
+          <img src="/logo.png" alt="TaixuChain Logo" className="logo-image" />
+          
           <h2>
             <span className="title-fire">TAIXUCHAIN</span>
           </h2>
-          <p>Connect your OneChain wallet to enter the metaverse</p>
+          <p>Connect your OneChain wallet to enter the world</p>
           
           {!walletAddress ? (
             <>
@@ -330,6 +332,13 @@ function WalletRegistration({ onRegistrationSuccess }) {
               
               {error && (
                 <div className="error-message">
+                  <button 
+                    className="error-close-button"
+                    onClick={() => setError('')}
+                    aria-label="Close error message"
+                  >
+                    ×
+                  </button>
                   <p>{error}</p>
                   {error.includes('install') && (
                     <a 

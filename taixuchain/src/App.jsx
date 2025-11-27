@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import BackgroundStory from './components/BackgroundStory'
 import CharacterSelection from './components/CharacterSelection'
 import CharacterCustomization from './components/CharacterCustomization'
 import CharacterNaming from './components/CharacterNaming'
@@ -12,7 +11,7 @@ import { checkExistingPlayer } from './utils/suiClient'
 
 function App() {
   const [walletAddress, setWalletAddress] = useState(null)
-  const [gameStage, setGameStage] = useState('story') // story, selection, customization, naming, mapSelection, game
+  const [gameStage, setGameStage] = useState('wallet') // wallet, selection, customization, naming, mapSelection, game
   const [selectedClass, setSelectedClass] = useState(null)
   const [customizedCharacter, setCustomizedCharacter] = useState(null)
   const [finalCharacter, setFinalCharacter] = useState(null)
@@ -80,13 +79,13 @@ function App() {
         setFinalCharacter(characterData)
         setGameStage('mapSelection')
       } else {
-        // 没有角色，进入角色创建流程
-        console.log('ℹ️ No existing character, starting character creation...')
+        // 没有角色，进入角色选择阶段
+        console.log('ℹ️ No existing character, entering selection stage...')
         setGameStage('selection')
       }
     } catch (error) {
       console.error('Error checking existing player:', error)
-      // 出错时也进入角色创建流程
+      // 出错时也进入角色选择阶段
       setGameStage('selection')
     } finally {
       setIsCheckingPlayer(false)
@@ -96,6 +95,11 @@ function App() {
   const handleCharacterSelected = (classData) => {
     setSelectedClass(classData)
     setGameStage('customization')
+  }
+  
+  const handleWalletRegistrationSuccess = () => {
+    // 钱包注册成功后，从 wallet 阶段进入 selection 阶段
+    setGameStage('selection')
   }
 
   const handleCustomizationComplete = (character) => {
@@ -132,7 +136,7 @@ function App() {
 
   const handleBackToSelection = () => {
     setSelectedClass(null)
-    setGameStage('selection')
+    setGameStage('wallet')
   }
 
   const handleBackToCustomization = () => {
@@ -143,12 +147,12 @@ function App() {
     <>
       {isCheckingPlayer && <GameLoading />}
       
-      {!isCheckingPlayer && gameStage === 'story' && (
-        <BackgroundStory onWalletConnected={handleWalletConnected} />
-      )}
-      
-      {!isCheckingPlayer && gameStage === 'selection' && (
-        <CharacterSelection onCharacterSelected={handleCharacterSelected} />
+      {!isCheckingPlayer && (gameStage === 'wallet' || gameStage === 'selection') && (
+        <CharacterSelection 
+          onCharacterSelected={handleCharacterSelected}
+          onWalletConnected={handleWalletConnected}
+          shouldShowSelection={gameStage === 'selection'}
+        />
       )}
       
       {!isCheckingPlayer && gameStage === 'customization' && selectedClass && (
