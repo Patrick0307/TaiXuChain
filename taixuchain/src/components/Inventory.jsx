@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import InventorySlot from './InventorySlot'
 import { getAllPlayerWeapons, getLingStoneBalance, requestLingStone, burnWeapon, mergeWeapons, listWeaponOnMarket } from '../utils/suiClient'
+import soundManager from '../utils/soundManager'
 import '../css/inventory.css'
 
 function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }) {
@@ -17,6 +18,23 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
   // 背包格子数量（动态扩展，无上限）
   // 根据武器数量动态计算，至少显示20个格子
   const INVENTORY_SIZE = Math.max(20, weapons.length + 5)
+
+  // 添加点击音效监听
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleClick = () => {
+      soundManager.play('click', 0.3)
+    }
+
+    const container = document.querySelector('.inventory-container')
+    if (container) {
+      container.addEventListener('click', handleClick)
+      return () => {
+        container.removeEventListener('click', handleClick)
+      }
+    }
+  }, [isOpen])
 
   useEffect(() => {
     if (isOpen) {

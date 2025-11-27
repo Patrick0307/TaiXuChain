@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import InventorySlot from './InventorySlot'
 import { getAllMarketplaceListings, buyWeaponFromMarket, getLingStoneBalance } from '../utils/suiClient'
+import soundManager from '../utils/soundManager'
 import '../css/marketplace.css'
 
 function Marketplace({ character, isOpen, onClose }) {
@@ -9,6 +10,23 @@ function Marketplace({ character, isOpen, onClose }) {
   const [selectedListing, setSelectedListing] = useState(null)
   const [lingStoneBalance, setLingStoneBalance] = useState(0)
   const [isBuying, setIsBuying] = useState(false)
+
+  // 添加点击音效监听
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleClick = () => {
+      soundManager.play('click', 0.3)
+    }
+
+    const container = document.querySelector('.marketplace-container')
+    if (container) {
+      container.addEventListener('click', handleClick)
+      return () => {
+        container.removeEventListener('click', handleClick)
+      }
+    }
+  }, [isOpen])
 
   useEffect(() => {
     if (isOpen) {

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import CharacterSelection from './components/CharacterSelection'
 import CharacterCustomization from './components/CharacterCustomization'
 import CharacterNaming from './components/CharacterNaming'
@@ -9,6 +9,7 @@ import ForestMap from './components/maps/ForestMap'
 import GameLoading from './components/GameLoading'
 import { NotificationContainer } from './components/Notification'
 import { checkExistingPlayer } from './utils/suiClient'
+import soundManager from './utils/soundManager'
 
 function App() {
   const [walletAddress, setWalletAddress] = useState(null)
@@ -23,6 +24,21 @@ function App() {
   const [hostId, setHostId] = useState(null) // 主机ID
   const [initialMonsters, setInitialMonsters] = useState([]) // 初始怪物列表
   const [isCheckingPlayer, setIsCheckingPlayer] = useState(false)
+
+  // 添加全局点击音效
+  useEffect(() => {
+    const handleClick = () => {
+      soundManager.play('click', 0.3) // 音量设置为30%
+    }
+
+    // 监听所有点击事件
+    document.addEventListener('click', handleClick)
+
+    // 清理函数
+    return () => {
+      document.removeEventListener('click', handleClick)
+    }
+  }, [])
 
   const handleWalletConnected = async (address) => {
     setWalletAddress(address)
