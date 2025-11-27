@@ -39,6 +39,8 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
   const [playerAttackTrigger, setPlayerAttackTrigger] = useState(0) // 玩家攻击触发器
   const [playerCurrentHp, setPlayerCurrentHp] = useState(character.hp) // 玩家当前生命值
   const [lootBoxes, setLootBoxes] = useState([]) // 宝箱列表
+  const [isDead, setIsDead] = useState(false) // 玩家是否死亡
+  const [respawnCountdown, setRespawnCountdown] = useState(10) // 复活倒计时
   const [showWeaponReward, setShowWeaponReward] = useState(null) // 显示武器奖励弹窗
   const [isMintingWeapon, setIsMintingWeapon] = useState(false) // 是否正在mint武器
   const lootBoxIdCounter = useRef(0) // 宝箱ID计数器
@@ -783,13 +785,10 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
         const centerY = (data.height * TILE_SIZE) / 2
         console.log(`Setting player to map center: (${centerX}, ${centerY})`)
         
-        // 立即设置 ref，确保第一帧就有正确位置
+        // 立即设置 ref 和 state
         const initialPos = { x: centerX, y: centerY }
         playerPosRef.current = initialPos
         setPlayerPos(initialPos)
-        
-        // 启动传送特效
-        setShowTeleportEffect(true)
         
         // 提取碰撞对象
         const collisionLayer = data.layers.find(layer => layer.name === 'collision')
@@ -1166,12 +1165,16 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
     }
   }, [isMoving])
 
-  // 传送特效动画
+  // 传送特效动画 - 简化版
   useEffect(() => {
-    if (!showTeleportEffect) return
+    // 只在地图数据和玩家位置都准备好后才开始传送特效
+    if (!mapData || !playerPos || !showTeleportEffect) return
+
+    console.log('🎬 Starting teleport animation, player at:', playerPos)
 
     const duration = 1500 // 1.5秒传送动画
     const startTime = Date.now()
+    let animationId
 
     const animate = () => {
       const elapsed = Date.now() - startTime
@@ -1180,26 +1183,71 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
       setTeleportProgress(progress)
 
       if (progress < 1) {
-        requestAnimationFrame(animate)
+        animationId = requestAnimationFrame(animate)
       } else {
         // 动画结束，隐藏特效
-        setTimeout(() => {
-          console.log('✨ Teleport effect ending, player position:', playerPosRef.current)
-          setShowTeleportEffect(false)
-          // 强制触发一次重新渲染，确保角色位置正确计算
-          if (playerPosRef.current) {
-            console.log('🔄 Forcing position update to trigger character render')
-            setPlayerPos({ ...playerPosRef.current })
-            // 额外触发一次移动状态更新，确保角色可见
-            setIsMoving(false)
-            setDirection('down')
-          }
-        }, 200)
+        console.log('✨ Teleport animation complete, showing character')
+        setShowTeleportEffect(false)
       }
     }
 
-    requestAnimationFrame(animate)
-  }, [showTeleportEffect])
+    animationId = requestAnimationFrame(animate)
+
+    return () => {
+      if (animationId) cancelAnimationFrame(animationId)
+    }
+  }, [mapData, playerPos, showTeleportEffect])
+
+  // 作弊：loading结束后自动微移一下，强制触发角色渲染
+  useEffect(() => {
+    if (isLoading || !mapData || !playerPosRef.current) return
+    
+    // loading刚结束，延迟一帧后自动微移
+    const timer = setTimeout(() => {
+      const currentPos = playerPosRef.current
+      if (currentPos) {
+        const nudgedPos = { x: currentPos.x - 1, y: currentPos.y }
+        playerPosRef.current = nudgedPos
+        setPlayerPos(nudgedPos)
+        console.log('🎮 Auto-nudge to force character render')
+      }
+    }, 100)
+    
+    return () => clearTimeout(timer)
+  }, [isLoading, mapData])
+
+  // 玩家死亡复活倒计时
+  useEffect(() => {
+    if (!isDead) return
+
+    if (respawnCountdown > 0) {
+      const timer = setTimeout(() => {
+        setRespawnCountdown(prev => prev - 1)
+      }, 1000)
+      return () => clearTimeout(timer)
+    } else {
+      // 倒计时结束，复活玩家
+      console.log('✨ Respawning player...')
+      
+      // 重置HP
+      setPlayerCurrentHp(character.max_hp)
+      
+      // 传送回地图中心（初始点）
+      const centerX = (mapData.width * TILE_SIZE) / 2
+      const centerY = (mapData.height * TILE_SIZE) / 2
+      playerPosRef.current = { x: centerX, y: centerY }
+      setPlayerPos({ x: centerX, y: centerY })
+      
+      // 显示传送特效
+      setShowTeleportEffect(true)
+      
+      // 重置死亡状态
+      setIsDead(false)
+      setRespawnCountdown(10)
+      
+      console.log('✅ Player respawned at center:', centerX, centerY)
+    }
+  }, [isDead, respawnCountdown, character.max_hp, mapData])
 
   // 渲染地图（智能相机跟随）- 优化版，使用 ref 避免重新创建
   useEffect(() => {
@@ -1547,42 +1595,14 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
     }
   }
 
-  // 如果角色位置还未初始化，显示加载中（但不阻止canvas渲染）
-  if (!playerPos) {
-    // 返回容器但不显示角色，让canvas先渲染
-    return (
-      <div className="forest-map-container" style={{ 
-        width: '100vw', 
-        height: '100vh', 
-        overflow: 'hidden',
-        position: 'relative',
-        background: '#000'
-      }}>
-        <canvas ref={canvasRef} className="forest-map-canvas" style={{
-          display: 'block',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          imageRendering: 'pixelated',
-          imageRendering: '-moz-crisp-edges',
-          imageRendering: 'crisp-edges'
-        }} />
-      </div>
-    )
-  }
+  // 移除提前返回，让组件正常渲染
 
-  const characterScreenPos = getCharacterScreenPosition()
+  // 只在有位置数据时计算屏幕位置
+  const characterScreenPos = playerPos ? getCharacterScreenPosition() : { x: 0, y: 0 }
   const scaledPlayerSize = PLAYER_SIZE * MAP_SCALE
   const scaledWalkOffset = { 
     x: Math.round(walkOffset.x * MAP_SCALE), 
     y: Math.round(walkOffset.y * MAP_SCALE) 
-  }
-  
-  // 调试日志：检查角色位置
-  if (characterScreenPos.x === 0 && characterScreenPos.y === 0 && playerPosRef.current) {
-    console.warn('⚠️ Character screen position is (0, 0), but player position exists:', playerPosRef.current)
-    console.warn('Canvas:', canvasRef.current?.width, 'x', canvasRef.current?.height)
-    console.warn('MapData:', mapData?.width, 'x', mapData?.height)
   }
 
   return (
@@ -1773,7 +1793,7 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
       )}
       
       {/* 宝箱层 - 在怪物之后渲染 */}
-      {!showTeleportEffect && (() => {
+      {(() => {
         console.log('🎨 Rendering loot boxes:', lootBoxes.length, lootBoxes.map(b => ({ id: b.id, owner: b.ownerName })))
         return lootBoxes.map(lootBox => {
         // 计算宝箱在屏幕上的位置
@@ -2023,7 +2043,7 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
       })()}
       
       {/* 怪物层 - 在角色之前渲染 */}
-      {!showTeleportEffect && (() => {
+      {(() => {
         console.log('🎨 Rendering monsters:', monsters.length, 'total,', monsters.filter(m => m.alive).length, 'alive')
         
         // 计算最近的怪物（主目标）
@@ -2219,6 +2239,9 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
                 }
               }}
               onAttackPlayer={(damage) => {
+                // 如果玩家已经死亡，不再受到伤害
+                if (isDead) return
+                
                 // 怪物攻击玩家
                 const newHp = Math.max(0, playerCurrentHp - damage)
                 setPlayerCurrentHp(newHp)
@@ -2226,7 +2249,8 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
                 
                 if (newHp <= 0) {
                   console.log('💀 Player defeated!')
-                  // TODO: 处理玩家死亡
+                  setIsDead(true)
+                  setRespawnCountdown(10)
                 }
               }}
             />
@@ -2235,7 +2259,7 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
       })()}
       
       {/* 其他玩家层 */}
-      {!showTeleportEffect && Array.from(otherPlayers.values()).map(player => {
+      {Array.from(otherPlayers.values()).map(player => {
         // 计算其他玩家在屏幕上的位置
         const getOtherPlayerScreenPosition = (playerX, playerY) => {
           if (!canvasRef.current || !mapData || !playerPosRef.current) return { x: 0, y: 0 }
@@ -2308,8 +2332,8 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
         )
       })}
 
-      {/* 角色层 - 叠加在Canvas上，传送特效结束后才显示 */}
-      {!showTeleportEffect && playerPosRef.current && (
+      {/* 角色层 - 叠加在Canvas上 */}
+      {playerPos && (
         <MapCharacter 
           character={character}
           screenPosition={characterScreenPos}
@@ -2331,6 +2355,149 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
         onOpenInventory={() => setIsInventoryOpen(true)}
         onOpenMarketplace={() => setIsMarketplaceOpen(true)}
       />
+      
+      {/* 死亡灰屏和复活倒计时 - 黑金配色 */}
+      {isDead && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(0, 0, 0, 0.92)',
+          backdropFilter: 'blur(10px)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          animation: 'fadeIn 0.5s ease-out'
+        }}>
+          {/* 死亡标题 - 黑金配色 */}
+          <div style={{
+            fontSize: '4rem',
+            fontWeight: 'bold',
+            background: 'linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            filter: 'drop-shadow(0 0 20px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 40px rgba(255, 215, 0, 0.5))',
+            marginBottom: '40px',
+            animation: 'pulse 2s ease-in-out infinite'
+          }}>
+            💀 YOU DIED 💀
+          </div>
+          
+          {/* 倒计时圆环 - 黑金配色 */}
+          <div style={{
+            position: 'relative',
+            width: '200px',
+            height: '200px',
+            marginBottom: '30px'
+          }}>
+            {/* 外圈光晕 - 金色 */}
+            <div style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '220px',
+              height: '220px',
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(255, 215, 0, 0.3) 0%, transparent 70%)',
+              animation: 'glow 2s ease-in-out infinite'
+            }} />
+            
+            {/* 倒计时圆环背景 */}
+            <svg style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              transform: 'rotate(-90deg)'
+            }}>
+              <circle
+                cx="100"
+                cy="100"
+                r="90"
+                fill="none"
+                stroke="rgba(255, 215, 0, 0.15)"
+                strokeWidth="8"
+              />
+              <circle
+                cx="100"
+                cy="100"
+                r="90"
+                fill="none"
+                stroke="url(#goldGradient)"
+                strokeWidth="8"
+                strokeLinecap="round"
+                strokeDasharray={`${2 * Math.PI * 90}`}
+                strokeDashoffset={`${2 * Math.PI * 90 * (1 - respawnCountdown / 10)}`}
+                style={{
+                  transition: 'stroke-dashoffset 1s linear',
+                  filter: 'drop-shadow(0 0 15px rgba(255, 215, 0, 0.9))'
+                }}
+              />
+              <defs>
+                <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#b8860b" />
+                  <stop offset="30%" stopColor="#ffd700" />
+                  <stop offset="50%" stopColor="#ffed4e" />
+                  <stop offset="70%" stopColor="#ffd700" />
+                  <stop offset="100%" stopColor="#daa520" />
+                </linearGradient>
+              </defs>
+            </svg>
+            
+            {/* 倒计时数字 - 完美居中 */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '200px',
+              height: '200px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '5rem',
+              fontWeight: '900',
+              fontFamily: 'Arial, sans-serif',
+              color: '#ffd700',
+              textShadow: '0 0 30px rgba(255, 215, 0, 1), 0 0 50px rgba(255, 215, 0, 0.7)',
+              userSelect: 'none',
+              lineHeight: '1'
+            }}>
+              {respawnCountdown}
+            </div>
+          </div>
+          
+          {/* 复活提示 - 黑金配色 */}
+          <div style={{
+            fontSize: '1.5rem',
+            color: '#c9c9c9',
+            textAlign: 'center',
+            maxWidth: '600px',
+            lineHeight: '1.8'
+          }}>
+            <div style={{ 
+              marginBottom: '10px',
+              color: '#ffd700',
+              textShadow: '0 0 10px rgba(255, 215, 0, 0.5)'
+            }}>
+              ⏳ Respawning...
+            </div>
+            <div style={{ 
+              fontSize: '1.2rem', 
+              color: '#ffed4e',
+              textShadow: '0 0 8px rgba(255, 237, 78, 0.4)'
+            }}>
+              You will respawn at the starting point in {respawnCountdown} seconds
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* 房间信息显示 */}
       {roomId && (
