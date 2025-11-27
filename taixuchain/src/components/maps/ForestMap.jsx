@@ -56,6 +56,9 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
   const lastSyncTime = useRef(0) // 上次同步时间
   const processedLootBoxes = useRef(new Set()) // 已处理的宝箱ID
   const loadingStartTime = useRef(Date.now()) // 记录加载开始时间
+  const monsterRespawnTimers = useRef(new Map()) // 野怪刷新计时器
+
+  const MONSTER_RESPAWN_TIME = 60000 // 野怪刷新时间（1分钟）
 
   const TILE_SIZE = 32
   const PLAYER_SIZE = 10  // 非常小的角色
@@ -528,6 +531,9 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
         return
       }
       
+      // 获取被击杀的怪物信息（用于刷新）
+      const killedMonster = monstersRef.current.find(m => m.id === monsterId)
+      
       // 更新怪物状态（使用 ref 获取最新状态）
       const updatedMonsters = monstersRef.current.map(m => 
         m.id === monsterId ? { ...m, alive: false, hp: 0 } : m
@@ -553,7 +559,7 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
       setLootBoxes(updatedLootBoxes)
       lootBoxesRef.current = updatedLootBoxes
       console.log(`📦 Host spawned loot box at (${position.x + offsetX}, ${position.y + offsetY}) for ${killerName}`)
-      console.log(`📦 Total loot boxes: ${updatedLootBoxes.length}`)
+      console.log(`� Tostal loot boxes: ${updatedLootBoxes.length}`)
       
       // 同步游戏状态给所有玩家
       console.log('📤 Host syncing game state after non-host kill')
@@ -561,6 +567,59 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
         monsters: updatedMonsters,
         lootBoxes: updatedLootBoxes
       })
+      
+      // 设置野怪刷新计时器（1分钟后在初始点刷新）
+      if (killedMonster) {
+        // 清除之前的计时器（如果有）
+        if (monsterRespawnTimers.current.has(monsterId)) {
+          clearTimeout(monsterRespawnTimers.current.get(monsterId))
+        }
+        
+        console.log(`⏰ Monster ${monsterId} will respawn in ${MONSTER_RESPAWN_TIME / 1000} seconds at initial position (${killedMonster.initialX}, ${killedMonster.initialY})`)
+        
+        const respawnTimer = setTimeout(() => {
+          console.log(`🔄 Respawning monster ${monsterId} at initial position...`)
+          
+          // 获取怪物基础属性
+          const monsterStats = {
+            'CowMonster1': { maxHp: 100, attack: 10 },
+            'CowMonster2': { maxHp: 150, attack: 15 }
+          }
+          const stats = monsterStats[killedMonster.type] || { maxHp: 100, attack: 10 }
+          
+          // 刷新怪物（在初始位置，满血复活）
+          setMonsters(prev => {
+            const respawnedMonsters = prev.map(m => 
+              m.id === monsterId 
+                ? { 
+                    ...m, 
+                    alive: true, 
+                    hp: stats.maxHp,
+                    x: m.initialX,
+                    y: m.initialY
+                  } 
+                : m
+            )
+            monstersRef.current = respawnedMonsters
+            
+            // 同步游戏状态给所有玩家
+            console.log('📤 Host syncing game state after monster respawn')
+            websocketClient.syncGameState({
+              monsters: respawnedMonsters,
+              lootBoxes: lootBoxesRef.current
+            })
+            
+            return respawnedMonsters
+          })
+          
+          console.log(`✅ Monster ${monsterId} (${killedMonster.type}) respawned!`)
+          
+          // 清除计时器引用
+          monsterRespawnTimers.current.delete(monsterId)
+        }, MONSTER_RESPAWN_TIME)
+        
+        monsterRespawnTimers.current.set(monsterId, respawnTimer)
+      }
     })
 
     // 监听其他玩家加入
@@ -641,6 +700,14 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
       websocketClient.off('player_moved')
       websocketClient.off('player_attacked')
       websocketClient.off('player_hp_updated')
+      
+      // 清理野怪刷新计时器
+      console.log('🧹 Cleaning up monster respawn timers')
+      monsterRespawnTimers.current.forEach((timer, monsterId) => {
+        clearTimeout(timer)
+        console.log(`  Cleared respawn timer for monster ${monsterId}`)
+      })
+      monsterRespawnTimers.current.clear()
     }
   }, [roomId, character, isHost]) // 移除 monsters 和 lootBoxes 依赖
 
@@ -2237,6 +2304,59 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
                     lootBoxes: updatedLootBoxes
                   })
                 }
+                
+                // 设置野怪刷新计时器（1分钟后在初始点刷新）
+                // 清除之前的计时器（如果有）
+                if (monsterRespawnTimers.current.has(monster.id)) {
+                  clearTimeout(monsterRespawnTimers.current.get(monster.id))
+                }
+                
+                console.log(`⏰ Monster ${monster.id} will respawn in ${MONSTER_RESPAWN_TIME / 1000} seconds at initial position (${monster.initialX}, ${monster.initialY})`)
+                
+                const respawnTimer = setTimeout(() => {
+                  console.log(`🔄 Respawning monster ${monster.id} at initial position...`)
+                  
+                  // 获取怪物基础属性
+                  const monsterStats = {
+                    'CowMonster1': { maxHp: 100, attack: 10 },
+                    'CowMonster2': { maxHp: 150, attack: 15 }
+                  }
+                  const stats = monsterStats[monster.type] || { maxHp: 100, attack: 10 }
+                  
+                  // 刷新怪物（在初始位置，满血复活）
+                  setMonsters(prev => {
+                    const respawnedMonsters = prev.map(m => 
+                      m.id === monster.id 
+                        ? { 
+                            ...m, 
+                            alive: true, 
+                            hp: stats.maxHp,
+                            x: m.initialX,
+                            y: m.initialY
+                          } 
+                        : m
+                    )
+                    monstersRef.current = respawnedMonsters
+                    
+                    // 如果是多人模式的主机，同步游戏状态
+                    if (roomId && isHost) {
+                      console.log('📤 Host syncing game state after monster respawn')
+                      websocketClient.syncGameState({
+                        monsters: respawnedMonsters,
+                        lootBoxes: lootBoxesRef.current
+                      })
+                    }
+                    
+                    return respawnedMonsters
+                  })
+                  
+                  console.log(`✅ Monster ${monster.id} (${monster.type}) respawned!`)
+                  
+                  // 清除计时器引用
+                  monsterRespawnTimers.current.delete(monster.id)
+                }, MONSTER_RESPAWN_TIME)
+                
+                monsterRespawnTimers.current.set(monster.id, respawnTimer)
               }}
               onAttackPlayer={(damage) => {
                 // 如果玩家已经死亡，不再受到伤害
