@@ -425,14 +425,20 @@ function Monster({
       if (newHp <= 0) {
         console.log(`💀 [Monster ${id}] DIED! (HP reached 0)`)
         
-        // 开始死亡动画
+        // 停止攻击动画，定格在当前帧
+        setIsAttacking(false)
+        
+        // 开始死亡动画 - 从内向外消失
         const startTime = Date.now()
-        const animationDuration = 800 // 0.8秒马赛克消失动画
+        const animationDuration = 1200 // 1.2秒消失动画
         
         const animateDeath = () => {
           const elapsed = Date.now() - startTime
           const progress = Math.min(elapsed / animationDuration, 1)
-          setDeathAnimation(progress)
+          
+          // 使用缓动函数让消失更自然（先慢后快）
+          const easeOutCubic = 1 - Math.pow(1 - progress, 3)
+          setDeathAnimation(easeOutCubic)
           
           if (progress < 1) {
             requestAnimationFrame(animateDeath)
@@ -476,9 +482,9 @@ function Monster({
     }
   }, [isAttacking, showHealthBar])
 
-  // 死亡后仍然渲染（用于马赛克消失动画）
-  if (isDead && deathAnimation === 0) {
-    return null // 动画未开始时不显示
+  // 死亡后不再渲染
+  if (isDead) {
+    return null
   }
 
   // 根据怪物类型选择图片路径
@@ -486,7 +492,7 @@ function Monster({
     const frameStr = String(attackFrame).padStart(3, '0')
     return `/maps/Spawns/${type}/Minotaur_${type === 'CowMonster1' ? '02' : '03'}_Attacking_${frameStr}.png`
   }
-
+  
   return (
     <div
       style={{
@@ -496,57 +502,46 @@ function Monster({
         width: `${monsterSize}px`,
         height: `${monsterSize}px`,
         pointerEvents: 'none',
-        zIndex: 50, // 降低z-index，让怪物显示在UI下面
+        zIndex: 50,
         transform: 'translate(-50%, -50%)',
       }}
     >
-      <img
-        src={getMonsterImage()}
-        alt={`${type} monster`}
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'contain',
-          imageRendering: 'pixelated',
-          filter: isAttacking 
-            ? 'brightness(1.2) drop-shadow(0 0 10px rgba(255, 0, 0, 0.5))' 
-            : deathAnimation > 0 
-              ? `brightness(${1 - deathAnimation * 0.5}) blur(${deathAnimation * 3}px)` 
+      {/* 怪物图片 */}
+      <div style={{
+        width: '100%',
+        height: '100%',
+        position: 'relative',
+        overflow: 'visible',
+        WebkitMaskImage: deathAnimation > 0 
+          ? `radial-gradient(circle at center, 
+              black ${(1 - deathAnimation) * 100}%, 
+              transparent ${(1 - deathAnimation) * 100}%)` 
+          : 'none',
+        maskImage: deathAnimation > 0 
+          ? `radial-gradient(circle at center, 
+              black ${(1 - deathAnimation) * 100}%, 
+              transparent ${(1 - deathAnimation) * 100}%)` 
+          : 'none',
+      }}>
+        <img
+          src={getMonsterImage()}
+          alt={`${type} monster`}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+            imageRendering: 'pixelated',
+            filter: isAttacking 
+              ? 'brightness(1.2) drop-shadow(0 0 10px rgba(255, 0, 0, 0.5))' 
               : 'none',
-          opacity: deathAnimation > 0 ? 1 - deathAnimation : 1,
-          transform: deathAnimation > 0 ? `scale(${1 - deathAnimation * 0.3})` : 'scale(1)',
-          transition: 'filter 0.1s ease'
-        }}
-        onError={(e) => {
-          console.warn(`Failed to load monster image: ${getMonsterImage()}`)
-          e.target.style.display = 'none'
-        }}
-      />
-      
-      {/* 马赛克消失效果 */}
-      {deathAnimation > 0 && (
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          background: `repeating-linear-gradient(
-            0deg,
-            rgba(255, 255, 255, ${0.3 * deathAnimation}) 0px,
-            transparent ${2 + deathAnimation * 8}px,
-            transparent ${4 + deathAnimation * 16}px
-          ),
-          repeating-linear-gradient(
-            90deg,
-            rgba(255, 255, 255, ${0.3 * deathAnimation}) 0px,
-            transparent ${2 + deathAnimation * 8}px,
-            transparent ${4 + deathAnimation * 16}px
-          )`,
-          pointerEvents: 'none',
-          mixBlendMode: 'overlay'
-        }} />
-      )}
+            transition: 'filter 0.1s ease'
+          }}
+          onError={(e) => {
+            console.warn(`Failed to load monster image: ${getMonsterImage()}`)
+            e.target.style.display = 'none'
+          }}
+        />
+      </div>
       
       {/* 怪物血条 - 只在攻击或被攻击时显示 */}
       {showHealthBar && (
