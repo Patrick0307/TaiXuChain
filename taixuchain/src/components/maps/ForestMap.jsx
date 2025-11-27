@@ -9,6 +9,7 @@ import WeaponReward from './WeaponReward'
 import MintingLoader from './MintingLoader'
 import { checkPlayerWeapon, mintWeaponForPlayer, mintRandomWeaponForPlayer, getAllPlayerWeapons } from '../../utils/suiClient'
 import websocketClient from '../../services/websocketClient'
+import soundManager from '../../utils/soundManager'
 import '../../css/maps/ForestMap.css'
 
 function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHostProp = false, hostIdProp = null, initialMonstersProp = [] }) {
@@ -61,6 +62,11 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
   const MONSTER_SIZE = 32 // 怪物大小（像素）- 缩小到32
   const PLAYER_ATTACK_RANGE = 60 // 玩家攻击范围（像素）
   const PLAYER_ATTACK_INTERVAL = 1000 // 玩家攻击间隔（毫秒）
+
+  // 预加载开宝箱音效
+  useEffect(() => {
+    soundManager.loadSound('openchest', '/sounds/openchest.mp3')
+  }, [])
 
   // 初始化其他玩家、主机状态和怪物（从props）
   useEffect(() => {
@@ -1843,6 +1849,9 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
                 alert(`这个宝箱属于 ${lootBox.ownerName}，只有他/她可以拾取！`)
                 return
               }
+              
+              // 播放开宝箱音效
+              soundManager.play('openchest', 0.5)
               
               // 记录打开时间
               lastLootBoxOpenTime.current = now
