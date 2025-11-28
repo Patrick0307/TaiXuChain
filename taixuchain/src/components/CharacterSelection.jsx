@@ -41,22 +41,22 @@ function CharacterSelection({ onCharacterSelected, onWalletConnected, shouldShow
     {
       id: 'warrior',
       name: 'Warrior',
-      description: 'Master of close combat with unbreakable defense',
-      stats: { hp: 500, attack: 15, defense: 12, speed: 8 },
+      description: '',
+      stats: { hp: 500, attack: 15 },
       color: '#8b0000'
     },
     {
       id: 'archer',
       name: 'Archer',
-      description: 'Swift ranger with deadly precision strikes',
-      stats: { hp: 500, attack: 18, defense: 8, speed: 12 },
+      description: '',
+      stats: { hp: 500, attack: 18 },
       color: '#228b22'
     },
     {
       id: 'mage',
       name: 'Mage',
-      description: 'Arcane wielder commanding devastating magic',
-      stats: { hp: 500, attack: 20, defense: 6, speed: 10 },
+      description: '',
+      stats: { hp: 500, attack: 20 },
       color: '#4b0082'
     }
   ]
