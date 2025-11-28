@@ -8,6 +8,7 @@ import Marketplace from '../Marketplace'
 import LootBox from './LootBox'
 import WeaponReward from './WeaponReward'
 import MintingLoader from './MintingLoader'
+import TutorialPopup from './TutorialPopup'
 import { alertManager } from '../AlertDialog'
 import { checkPlayerWeapon, mintWeaponForPlayer, mintRandomWeaponForPlayer, getAllPlayerWeapons } from '../../utils/suiClient'
 import websocketClient from '../../services/websocketClient'
@@ -47,6 +48,7 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
   const [showWeaponReward, setShowWeaponReward] = useState(null) // 显示武器奖励弹窗
   const [isMintingWeapon, setIsMintingWeapon] = useState(false) // 是否正在mint武器
   const [attackEffect, setAttackEffect] = useState(null) // 攻击特效 { type, startPos, targetPos }
+  const [showTutorial, setShowTutorial] = useState(true) // 显示教程弹窗
   const lootBoxIdCounter = useRef(0) // 宝箱ID计数器
   const pickingLootBox = useRef(new Set()) // 正在拾取的宝箱ID（防止重复点击）
   const lastLootBoxOpenTime = useRef(0) // 上次打开宝箱的时间
@@ -2839,6 +2841,11 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
           weapon={showWeaponReward}
           onClose={() => setShowWeaponReward(null)}
         />
+      )}
+      
+      {/* 教程弹窗 */}
+      {showTutorial && (
+        <TutorialPopup onClose={() => setShowTutorial(false)} />
       )}
     </div>
   )
