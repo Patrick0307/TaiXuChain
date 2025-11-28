@@ -189,9 +189,9 @@ function GameLoading() {
 
         {/* 加载状态文字 */}
         <div className="loading-stage">
-          {currentStage < loadingStages.length && (
-            <p className="stage-text">{loadingStages[currentStage].text}</p>
-          )}
+          <p className="stage-text">
+            {progress >= 100 ? 'Waking up cold server...' : loadingStages[currentStage]?.text}
+          </p>
         </div>
 
         {/* 底部三个角色 */}

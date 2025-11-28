@@ -36,7 +36,7 @@
 
 /* ========== 战士待机动作 ========== */
 .warrior-idle {
-  animation: warrior-breathe 2s ease-in-out infinite;
+  /* 移除浮动动画 */
 }
 
 @keyframes warrior-breathe {
@@ -167,7 +167,7 @@
 
 /* ========== 弓箭手待机动作 ========== */
 .archer-idle {
-  animation: archer-sway 3s ease-in-out infinite;
+  /* 移除浮动动画 */
 }
 
 @keyframes archer-sway {
@@ -254,7 +254,7 @@
 
 /* ========== 法师待机动作 ========== */
 .mage-idle {
-  animation: mage-float 4s ease-in-out infinite;
+  /* 移除浮动动画 */
 }
 
 @keyframes mage-float {

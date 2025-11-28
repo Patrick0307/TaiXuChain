@@ -3,7 +3,7 @@
 <div align="center">
 
 [![Live Demo](https://img.shields.io/badge/🎮%20Play%20Now-Live%20Demo-FF6B6B?style=for-the-badge)](https://tai-xu-chain.vercel.app)
-[![YouTube](https://img.shields.io/badge/📺%20Demo-YouTube-red?style=for-the-badge)](https://youtube.com/your-video-link)
+[![YouTube](https://img.shields.io/badge/📺%20Demo-YouTube-red?style=for-the-badge)](https://www.youtube.com/watch?v=l86PfXooajU)
 
 [![OneChain](https://img.shields.io/badge/Network-OneChain%20Testnet-purple)](https://onelabs.cc/)
 [![Sui Move](https://img.shields.io/badge/Smart%20Contract-Sui%20Move-4A90E2)](https://sui.io/)

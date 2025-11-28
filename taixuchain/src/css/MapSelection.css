@@ -231,7 +231,7 @@
   box-shadow: 
     0 8px 30px rgba(0, 0, 0, 0.5),
     inset 0 1px 0 rgba(255, 215, 0, 0.1);
-  animation: cardSlideIn 0.6s ease-out backwards, cardFloat 3s ease-in-out infinite;
+  animation: cardSlideIn 0.6s ease-out backwards;
 }
 
 @keyframes cardSlideIn {
@@ -280,7 +280,6 @@
   padding: 8px;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
-  animation: frameBreath 3s ease-in-out infinite;
 }
 
 @keyframes frameBreath {
@@ -515,7 +514,7 @@
   box-shadow: 
     0 8px 30px rgba(0, 0, 0, 0.5),
     inset 0 1px 0 rgba(255, 215, 0, 0.1);
-  animation: cardSlideIn 0.6s ease-out backwards, cardFloat 3s ease-in-out infinite;
+  animation: cardSlideIn 0.6s ease-out backwards;
 }
 
 .map-tile-bg {
@@ -546,7 +545,6 @@
 }
 
 .map-tile:hover {
-  transform: translateY(-10px) scale(1.02);
   border-color: rgba(255, 215, 0, 0.6);
   box-shadow: 
     0 20px 60px rgba(255, 215, 0, 0.3),
@@ -568,8 +566,7 @@
     0 0 50px rgba(255, 215, 0, 0.6),
     0 20px 60px rgba(255, 215, 0, 0.4),
     inset 0 0 30px rgba(255, 215, 0, 0.1);
-  transform: translateY(-10px) scale(1.05);
-  animation: cardFloat 3s ease-in-out infinite, selectedGlow 2s ease-in-out infinite;
+  animation: selectedGlow 2s ease-in-out infinite;
 }
 
 .map-tile.active .map-tile-border {
@@ -686,6 +683,9 @@
   transition: all 0.4s ease;
   box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
   animation: buttonBreath 3s ease-in-out infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @keyframes buttonBreath {
@@ -744,6 +744,8 @@
   z-index: 2;
   transition: all 0.3s ease;
   font-family: 'Press Start 2P', cursive;
+  white-space: nowrap;
+  text-align: center;
 }
 
 .confirm-btn:not(.disabled):hover .btn-text {
