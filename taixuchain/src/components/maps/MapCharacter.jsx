@@ -93,10 +93,11 @@ function MapCharacter({
       <div style={{
         position: 'absolute',
         top: `${-18 * mapScale}px`,
-        left: '50%',
+        left: '120%',
         transform: 'translateX(-50%)',
         display: 'flex',
         alignItems: 'center',
+        justifyContent: 'center',
         gap: `${4 * mapScale}px`,
         whiteSpace: 'nowrap',
         imageRendering: 'pixelated'
