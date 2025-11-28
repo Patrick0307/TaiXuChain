@@ -72,7 +72,7 @@ function LootBox({
         </div>
       )}
       
-      {/* 归属者名字 */}
+      {/* Owner name */}
       {ownerName && !isOwner && (
         <div style={{
           position: 'absolute',
@@ -86,7 +86,7 @@ function LootBox({
           whiteSpace: 'nowrap',
           pointerEvents: 'none'
         }}>
-          {ownerName}的宝箱
+          {ownerName}'s Loot Box
         </div>
       )}
       

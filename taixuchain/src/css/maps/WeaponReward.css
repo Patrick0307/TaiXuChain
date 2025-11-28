@@ -16,7 +16,7 @@
   overflow: hidden;
 }
 
-/* 马赛克背景效果 */
+/* Mosaic background effect */
 .weapon-reward-overlay::before {
   content: '';
   position: absolute;
@@ -77,7 +77,7 @@
     inset 0 0 50px rgba(255, 215, 0, 0.08);
   overflow: hidden;
   font-family: 'Orbitron', sans-serif;
-  /* 像素风格边框 */
+  /* Pixel-style border */
   clip-path: polygon(
     0 8px, 8px 8px, 8px 0,
     calc(100% - 8px) 0, calc(100% - 8px) 8px, 100% 8px,
@@ -135,7 +135,7 @@
   }
 }
 
-/* 光辉扫描效果 */
+/* Glowing scan effect */
 .weapon-reward-container::after {
   content: '';
   position: absolute;
@@ -177,7 +177,7 @@
   }
 }
 
-/* 容器光晕效果 */
+/* Container glow effect */
 .weapon-reward-container::before {
   content: '';
   position: absolute;
@@ -452,7 +452,7 @@
   position: relative;
   font-family: 'Orbitron', sans-serif;
   z-index: 1;
-  /* 像素风格 */
+  /* Pixel style */
   clip-path: polygon(
     0 4px, 4px 4px, 4px 0,
     calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px,

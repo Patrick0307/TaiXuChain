@@ -25,7 +25,7 @@
   overflow: hidden;
 }
 
-/* 马赛克背景 - 黑金主题 */
+/* Mosaic background - Black & Gold theme */
 .forest-map-loading .mosaic-bg {
   position: absolute;
   top: 0;
@@ -53,7 +53,7 @@
   100% { background-position: 40px 40px, 40px 40px; }
 }
 
-/* 魔法圆环 - 黑金主题 */
+/* Magic circle - Black & Gold theme */
 .forest-map-loading .magic-circle {
   position: absolute;
   left: 50%;
@@ -96,7 +96,7 @@
   to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
-/* 粒子容器 */
+/* Particle container */
 .forest-map-loading .particles-container {
   position: absolute;
   top: 0;
@@ -107,7 +107,7 @@
   overflow: hidden;
 }
 
-/* 星星 - 黑金主题 */
+/* Stars - Black & Gold theme */
 .forest-map-loading .star {
   position: absolute;
   width: 2px;
@@ -123,7 +123,7 @@
   50% { opacity: 1; transform: scale(1.8); }
 }
 
-/* 金色粒子 */
+/* Golden particles */
 .forest-map-loading .particle {
   position: absolute;
   width: 4px;
@@ -151,7 +151,7 @@
   }
 }
 
-/* 能量球 - 黑金主题 */
+/* Energy orb - Black & Gold theme */
 .forest-map-loading .energy-orb {
   position: absolute;
   width: 8px;
@@ -173,7 +173,7 @@
   }
 }
 
-/* 流星 - 黑金主题 */
+/* Meteor - Black & Gold theme */
 .forest-map-loading .meteor {
   position: absolute;
   width: 3px;
@@ -197,7 +197,7 @@
   }
 }
 
-/* 光束 - 黑金主题 */
+/* Light beam - Black & Gold theme */
 .forest-map-loading .light-beam {
   position: absolute;
   top: -50%;
@@ -218,7 +218,7 @@
   50% { opacity: 0.7; }
 }
 
-/* Loading 卡片 - 黑金主题 */
+/* Loading card - Black & Gold theme */
 .forest-map-loading .loading-card {
   position: relative;
   width: 500px;
@@ -240,7 +240,7 @@
   50% { transform: translateY(-10px); }
 }
 
-/* 卡片装饰角 - 黑金主题 */
+/* Card decorative corners - Black & Gold theme */
 .forest-map-loading .card-corner {
   position: absolute;
   width: 25px;
@@ -288,7 +288,7 @@
   border-top: none;
 }
 
-/* 地图图标 - 黑金主题 */
+/* Map icon - Black & Gold theme */
 .forest-map-loading .loading-icon {
   font-size: 4.5rem;
   text-align: center;
@@ -311,7 +311,7 @@
   }
 }
 
-/* 标题 - 黑金主题 */
+/* Title - Black & Gold theme */
 .forest-map-loading .loading-title {
   display: flex;
   align-items: center;
@@ -354,7 +354,7 @@
   }
 }
 
-/* 进度条容器 - 黑金主题 */
+/* Progress bar container - Black & Gold theme */
 .forest-map-loading .progress-container {
   position: relative;
   margin-bottom: 20px;
@@ -441,7 +441,7 @@
   letter-spacing: 1px;
 }
 
-/* 加载提示 - 黑金主题 */
+/* Loading hint - Black & Gold theme */
 .forest-map-loading .loading-hint {
   display: flex;
   align-items: center;
@@ -491,7 +491,7 @@
   text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }
 
-/* 响应式 */
+/* Responsive */
 @media (max-width: 768px) {
   .forest-map-loading .loading-card {
     padding: 40px 30px;
@@ -534,7 +534,7 @@
   }
 }
 
-/* 死亡UI动画 */
+/* Death UI animation */
 @keyframes fadeIn {
   from {
     opacity: 0;

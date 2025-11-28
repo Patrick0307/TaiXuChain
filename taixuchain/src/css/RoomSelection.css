@@ -1,4 +1,4 @@
-/* 黑金马赛克主题 - 房间选择 */
+/* Black & Gold Mosaic Theme - Room Selection */
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 .room-selection-container {
@@ -15,7 +15,7 @@
   overflow: hidden;
 }
 
-/* 马赛克背景 */
+/* Mosaic background */
 .room-selection-container::before {
   content: '';
   position: absolute;
@@ -83,7 +83,7 @@
   line-height: 1.8;
 }
 
-/* ========== 菜单样式 ========== */
+/* ========== Menu styles ========== */
 .room-menu {
   text-align: center;
 }
@@ -154,7 +154,7 @@
   flex: 1;
 }
 
-/* ========== 创建房间样式 ========== */
+/* ========== Create room styles ========== */
 .room-create {
   text-align: center;
 }
@@ -231,7 +231,7 @@
   line-height: 1.8;
 }
 
-/* ========== 加入房间样式 ========== */
+/* ========== Join room styles ========== */
 .room-join {
   text-align: center;
 }
@@ -289,7 +289,7 @@
   font-size: 0.8rem;
 }
 
-/* ========== 公开房间样式 ========== */
+/* ========== Public room styles ========== */
 .room-public {
   text-align: center;
 }
@@ -301,7 +301,7 @@
   padding: 10px;
 }
 
-/* 隐藏滚动条 */
+/* Hide scrollbar */
 .rooms-list::-webkit-scrollbar {
   display: none;
 }
@@ -406,7 +406,7 @@
   color: #666;
 }
 
-/* ========== 操作按钮 ========== */
+/* ========== Action buttons ========== */
 .action-buttons {
   display: flex;
   gap: 15px;
@@ -481,7 +481,7 @@
   cursor: not-allowed;
 }
 
-/* ========== 错误消息 ========== */
+/* ========== Error message ========== */
 .error-message {
   background: rgba(139, 0, 0, 0.3);
   color: #ff6b6b;
@@ -513,7 +513,7 @@
   }
 }
 
-/* ========== 响应式设计 ========== */
+/* ========== Responsive design ========== */
 @media (max-width: 768px) {
   .room-selection-content {
     min-width: 90vw;
@@ -623,7 +623,7 @@
   }
 }
 
-/* ========== 粒子特效 ========== */
+/* ========== Particle effects ========== */
 .particles-container {
   position: fixed;
   top: 0;
@@ -635,7 +635,7 @@
   z-index: 0;
 }
 
-/* 星空闪烁 */
+/* Starry sky twinkling */
 .star {
   position: absolute;
   width: 2px;
@@ -657,7 +657,7 @@
   }
 }
 
-/* 金色粒子上升 */
+/* Golden particles rising */
 .particle {
   position: absolute;
   width: 3px;
@@ -686,7 +686,7 @@
   }
 }
 
-/* 能量球轨迹 */
+/* Energy orb trajectory */
 .energy-orb {
   position: absolute;
   width: 8px;
@@ -718,7 +718,7 @@
   }
 }
 
-/* 流星效果 */
+/* Meteor effect */
 .meteor {
   position: absolute;
   width: 2px;
@@ -751,7 +751,7 @@
   background: linear-gradient(90deg, #FFD700, transparent);
 }
 
-/* 光束效果 */
+/* Light beam effect */
 .light-beam {
   position: absolute;
   width: 2px;

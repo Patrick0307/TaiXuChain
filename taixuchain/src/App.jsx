@@ -8,6 +8,7 @@ import UIDDisplay from './components/UIDDisplay'
 import ForestMap from './components/maps/ForestMap'
 import GameLoading from './components/GameLoading'
 import { NotificationContainer } from './components/Notification'
+import { AlertContainer } from './components/AlertDialog'
 import { checkExistingPlayer } from './utils/suiClient'
 import soundManager from './utils/soundManager'
 
@@ -18,23 +19,23 @@ function App() {
   const [customizedCharacter, setCustomizedCharacter] = useState(null)
   const [finalCharacter, setFinalCharacter] = useState(null)
   const [selectedMap, setSelectedMap] = useState(null)
-  const [roomId, setRoomId] = useState(null) // 多人房间ID
-  const [roomPlayers, setRoomPlayers] = useState([]) // 房间内的玩家列表
-  const [isHost, setIsHost] = useState(false) // 是否是主机
-  const [hostId, setHostId] = useState(null) // 主机ID
-  const [initialMonsters, setInitialMonsters] = useState([]) // 初始怪物列表
+  const [roomId, setRoomId] = useState(null) // Multiplayer room ID
+  const [roomPlayers, setRoomPlayers] = useState([]) // List of players in room
+  const [isHost, setIsHost] = useState(false) // Whether is host
+  const [hostId, setHostId] = useState(null) // Host ID
+  const [initialMonsters, setInitialMonsters] = useState([]) // Initial monster list
   const [isCheckingPlayer, setIsCheckingPlayer] = useState(false)
 
-  // 添加全局点击音效
+  // Add global click sound effect
   useEffect(() => {
     const handleClick = () => {
-      soundManager.play('click', 0.3) // 音量设置为30%
+      soundManager.play('click', 0.3) // Volume set to 30%
     }
 
-    // 监听所有点击事件
+    // Listen to all click events
     document.addEventListener('click', handleClick)
 
-    // 清理函数
+    // Cleanup function
     return () => {
       document.removeEventListener('click', handleClick)
     }
@@ -45,25 +46,25 @@ function App() {
     setIsCheckingPlayer(true)
     
     try {
-      // 检查钱包是否已有角色
+      // Check if wallet already has a character
       const existingPlayer = await checkExistingPlayer(address)
       
       if (existingPlayer) {
-        // 已有角色，直接加载角色信息并跳到地图选择
+        // Has character, directly load character info and jump to map selection
         console.log('🎮 Loading existing character...')
         
-        // 将后端返回的数据转换为前端格式
+        // Convert backend data to frontend format
         const classMap = {
           1: { id: 'mage', name: 'Mage' },
           2: { id: 'warrior', name: 'Warrior' },
           3: { id: 'archer', name: 'Archer' }
         }
         
-        // 计算默认属性（如果是旧角色没有这些字段）
+        // Calculate default stats (if old character doesn't have these fields)
         const classId = existingPlayer.class
         const level = existingPlayer.level
         
-        // 职业成长系数（与合约保持一致）
+        // Class growth coefficients (consistent with contract)
         const getDefaultStats = (classId, level) => {
           const statsMap = {
             1: { hpPerLevel: 350, atkPerLevel: 40 },  // Mage
@@ -96,13 +97,13 @@ function App() {
         setFinalCharacter(characterData)
         setGameStage('mapSelection')
       } else {
-        // 没有角色，进入角色选择阶段
+        // No character, enter character selection stage
         console.log('ℹ️ No existing character, entering selection stage...')
         setGameStage('selection')
       }
     } catch (error) {
       console.error('Error checking existing player:', error)
-      // 出错时也进入角色选择阶段
+      // On error, also enter character selection stage
       setGameStage('selection')
     } finally {
       setIsCheckingPlayer(false)
@@ -115,7 +116,7 @@ function App() {
   }
   
   const handleWalletRegistrationSuccess = () => {
-    // 钱包注册成功后，从 wallet 阶段进入 selection 阶段
+    // After wallet registration success, enter selection stage from wallet stage
     setGameStage('selection')
   }
 
@@ -163,6 +164,7 @@ function App() {
   return (
     <>
       <NotificationContainer />
+      <AlertContainer />
       {isCheckingPlayer && <GameLoading />}
       
       {!isCheckingPlayer && (gameStage === 'wallet' || gameStage === 'selection') && (

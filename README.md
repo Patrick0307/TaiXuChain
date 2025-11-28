@@ -1,80 +1,80 @@
-# TaiXu Chain - 太虚世界
+# TaiXu Chain - TaiXu World
 
-一个基于区块链的 Web3 游戏项目，结合了 React 前端和 Sui Move 智能合约。
+A blockchain-based Web3 gaming project that combines React frontend with Sui Move smart contracts.
 
-## ✨ 特色功能
+## ✨ Key Features
 
-🎉 **零门槛游戏** - 使用赞助交易（Sponsored Transactions），玩家无需任何代币即可开始游戏！
-
----
-
-## 🚀 立即开始
-
-**新用户？** 👉 [GET_STARTED.md](./GET_STARTED.md) - 3 分钟快速开始
-
-**详细指南？** 👉 [QUICK_START.md](./QUICK_START.md) - 5 分钟完整设置
-
-**查看所有文档？** 👉 [DOCUMENTATION_INDEX.md](./DOCUMENTATION_INDEX.md) - 文档索引
+🎉 **Zero Barrier Gaming** - Using Sponsored Transactions, players can start playing without any tokens!
 
 ---
 
-## 项目结构
+## 🚀 Get Started
+
+**New User?** 👉 [GET_STARTED.md](./GET_STARTED.md) - 3-minute quick start
+
+**Detailed Guide?** 👉 [QUICK_START.md](./QUICK_START.md) - 5-minute complete setup
+
+**View All Documentation?** 👉 [DOCUMENTATION_INDEX.md](./DOCUMENTATION_INDEX.md) - Documentation Index
+
+---
+
+## Project Structure
 
 ```
 TaiXuChain/
-├── taixuchain/        # React 游戏前端
-│   ├── src/          # 源代码
-│   ├── public/       # 静态资源
-│   └── package.json  # 依赖配置
+├── taixuchain/        # React game frontend
+│   ├── src/          # Source code
+│   ├── public/       # Static assets
+│   └── package.json  # Dependencies config
 │
-├── taixu-backend/    # 赞助交易后端服务 ⭐ NEW
-│   ├── services/     # 赞助服务
-│   ├── server.js     # Express 服务器
-│   └── package.json  # 依赖配置
+├── taixu-backend/    # Sponsored transaction backend service ⭐ NEW
+│   ├── services/     # Sponsorship services
+│   ├── server.js     # Express server
+│   └── package.json  # Dependencies config
 │
-└── taixu-move/       # Sui Move 智能合约
-    ├── sources/      # 合约源代码
-    ├── scripts/      # 部署脚本
-    └── Move.toml     # Move 配置
+└── taixu-move/       # Sui Move smart contracts
+    ├── sources/      # Contract source code
+    ├── scripts/      # Deployment scripts
+    └── Move.toml     # Move configuration
 ```
 
-## 技术栈
+## Tech Stack
 
-### 前端
+### Frontend
 - React 18
 - TypeScript
 - Sui TypeScript SDK
-- Phaser 3 (游戏引擎)
+- Phaser 3 (Game Engine)
 
-### 智能合约
+### Smart Contracts
 - Sui Move
 - OneChain Testnet
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 方式 1：一键启动多人模式（推荐）⭐ NEW
+### Method 1: One-Click Multiplayer Launch (Recommended) ⭐ NEW
 
 ```bash
 # Windows
 start-multiplayer.bat
 
-# 或手动启动
+# Or manual start
 .\start-all.ps1
 ```
 
-### 方式 2：手动启动
+### Method 2: Manual Start
 
-#### 1. 启动后端服务器（赞助交易）
+#### 1. Start Backend Server (Sponsored Transactions)
 
 ```bash
 cd taixu-backend
 npm install
 copy .env.example .env
-# 编辑 .env 文件，填入你的钱包私钥
+# Edit .env file and add your wallet private key
 npm start
 ```
 
-#### 2. 启动前端
+#### 2. Start Frontend
 
 ```bash
 cd taixuchain
@@ -82,52 +82,52 @@ npm install
 npm run dev
 ```
 
-#### 3. 智能合约开发
+#### 3. Smart Contract Development
 
 ```bash
 cd taixu-move
 sui move build
 ```
 
-### 📖 详细设置指南
+### 📖 Detailed Setup Guide
 
-**首次使用？** 请查看 [赞助交易设置指南](./SPONSORED_TRANSACTION_SETUP.md)
+**First Time?** Check out [Sponsored Transaction Setup Guide](./SPONSORED_TRANSACTION_SETUP.md)
 
-**多人游戏？** 请查看 [多人游戏快速开始](./QUICK_START.md) ⭐ NEW
+**Multiplayer?** Check out [Multiplayer Quick Start](./QUICK_START.md) ⭐ NEW
 
-**后端文档：** [taixu-backend/README.md](./taixu-backend/README.md)
+**Backend Documentation:** [taixu-backend/README.md](./taixu-backend/README.md)
 
-**多人功能指南：** [MULTIPLAYER_GUIDE.md](./MULTIPLAYER_GUIDE.md) ⭐ NEW
+**Multiplayer Guide:** [MULTIPLAYER_GUIDE.md](./MULTIPLAYER_GUIDE.md) ⭐ NEW
 
-## 🎮 游戏特性
+## 🎮 Game Features
 
-- 🎮 基于区块链的 RPG 游戏
-- 💎 NFT 武器系统
-- 👤 玩家角色系统（SBT - 灵魂绑定代币）
-- 🏪 去中心化市场
-- 💰 游戏内代币经济（灵石）
-- ⭐ **零门槛** - 玩家无需代币即可开始游戏（赞助交易）
-- 👥 **多人在线** - 实时多人游戏支持 ⭐ NEW
+- 🎮 Blockchain-based RPG game
+- 💎 NFT weapon system
+- 👤 Player character system (SBT - Soulbound Token)
+- 🏪 Decentralized marketplace
+- 💰 In-game token economy (Spirit Stones)
+- ⭐ **Zero Barrier** - Players can start without tokens (Sponsored Transactions)
+- 👥 **Multiplayer Online** - Real-time multiplayer support ⭐ NEW
 
-## 💰 赞助交易系统
+## 💰 Sponsored Transaction System
 
-本游戏使用 **Sponsored Transactions** 技术，让玩家无需持有任何代币即可：
+This game uses **Sponsored Transactions** technology, allowing players to:
 
-- ✅ 创建角色
-- ✅ 开始游戏
-- ✅ 获得首个武器
+- ✅ Create characters
+- ✅ Start playing
+- ✅ Obtain first weapon
 
-所有 gas 费用由项目方承担，玩家只需签名确认操作。
+All gas fees are covered by the project, players only need to sign to confirm operations.
 
-**成本估算：**
-- 每个玩家注册：~0.001 SUI
-- 1000 个玩家：~1 SUI (~$0.10 USD)
-- 测试网代币免费获取
+**Cost Estimation:**
+- Per player registration: ~0.001 SUI
+- 1000 players: ~1 SUI (~$0.10 USD)
+- Testnet tokens are free
 
-## 开发状态
+## Development Status
 
-🚧 项目正在积极开发中
+🚧 Project is under active development
 
-## 许可证
+## License
 
 MIT License

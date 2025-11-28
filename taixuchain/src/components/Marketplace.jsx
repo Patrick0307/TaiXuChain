@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import InventorySlot from './InventorySlot'
 import ConfirmDialog from './ConfirmDialog'
+import { alertManager } from './AlertDialog'
 import { getAllMarketplaceListings, buyWeaponFromMarket, getLingStoneBalance } from '../utils/suiClient'
 import soundManager from '../utils/soundManager'
 import '../css/marketplace.css'
@@ -64,7 +65,7 @@ function Marketplace({ character, isOpen, onClose }) {
       setListings(allListings)
     } catch (error) {
       console.error('Error loading marketplace listings:', error)
-      alert('⚠️ Unable to load market data\n\nDue to on-chain query limitations, marketplace listings cannot be displayed temporarily.\n\nSolutions:\n1. Wait for off-chain indexing service\n2. Use contract event queries\n3. Purchase directly via weapon ID')
+      alertManager.warning('Unable to load market data\n\nDue to on-chain query limitations, marketplace listings cannot be displayed temporarily.\n\nSolutions:\n1. Wait for off-chain indexing service\n2. Use contract event queries\n3. Purchase directly via weapon ID')
       setListings([])
     } finally {
       setIsLoading(false)
@@ -123,7 +124,7 @@ function Marketplace({ character, isOpen, onClose }) {
     
     // Check if balance is sufficient
     if (price > lingStoneBalance) {
-      alert(`❌ Insufficient LingStone\n\nRequired: ${price} LING\nBalance: ${lingStoneBalance} LING`)
+      alertManager.error(`Insufficient LingStone\n\nRequired: ${price} LING\nBalance: ${lingStoneBalance} LING`)
       return
     }
     
@@ -176,15 +177,15 @@ function Marketplace({ character, isOpen, onClose }) {
       setSelectedListing(null)
       
       console.log('✅ Purchase complete! Weapon transferred to your inventory')
-      alert(`✅ Purchase successful!\n\nReceived: ${listing.weapon.name}\n\n💡 Tip: Open your inventory to view your new weapon`)
+      alertManager.success(`Purchase successful!\n\nReceived: ${listing.weapon.name}\n\nTip: Open your inventory to view your new weapon`)
     } catch (error) {
       console.error('Error buying weapon:', error)
       if (error.message.includes('User rejected') || error.message.includes('rejected')) {
-        alert(`❌ You cancelled the transaction`)
+        alertManager.error('You cancelled the transaction')
       } else if (error.message.includes('Insufficient') || error.message.includes('insufficient')) {
-        alert(`❌ Insufficient balance\n\nPlease ensure you have enough LingStone and OCT tokens to pay gas fees.`)
+        alertManager.error('Insufficient balance\n\nPlease ensure you have enough LingStone and OCT tokens to pay gas fees.')
       } else {
-        alert(`❌ Purchase failed: ${error.message}`)
+        alertManager.error(`Purchase failed: ${error.message}`)
       }
     } finally {
       setIsBuying(false)

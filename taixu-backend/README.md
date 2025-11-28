@@ -1,74 +1,74 @@
 # Taixu Backend - Sponsored Transaction Server
 
-这是 Taixu 游戏的后端服务器，用于处理赞助交易（Sponsored Transactions）。
+Backend server for Taixu game, handling Sponsored Transactions.
 
-## 功能
+## Features
 
-- 🎮 **赞助创建角色** - 玩家创建角色时，由项目方支付 gas 费用
-- 💰 **零门槛** - 玩家不需要任何代币即可开始游戏
-- 🔒 **安全** - 玩家仍需签名确认操作
+- 🎮 **Sponsored Character Creation** - Project pays gas fees when players create characters
+- 💰 **Zero Barrier** - Players don't need any tokens to start playing
+- 🔒 **Secure** - Players still need to sign to confirm operations
 
-## 快速开始
+## Quick Start
 
-### 1. 安装依赖
+### 1. Install Dependencies
 
 ```bash
 cd taixu-backend
 npm install
 ```
 
-### 2. 配置环境变量
+### 2. Configure Environment Variables
 
-复制 `.env.example` 为 `.env`：
+Copy `.env.example` to `.env`:
 
 ```bash
 copy .env.example .env
 ```
 
-编辑 `.env` 文件，填入你的钱包私钥：
+Edit `.env` file and add your wallet private key:
 
 ```env
-# 从 OneChain 钱包导出私钥
-# 设置 -> 安全 -> 导出私钥
-SPONSOR_PRIVATE_KEY=你的私钥
+# Export private key from OneChain wallet
+# Settings -> Security -> Export Private Key
+SPONSOR_PRIVATE_KEY=your_private_key
 
-# 其他配置已经预设好了
+# Other configurations are already preset
 ```
 
-⚠️ **重要安全提示：**
-- 不要将 `.env` 文件提交到 Git
-- 私钥要保密，不要分享给任何人
-- 建议使用专门的赞助钱包，不要用主钱包
+⚠️ **Important Security Notes:**
+- Do not commit `.env` file to Git
+- Keep private key confidential, don't share with anyone
+- Recommend using dedicated sponsor wallet, not main wallet
 
-### 3. 确保赞助钱包有余额
+### 3. Ensure Sponsor Wallet Has Balance
 
-你的赞助钱包需要有一些 SUI/OCT 代币来支付 gas：
+Your sponsor wallet needs some SUI/OCT tokens to pay gas:
 
-- **测试网水龙头**: https://faucet.onechain.com/
-- 建议至少有 1 SUI/OCT（可以支持数千次交易）
+- **Testnet Faucet**: https://faucet.onechain.com/
+- Recommend at least 1 SUI/OCT (can support thousands of transactions)
 
-### 4. 启动服务器
+### 4. Start Server
 
 ```bash
 npm start
 ```
 
-或者使用开发模式（自动重启）：
+Or use development mode (auto-restart):
 
 ```bash
 npm run dev
 ```
 
-服务器将在 `http://localhost:3001` 启动。
+Server will start at `http://localhost:3001`.
 
-### 5. 测试服务器
+### 5. Test Server
 
-打开浏览器访问：
+Open browser and visit:
 ```
 http://localhost:3001/health
 ```
 
-应该看到：
+Should see:
 ```json
 {
   "status": "ok",
@@ -76,50 +76,50 @@ http://localhost:3001/health
 }
 ```
 
-## API 接口
+## API Endpoints
 
 ### POST /api/sponsor/create-player
 
-创建玩家角色（赞助交易）
+Create player character (sponsored transaction)
 
-**请求体：**
+**Request Body:**
 ```json
 {
   "playerAddress": "0x...",
-  "name": "玩家名称",
+  "name": "Player Name",
   "classId": 1
 }
 ```
 
-**响应：**
+**Response:**
 ```json
 {
   "success": true,
   "result": {
-    "digest": "交易哈希",
+    "digest": "Transaction Hash",
     "effects": { ... }
   },
   "message": "Player created successfully with sponsored gas"
 }
 ```
 
-## 成本估算
+## Cost Estimation
 
-- 每次创建角色约消耗：0.001 SUI/OCT
-- 1 SUI/OCT 可以支持约 1000 个玩家注册
-- 测试网代币免费，可以从水龙头获取
+- Per character creation: ~0.001 SUI/OCT
+- 1 SUI/OCT can support ~1000 player registrations
+- Testnet tokens are free, available from faucet
 
-## 前端配置
+## Frontend Configuration
 
-在前端项目的 `.env` 文件中添加：
+Add to frontend project's `.env` file:
 
 ```env
 VITE_BACKEND_URL=http://localhost:3001
 ```
 
-## 部署到生产环境
+## Deploy to Production
 
-### 使用 PM2（推荐）
+### Using PM2 (Recommended)
 
 ```bash
 npm install -g pm2
@@ -128,35 +128,35 @@ pm2 save
 pm2 startup
 ```
 
-### 使用 Docker
+### Using Docker
 
 ```bash
 docker build -t taixu-backend .
 docker run -d -p 3001:3001 --env-file .env taixu-backend
 ```
 
-## 安全建议
+## Security Recommendations
 
-1. **使用专用赞助钱包** - 不要用主钱包
-2. **限制赞助次数** - 可以添加每个地址的赞助次数限制
-3. **监控余额** - 定期检查赞助钱包余额
-4. **使用 HTTPS** - 生产环境必须使用 HTTPS
-5. **添加速率限制** - 防止滥用
+1. **Use Dedicated Sponsor Wallet** - Don't use main wallet
+2. **Limit Sponsorship Count** - Can add per-address sponsorship limit
+3. **Monitor Balance** - Regularly check sponsor wallet balance
+4. **Use HTTPS** - Production must use HTTPS
+5. **Add Rate Limiting** - Prevent abuse
 
-## 故障排除
+## Troubleshooting
 
-### 错误：SPONSOR_PRIVATE_KEY not set
+### Error: SPONSOR_PRIVATE_KEY not set
 
-确保 `.env` 文件存在且包含正确的私钥。
+Ensure `.env` file exists and contains correct private key.
 
-### 错误：Sponsor wallet has no gas coins
+### Error: Sponsor wallet has no gas coins
 
-赞助钱包余额不足，需要从水龙头获取代币。
+Sponsor wallet balance insufficient, need to get tokens from faucet.
 
-### 错误：Connection refused
+### Error: Connection refused
 
-确保后端服务器正在运行，检查端口是否被占用。
+Ensure backend server is running, check if port is occupied.
 
-## 许可证
+## License
 
 MIT

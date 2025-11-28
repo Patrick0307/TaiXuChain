@@ -1,4 +1,4 @@
-// 房间管理服务
+// Room management service
 import { v4 as uuidv4 } from 'uuid';
 
 class RoomService {
@@ -7,24 +7,24 @@ class RoomService {
     this.playerRooms = new Map(); // playerId -> roomId
   }
 
-  // 创建新房间
+  // Create new room
   createRoom(hostPlayerId, mapName, isPublic = true) {
-    // 生成8位大写字母数字组合的房间号
+    // Generate 8-character uppercase alphanumeric room ID
     const roomId = uuidv4().replace(/-/g, '').substring(0, 8).toUpperCase();
     const room = {
       id: roomId,
-      hostId: hostPlayerId, // 房主（主机）
+      hostId: hostPlayerId, // Room host (host player)
       mapName: mapName,
       isPublic: isPublic,
       players: new Map(), // playerId -> playerData
-      monsters: [], // 怪物状态（由主机管理）
-      lootBoxes: [], // 宝箱状态（由主机管理）
+      monsters: [], // Monster state (managed by host)
+      lootBoxes: [], // Loot box state (managed by host)
       gameState: {
         initialized: false,
         lastUpdate: Date.now()
       },
       createdAt: Date.now(),
-      maxPlayers: 2 // 限制为双人模式
+      maxPlayers: 2 // Limited to 2-player mode
     };
 
     this.rooms.set(roomId, room);
@@ -33,9 +33,9 @@ class RoomService {
     return room;
   }
 
-  // 加入房间
+  // Join room
   joinRoom(roomId, playerId, playerData) {
-    // 确保房间ID是大写
+    // Ensure room ID is uppercase
     const normalizedRoomId = roomId.toUpperCase();
     const room = this.rooms.get(normalizedRoomId);
     
@@ -49,7 +49,7 @@ class RoomService {
       throw new Error('Room is full');
     }
 
-    // 添加玩家到房间
+    // Add player to room
     room.players.set(playerId, {
       id: playerId,
       ...playerData,
@@ -67,7 +67,7 @@ class RoomService {
     return room;
   }
 
-  // 离开房间
+  // Leave room
   leaveRoom(playerId) {
     const roomId = this.playerRooms.get(playerId);
     
@@ -81,7 +81,7 @@ class RoomService {
       room.players.delete(playerId);
       console.log(`👋 Player ${playerId} left room ${roomId}`);
 
-      // 如果房间空了，删除房间
+      // If room is empty, delete room
       if (room.players.size === 0) {
         this.rooms.delete(roomId);
         console.log(`🗑️ Room ${roomId} deleted (empty)`);
@@ -92,7 +92,7 @@ class RoomService {
     return roomId;
   }
 
-  // 获取房间
+  // Get room
   getRoom(roomId) {
     return this.rooms.get(roomId);
   }

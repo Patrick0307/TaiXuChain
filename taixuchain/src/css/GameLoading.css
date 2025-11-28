@@ -9,7 +9,7 @@
   justify-content: center;
 }
 
-/* 马赛克背景效果 */
+/* Mosaic background effect */
 .mosaic-background {
   position: absolute;
   top: 0;
@@ -47,7 +47,7 @@
   max-width: 800px;
 }
 
-/* 标题样式 */
+/* Title styles */
 .loading-title {
   position: relative;
   font-size: 4rem;
@@ -79,7 +79,7 @@
   }
 }
 
-/* 进度条容器 */
+/* Progress bar container */
 .progress-container {
   width: 100%;
   display: flex;
@@ -188,7 +188,7 @@
   font-family: 'Courier New', monospace;
 }
 
-/* 加载状态文字 */
+/* Loading status text */
 .loading-stage {
   min-height: 40px;
   display: flex;
@@ -217,7 +217,7 @@
   }
 }
 
-/* 底部角色展示 */
+/* Bottom character showcase */
 .characters-showcase {
   display: flex;
   gap: 60px;
@@ -304,7 +304,7 @@
   margin-top: 15px;
 }
 
-/* ===== 粒子特效 ===== */
+/* ===== Particle effects ===== */
 .particles-container {
   position: absolute;
   top: 0;
@@ -316,7 +316,7 @@
   z-index: 0;
 }
 
-/* 星空闪烁 */
+/* Starry sky twinkling */
 .star {
   position: absolute;
   width: 2px;
@@ -338,7 +338,7 @@
   }
 }
 
-/* 金色粒子上升 */
+/* Golden particles rising */
 .particle {
   position: absolute;
   width: 3px;
@@ -367,7 +367,7 @@
   }
 }
 
-/* 能量球轨迹 */
+/* Energy orb trajectory */
 .energy-orb {
   position: absolute;
   width: 6px;
@@ -397,7 +397,7 @@
   }
 }
 
-/* 流星效果 */
+/* Meteor effect */
 .meteor {
   position: absolute;
   width: 2px;
@@ -430,7 +430,7 @@
   background: linear-gradient(90deg, #FFD700, transparent);
 }
 
-/* 光束效果 */
+/* Light beam effect */
 .light-beam {
   position: absolute;
   width: 2px;
@@ -454,7 +454,7 @@
   }
 }
 
-/* 响应式设计 */
+/* Responsive design */
 @media (max-width: 768px) {
   .loading-title {
     font-size: 2.5rem;

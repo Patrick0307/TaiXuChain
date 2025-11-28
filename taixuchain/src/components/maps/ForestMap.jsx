@@ -7,6 +7,7 @@ import Marketplace from '../Marketplace'
 import LootBox from './LootBox'
 import WeaponReward from './WeaponReward'
 import MintingLoader from './MintingLoader'
+import { alertManager } from '../AlertDialog'
 import { checkPlayerWeapon, mintWeaponForPlayer, mintRandomWeaponForPlayer, getAllPlayerWeapons } from '../../utils/suiClient'
 import websocketClient from '../../services/websocketClient'
 import soundManager from '../../utils/soundManager'
@@ -384,7 +385,7 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
       // 注意：不需要恢复宝箱UI，因为服务器会通过 game_state_synced 重新同步
       // 或者玩家刷新页面后会重新获取
       
-      alert(`拾取失败：${message}`)
+      alertManager.error(`Pickup failed: ${message}`)
     })
 
     // 监听宝箱被拾取
@@ -473,12 +474,12 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
               setShowWeaponReward(constructedWeapon)
             } else {
               console.warn('⚠️ Weapon info incomplete, showing generic reward')
-              alert('武器已铸造！请查看背包')
+              alertManager.success('Weapon minted! Please check your inventory')
             }
           } catch (error) {
             console.error('❌ Failed to mint weapon:', error)
             console.error('Error details:', error.message)
-            alert('铸造武器失败：' + error.message + '\n请查看背包或稍后重试')
+            alertManager.error('Failed to mint weapon: ' + error.message + '\nPlease check your inventory or try again later')
           } finally {
             // 隐藏loading
             setIsMintingWeapon(false)
@@ -1948,10 +1949,10 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
                 return
               }
               
-              // 检查宝箱归属
+              // Check loot box ownership
               if (lootBox.ownerId && lootBox.ownerId !== currentPlayerId) {
                 console.log(`⚠️ This loot box belongs to ${lootBox.ownerName}`)
-                alert(`这个宝箱属于 ${lootBox.ownerName}，只有他/她可以拾取！`)
+                alertManager.warning(`This loot box belongs to ${lootBox.ownerName}, only they can pick it up!`)
                 return
               }
               
@@ -2030,7 +2031,7 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
                 
                 if (!newWeaponId) {
                   console.error('❌ Could not extract weapon ID from transaction')
-                  alert('无法获取武器ID，请查看背包')
+                  alertManager.error('Unable to get weapon ID, please check your inventory')
                   return
                 }
                 
@@ -2111,7 +2112,7 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
                 }
               } catch (error) {
                 console.error('❌ Failed to open loot box:', error)
-                alert('开箱失败，请稍后重试')
+                alertManager.error('Failed to open loot box, please try again later')
               } finally {
                 // 隐藏loading
                 setIsMintingWeapon(false)

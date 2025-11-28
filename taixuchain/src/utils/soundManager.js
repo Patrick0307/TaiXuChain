@@ -1,20 +1,20 @@
-// 音效管理器
+// Sound Manager
 class SoundManager {
   constructor() {
     this.sounds = {}
     this.enabled = true
-    this.bgm = null // 背景音乐
-    this.bgmVolume = 0.3 // 背景音乐音量
+    this.bgm = null // Background music
+    this.bgmVolume = 0.3 // Background music volume
   }
 
-  // 加载音效
+  // Load sound
   loadSound(name, path) {
     const audio = new Audio(path)
     audio.preload = 'auto'
     this.sounds[name] = audio
   }
 
-  // 播放音效
+  // Play sound
   play(name, volume = 1.0) {
     if (!this.enabled) {
       console.log('🔇 Sound disabled')
@@ -34,14 +34,14 @@ class SoundManager {
     })
   }
 
-  // 随机播放一组音效中的一个
+  // Randomly play one sound from a group
   playRandom(names, volume = 1.0) {
     if (!this.enabled || !names || names.length === 0) return
     const randomIndex = Math.floor(Math.random() * names.length)
     this.play(names[randomIndex], volume)
   }
 
-  // 根据职业播放武器攻击音效
+  // Play weapon attack sound based on character class
   playWeaponAttack(characterClass, volume = 0.6) {
     const classLower = characterClass?.toLowerCase()
     console.log('🔊 Playing weapon attack sound for class:', classLower)
@@ -60,15 +60,15 @@ class SoundManager {
     }
   }
 
-  // 播放怪物攻击音效
+  // Play monster attack sound
   playMonsterAttack(volume = 0.5) {
     this.play('monsterattack', volume)
   }
 
-  // 播放背景音乐（循环）
+  // Play background music (loop)
   playBGM(volume = 0.3) {
     if (this.bgm) {
-      // 如果已经在播放，不重复播放
+      // If already playing, don't play again
       if (!this.bgm.paused) return
     }
     
@@ -83,7 +83,7 @@ class SoundManager {
     })
   }
 
-  // 停止背景音乐
+  // Stop background music
   stopBGM() {
     if (this.bgm) {
       this.bgm.pause()
@@ -92,7 +92,7 @@ class SoundManager {
     }
   }
 
-  // 暂停背景音乐
+  // Pause background music
   pauseBGM() {
     if (this.bgm && !this.bgm.paused) {
       this.bgm.pause()
@@ -100,7 +100,7 @@ class SoundManager {
     }
   }
 
-  // 恢复背景音乐
+  // Resume background music
   resumeBGM() {
     if (this.bgm && this.bgm.paused) {
       this.bgm.play().catch(err => {
@@ -109,7 +109,7 @@ class SoundManager {
     }
   }
 
-  // 设置背景音乐音量
+  // Set background music volume
   setBGMVolume(volume) {
     this.bgmVolume = volume
     if (this.bgm) {
@@ -117,7 +117,7 @@ class SoundManager {
     }
   }
 
-  // 启用/禁用音效
+  // Enable/disable sound effects
   setEnabled(enabled) {
     this.enabled = enabled
     if (!enabled && this.bgm) {
@@ -127,32 +127,32 @@ class SoundManager {
     }
   }
 
-  // 检查是否启用
+  // Check if enabled
   isEnabled() {
     return this.enabled
   }
 }
 
-// 创建全局单例
+// Create global singleton
 const soundManager = new SoundManager()
 
-// 预加载点击音效
+// Preload click sound
 soundManager.loadSound('click', '/sounds/click1.mp3')
 
-// 预加载武器音效 - 剑（战士）
+// Preload weapon sounds - Sword (Warrior)
 soundManager.loadSound('sword1', '/sounds/weapon/sword/sword1.mp3')
 soundManager.loadSound('sword2', '/sounds/weapon/sword/sword2.mp3')
 soundManager.loadSound('sword3', '/sounds/weapon/sword/sword3.mp3')
 
-// 预加载武器音效 - 弓（弓箭手）
+// Preload weapon sounds - Bow (Archer)
 soundManager.loadSound('arrow1', '/sounds/weapon/bow/arrow1.mp3')
 soundManager.loadSound('arrow2', '/sounds/weapon/bow/arrow2.mp3')
 
-// 预加载武器音效 - 法杖（法师）
+// Preload weapon sounds - Staff (Mage)
 soundManager.loadSound('stave1', '/sounds/weapon/stave/Stave1.mp3')
 soundManager.loadSound('stave2', '/sounds/weapon/stave/Stave2.mp3')
 
-// 预加载怪物攻击音效
+// Preload monster attack sound
 soundManager.loadSound('monsterattack', '/sounds/monsterattack1.mp3')
 
 export default soundManager

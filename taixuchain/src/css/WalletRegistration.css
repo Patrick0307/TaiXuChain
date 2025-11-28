@@ -1,4 +1,4 @@
-/* 80年代黑金风格 - 赛博朋克马赛克 */
+/* 80s Black & Gold Style - Cyberpunk Mosaic */
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 
 .wallet-registration-overlay {
@@ -8,7 +8,7 @@
   width: 100%;
   height: 100%;
   background: 
-    /* 马赛克网格 */
+    /* Mosaic grid */
     repeating-linear-gradient(
       0deg,
       rgba(212, 175, 55, 0.04) 0px,
@@ -23,7 +23,7 @@
       transparent 4px,
       rgba(212, 175, 55, 0.04) 6px
     ),
-    /* 渐变背景 */
+    /* Gradient background */
     radial-gradient(ellipse at top, #1a1410 0%, #0a0a08 50%),
     linear-gradient(180deg, #151510 0%, #0a0a08 100%);
   display: flex;
@@ -34,7 +34,7 @@
   animation: scanlines 8s linear infinite;
 }
 
-/* 扫描线效果 + 80年代网格地板 */
+/* Scanline effect + 80s grid floor */
 .wallet-registration-overlay::before {
   content: '';
   position: absolute;
@@ -43,7 +43,7 @@
   width: 100%;
   height: 100%;
   background: 
-    /* 扫描线 */
+    /* Scanlines */
     repeating-linear-gradient(
       0deg,
       rgba(0, 0, 0, 0.15) 0px,
@@ -51,7 +51,7 @@
       transparent 1px,
       transparent 2px
     ),
-    /* 底部网格 */
+    /* Bottom grid */
     linear-gradient(
       to bottom,
       transparent 0%,
@@ -63,7 +63,7 @@
   z-index: 1;
 }
 
-/* 金色光晕动画 */
+/* Golden glow animation */
 .wallet-registration-overlay::after {
   content: '';
   position: absolute;
@@ -118,12 +118,12 @@
   gap: 35px;
 }
 
-/* 移除伪元素 */
+/* Remove pseudo-element */
 .wallet-registration-box::before {
   display: none;
 }
 
-/* 火焰粒子效果容器 */
+/* Flame particle effect container */
 .wallet-registration-box::after {
   display: none;
 }
@@ -646,7 +646,7 @@
   }
 }
 
-/* 火焰粒子效果 */
+/* Flame particle effect */
 .flame-particles {
   position: absolute;
   top: 0;
@@ -693,7 +693,7 @@
   }
 }
 
-/* ===== 星空闪烁效果 ===== */
+/* ===== Starry sky twinkling effect ===== */
 .stars-container {
   position: absolute;
   top: 0;
@@ -726,7 +726,7 @@
   }
 }
 
-/* ===== 金色能量球 ===== */
+/* ===== Golden energy orbs ===== */
 .energy-orbs-container {
   position: absolute;
   top: 0;
@@ -767,7 +767,7 @@
   }
 }
 
-/* ===== 光束效果 ===== */
+/* ===== Light beam effect ===== */
 .light-beams-container {
   position: absolute;
   top: 0;
@@ -802,7 +802,7 @@
   }
 }
 
-/* ===== 流星效果 ===== */
+/* ===== Meteor effect ===== */
 .meteor {
   position: absolute;
   width: 2px;
@@ -835,7 +835,7 @@
   background: linear-gradient(90deg, #FFD700, transparent);
 }
 
-/* ===== 魔法圆环 ===== */
+/* ===== Magic circles ===== */
 .magic-circles-container {
   position: absolute;
   top: 50%;
@@ -866,7 +866,7 @@
   }
 }
 
-/* 标题火焰效果 */
+/* Title flame effect */
 .title-fire {
   position: relative;
   display: inline-block;
@@ -887,7 +887,7 @@
   }
 }
 
-/* 马赛克边框装饰 - 屏幕四角 */
+/* Mosaic border decoration - Screen corners */
 .wallet-registration-box .mosaic-corner {
   position: fixed;
   width: 80px;
@@ -947,7 +947,7 @@
 
 
 
-/* 扫描线动画增强 */
+/* Enhanced scanline animation */
 @media (prefers-reduced-motion: no-preference) {
   .wallet-registration-overlay {
     animation: scanlines 8s linear infinite, backgroundShift 20s ease-in-out infinite alternate;
@@ -965,7 +965,7 @@
 
 
 
-/* 增强的火焰光晕 */
+/* Enhanced flame glow */
 .wallet-registration-box::after {
   animation: flameFlicker 0.3s ease-in-out infinite alternate, flamePulse 2s ease-in-out infinite;
 }
@@ -981,7 +981,7 @@
   }
 }
 
-/* 按钮按下时的火花效果 */
+/* Spark effect when button is pressed */
 .connect-button:active:not(:disabled)::before {
   animation: none;
   background: radial-gradient(
@@ -994,7 +994,7 @@
 
 
 
-/* 数字雨效果（可选） */
+/* Digital rain effect (optional) */
 .digital-rain {
   position: absolute;
   top: 0;
@@ -1027,7 +1027,7 @@
   }
 }
 
-/* 80年代扫描线边框 */
+/* 80s scanline border */
 .screen-border {
   position: fixed;
   pointer-events: none;
@@ -1081,7 +1081,7 @@
   right: 0;
 }
 
-/* 响应式设计 */
+/* Responsive design */
 @media (max-width: 1024px) {
   .wallet-registration-box {
     max-width: 700px;
@@ -1238,7 +1238,7 @@
 
 
 
-/* 成功消息样式优化 */
+/* Success message style optimization */
 .success-message {
   position: absolute;
   top: 50%;
@@ -1263,7 +1263,7 @@
 
 
 
-/* 按钮连接状态 */
+/* Button connecting state */
 .connect-button.connecting {
   animation: connectingPulse 1s ease-in-out infinite;
   pointer-events: none;
@@ -1290,7 +1290,7 @@
   }
 }
 
-/* 增强马赛克角的动画 */
+/* Enhanced mosaic corner animation */
 @keyframes mosaicPulse {
   0%, 100% {
     opacity: 0.7;
@@ -1302,7 +1302,7 @@
   }
 }
 
-/* 屏幕边框动画 */
+/* Screen border animation */
 .screen-border {
   animation: borderGlow 4s ease-in-out infinite alternate;
 }
@@ -1318,7 +1318,7 @@
 
 
 
-/* 禁用状态优化 */
+/* Disabled state optimization */
 .connect-button:disabled {
   opacity: 0.4;
   cursor: not-allowed;

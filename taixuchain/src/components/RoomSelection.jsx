@@ -16,7 +16,7 @@ function RoomSelection({ character, onRoomJoined, onBack }) {
     
     websocketClient.connect(wsUrl).catch(err => {
       console.error('Failed to connect WebSocket:', err)
-      setError('无法连接到服务器')
+      setError('Unable to connect to server')
     })
 
     // 监听房间创建成功

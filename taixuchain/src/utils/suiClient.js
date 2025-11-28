@@ -1,30 +1,30 @@
 import { SuiClient } from '@mysten/sui/client'
 import { Transaction } from '@mysten/sui/transactions'
 
-// 初始化 Sui 客户端 - 使用 OneChain Testnet
+// Initialize Sui client - Using OneChain Testnet
 export const suiClient = new SuiClient({ url: 'https://rpc-testnet.onelabs.cc:443' })
 
-// 从环境变量或配置文件读取 (V8 - 2025-11-20)
+// Read from environment variables or config file (V8 - 2025-11-20)
 export const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID || '0xd249f6f2ecf256b26025e2d8454482e05565b716d5c3ebb6cf5fd24d01f03c9f'
 export const REGISTRY_ID = import.meta.env.VITE_REGISTRY_ID || '0xb385cbebfde05028eb3dd95754ca2d3651d477bd438621741d393fb390776948'
 export const MARKETPLACE_ID = import.meta.env.VITE_MARKETPLACE_ID || '0x3b18f7a9fe90b85aad2e425ff42a1a27b73005d4eee08974c340c378c137e463'
 export const WEAPON_MINT_CAP = import.meta.env.VITE_WEAPON_MINT_CAP || '0xb7bd7f2b0f7f1a93a71e52a380345f930c2010997a7fccee27b70f59a66e5c95'
 
-// 职业映射（与后端和合约保持一致）
-// Move 合约定义: CLASS_MAGE=1, CLASS_WARRIOR=2, CLASS_ARCHER=3
+// Class mapping (consistent with backend and contract)
+// Move contract definition: CLASS_MAGE=1, CLASS_WARRIOR=2, CLASS_ARCHER=3
 export const CLASS_MAP = {
-  'Mage': 1,      // 术士
-  'Warrior': 2,   // 武者
-  'Archer': 3     // 射手
+  'Mage': 1,
+  'Warrior': 2,
+  'Archer': 3
 }
 
 /**
- * 创建玩家角色并注册到区块链（使用赞助交易，玩家不需要付 gas）
- * @param {string} name - 角色名称
- * @param {string} className - 职业名称 (Mage, Warrior, Archer)
- * @param {object} suiWallet - Sui 钱包对象
- * @param {object} customization - 角色自定义数据
- * @returns {Promise<object>} 交易结果
+ * Create player character and register to blockchain (using sponsored transaction, player doesn't need to pay gas)
+ * @param {string} name - Character name
+ * @param {string} className - Class name (Mage, Warrior, Archer)
+ * @param {object} suiWallet - Sui wallet object
+ * @param {object} customization - Character customization data
+ * @returns {Promise<object>} Transaction result
  */
 export async function createPlayerOnChain(name, className, suiWallet, customization) {
   try {
@@ -33,10 +33,7 @@ export async function createPlayerOnChain(name, className, suiWallet, customizat
       throw new Error(`Invalid class: ${className}`)
     }
 
-    console.log('🎮 Creating player with SPONSORED transaction (no gas needed)...')
-    console.log('Wallet object:', suiWallet)
-
-    // 获取钱包地址
+    // Get wallet address
     let playerAddress
     if (suiWallet.getAccounts) {
       const accounts = await suiWallet.getAccounts()
@@ -49,10 +46,7 @@ export async function createPlayerOnChain(name, className, suiWallet, customizat
       throw new Error('Cannot get wallet address')
     }
 
-    console.log('Player address:', playerAddress)
-    console.log('💰 Gas will be paid by game sponsor (you don\'t need any tokens!)')
-
-    // 调用后端赞助服务
+    // Call backend sponsor service
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
     
     const response = await fetch(`${BACKEND_URL}/api/sponsor/create-player`, {
@@ -74,20 +68,17 @@ export async function createPlayerOnChain(name, className, suiWallet, customizat
     }
 
     const data = await response.json()
-    console.log('✅ Player created successfully with sponsored gas!')
-    console.log('Transaction result:', data.result)
     
     return data.result
   } catch (error) {
-    console.error('❌ Error creating player on chain:', error)
     throw error
   }
 }
 
 /**
- * 查询玩家信息
- * @param {string} playerObjectId - 玩家对象 ID
- * @returns {Promise<object>} 玩家信息
+ * Query player information
+ * @param {string} playerObjectId - Player object ID
+ * @returns {Promise<object>} Player information
  */
 export async function getPlayerInfo(playerObjectId) {
   try {
@@ -99,15 +90,14 @@ export async function getPlayerInfo(playerObjectId) {
     })
     return object.data.content.fields
   } catch (error) {
-    console.error('Error fetching player info:', error)
     throw error
   }
 }
 
 /**
- * 查询钱包地址是否已有角色
- * @param {string} walletAddress - 钱包地址
- * @returns {Promise<object|null>} 玩家角色信息或 null
+ * Check if wallet address already has a character
+ * @param {string} walletAddress - Wallet address
+ * @returns {Promise<object|null>} Player character information or null
  */
 export async function checkExistingPlayer(walletAddress) {
   try {
@@ -122,29 +112,26 @@ export async function checkExistingPlayer(walletAddress) {
     const data = await response.json()
     
     if (data.exists && data.player) {
-      console.log('✅ Existing player found:', data.player)
       return data.player
     }
     
-    console.log('ℹ️ No existing player found for this wallet')
     return null
   } catch (error) {
-    console.error('❌ Error checking existing player:', error)
     throw error
   }
 }
 
 /**
- * 查询玩家武器（可选：根据职业过滤）
- * @param {string} walletAddress - 钱包地址
- * @param {number} classId - 职业 ID (可选，用于过滤匹配职业的武器)
- * @returns {Promise<object|null>} 武器信息或 null
+ * Query player weapon (optional: filter by class)
+ * @param {string} walletAddress - Wallet address
+ * @param {number} classId - Class ID (optional, used to filter weapons matching the class)
+ * @returns {Promise<object|null>} Weapon information or null
  */
 export async function checkPlayerWeapon(walletAddress, classId = null) {
   try {
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
     
-    // 如果提供了 classId，添加到查询参数
+    // If classId is provided, add it to query parameters
     const url = classId 
       ? `${BACKEND_URL}/api/weapon/${walletAddress}?classId=${classId}`
       : `${BACKEND_URL}/api/weapon/${walletAddress}`
@@ -158,22 +145,19 @@ export async function checkPlayerWeapon(walletAddress, classId = null) {
     const data = await response.json()
     
     if (data.exists && data.weapon) {
-      console.log('✅ Player weapon found:', data.weapon)
       return data.weapon
     }
     
-    console.log('ℹ️ No weapon found for this player' + (classId ? ` (class ${classId})` : ''))
     return null
   } catch (error) {
-    console.error('❌ Error checking player weapon:', error)
     throw error
   }
 }
 
 /**
- * 获取玩家所有武器
- * @param {string} walletAddress - 钱包地址
- * @returns {Promise<Array>} 武器列表
+ * Get all player weapons
+ * @param {string} walletAddress - Wallet address
+ * @returns {Promise<Array>} Weapon list
  */
 export async function getAllPlayerWeapons(walletAddress) {
   try {
@@ -187,26 +171,21 @@ export async function getAllPlayerWeapons(walletAddress) {
 
     const data = await response.json()
     
-    console.log(`✅ Found ${data.count} weapon(s)`)
     return data.weapons || []
   } catch (error) {
-    console.error('❌ Error getting player weapons:', error)
     throw error
   }
 }
 
 /**
- * 赞助铸造武器（根据职业自动选择）
- * @param {string} walletAddress - 钱包地址
- * @param {number} classId - 职业 ID
- * @returns {Promise<object>} 交易结果
+ * Sponsored weapon minting (automatically selects based on class)
+ * @param {string} walletAddress - Wallet address
+ * @param {number} classId - Class ID
+ * @returns {Promise<object>} Transaction result
  */
 export async function mintWeaponForPlayer(walletAddress, classId) {
   try {
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
-    
-    console.log('🗡️ Minting weapon with SPONSORED transaction...')
-    console.log('💰 Gas will be paid by game sponsor!')
     
     const response = await fetch(`${BACKEND_URL}/api/sponsor/mint-weapon`, {
       method: 'POST',
@@ -225,26 +204,21 @@ export async function mintWeaponForPlayer(walletAddress, classId) {
     }
 
     const data = await response.json()
-    console.log('✅ Weapon minted successfully!')
     
     return data.result
   } catch (error) {
-    console.error('❌ Error minting weapon:', error)
     throw error
   }
 }
 
 /**
- * 赞助铸造随机武器（怪物掉落）
- * @param {string} walletAddress - 钱包地址
- * @returns {Promise<object>} 交易结果和武器信息
+ * Sponsored random weapon minting (monster drop)
+ * @param {string} walletAddress - Wallet address
+ * @returns {Promise<object>} Transaction result and weapon information
  */
 export async function mintRandomWeaponForPlayer(walletAddress) {
   try {
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
-    
-    console.log('🎲 Minting RANDOM weapon with SPONSORED transaction...')
-    console.log('💰 Gas will be paid by game sponsor!')
     
     const response = await fetch(`${BACKEND_URL}/api/sponsor/mint-random-weapon`, {
       method: 'POST',
@@ -262,20 +236,17 @@ export async function mintRandomWeaponForPlayer(walletAddress) {
     }
 
     const data = await response.json()
-    console.log('✅ Random weapon minted successfully!')
-    console.log('🎲 Weapon info:', data.weaponInfo)
     
     return data
   } catch (error) {
-    console.error('❌ Error minting random weapon:', error)
     throw error
   }
 }
 
 /**
- * 获取 LingStone 余额
- * @param {string} walletAddress - 钱包地址
- * @returns {Promise<number>} LingStone 余额
+ * Get LingStone balance
+ * @param {string} walletAddress - Wallet address
+ * @returns {Promise<number>} LingStone balance
  */
 export async function getLingStoneBalance(walletAddress) {
   try {
@@ -290,22 +261,18 @@ export async function getLingStoneBalance(walletAddress) {
     const data = await response.json()
     return data.balance || 0
   } catch (error) {
-    console.error('❌ Error getting LingStone balance:', error)
     return 0
   }
 }
 
 /**
- * 请求 LingStone（铸币 10000）
- * @param {string} walletAddress - 钱包地址
- * @returns {Promise<object>} 交易结果
+ * Request LingStone (mint 10000)
+ * @param {string} walletAddress - Wallet address
+ * @returns {Promise<object>} Transaction result
  */
 export async function requestLingStone(walletAddress) {
   try {
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
-    
-    console.log('💎 Requesting LingStone with SPONSORED transaction...')
-    console.log('💰 Gas will be paid by game sponsor!')
     
     const response = await fetch(`${BACKEND_URL}/api/sponsor/mint-lingstone`, {
       method: 'POST',
@@ -323,40 +290,33 @@ export async function requestLingStone(walletAddress) {
     }
 
     const data = await response.json()
-    console.log('✅ LingStone minted successfully!')
     
     return data.result
   } catch (error) {
-    console.error('❌ Error requesting LingStone:', error)
     throw error
   }
 }
 
 /**
- * 销毁武器（丢弃）- 玩家自己签名
- * @param {string} weaponObjectId - 武器对象 ID
- * @returns {Promise<object>} 交易结果
+ * Burn weapon (discard) - Player signs themselves
+ * @param {string} weaponObjectId - Weapon object ID
+ * @returns {Promise<object>} Transaction result
  */
 export async function burnWeapon(weaponObjectId) {
   try {
-    console.log('🔥 Burning weapon...')
-    console.log('  Weapon ID:', weaponObjectId)
-    console.log('  Package ID:', PACKAGE_ID)
-    console.log('📝 You will need to sign this transaction')
-    
-    // 获取钱包
+    // Get wallet
     const suiWallet = window.suiWallet
     if (!suiWallet) {
       throw new Error('Wallet not connected')
     }
 
-    // 创建交易
+    // Create transaction
     const tx = new Transaction()
     
-    // 设置 gas budget（销毁操作很简单，不需要太多 gas）
+    // Set gas budget (burning is simple, doesn't need much gas)
     tx.setGasBudget(10000000) // 0.01 SUI/OCT
     
-    // 调用 burn_weapon_by_player 函数
+    // Call burn_weapon_by_player function
     tx.moveCall({
       target: `${PACKAGE_ID}::weapon::burn_weapon_by_player`,
       arguments: [
@@ -364,10 +324,7 @@ export async function burnWeapon(weaponObjectId) {
       ],
     })
     
-    console.log('🔥 Signing and executing burn transaction...')
-    console.log('  Target:', `${PACKAGE_ID}::weapon::burn_weapon_by_player`)
-    
-    // 玩家签名并执行交易
+    // Player signs and executes transaction
     const result = await suiWallet.signAndExecuteTransaction({
       transaction: tx,
       options: {
@@ -377,50 +334,38 @@ export async function burnWeapon(weaponObjectId) {
       },
     })
     
-    console.log('✅ Weapon burned successfully!')
-    console.log('  Digest:', result.digest)
-    
     return result
   } catch (error) {
-    console.error('❌ Error burning weapon:', error)
-    console.error('  Error details:', error.message)
     throw error
   }
 }
 
 /**
- * 合成武器 - 玩家销毁LingStone和两把武器，sponsor铸造升级后的武器
- * @param {string} weapon1ObjectId - 第一把武器对象 ID
- * @param {string} weapon2ObjectId - 第二把武器对象 ID
- * @param {number} weaponType - 武器类型
- * @param {number} rarity - 稀有度
- * @param {number} newLevel - 新武器等级
- * @param {string} walletAddress - 钱包地址
- * @param {number} weaponLevel - 当前武器等级（用于计算费用）
- * @returns {Promise<object>} 交易结果
+ * Merge weapons - Player burns LingStone and two weapons, sponsor mints upgraded weapon
+ * @param {string} weapon1ObjectId - First weapon object ID
+ * @param {string} weapon2ObjectId - Second weapon object ID
+ * @param {number} weaponType - Weapon type
+ * @param {number} rarity - Rarity
+ * @param {number} newLevel - New weapon level
+ * @param {string} walletAddress - Wallet address
+ * @param {number} weaponLevel - Current weapon level (used to calculate cost)
+ * @returns {Promise<object>} Transaction result
  */
 export async function mergeWeapons(weapon1ObjectId, weapon2ObjectId, weaponType, rarity, newLevel, walletAddress, weaponLevel) {
   try {
-    console.log('⚔️ Merging weapons...')
-    console.log('  Weapon 1:', weapon1ObjectId)
-    console.log('  Weapon 2:', weapon2ObjectId)
-    console.log('  New Level:', newLevel)
-    
-    // 计算合成费用：基础费用 100 LING + (等级 * 50 LING)
+    // Calculate merge cost: base cost 100 LING + (level * 50 LING)
     const mergeCost = (100 + (weaponLevel * 50)) * 1_000_000_000
-    console.log(`💎 Merge cost: ${(100 + (weaponLevel * 50))} LING`)
-    console.log('📝 Step 1: You will sign to pay LingStone and burn 2 weapons (you pay gas)')
     
-    // 获取钱包
+    // Get wallet
     const suiWallet = window.suiWallet
     if (!suiWallet) {
       throw new Error('Wallet not connected')
     }
 
-    // 步骤1：玩家销毁LingStone和两把武器（玩家付gas）
+    // Step 1: Player burns LingStone and two weapons (player pays gas)
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
     
-    // 获取玩家的 LingStone coin 对象
+    // Get player's LingStone coin objects
     const response = await fetch(`${BACKEND_URL}/api/lingstone/coins/${walletAddress}`)
     if (!response.ok) {
       throw new Error('Failed to get LingStone coins')
@@ -431,7 +376,7 @@ export async function mergeWeapons(weapon1ObjectId, weapon2ObjectId, weaponType,
       throw new Error('No LingStone coins found')
     }
     
-    // 找到足够余额的 coin 或合并多个 coins
+    // Find coin with sufficient balance or merge multiple coins
     let selectedCoin = null
     for (const coin of coinsData.coins) {
       if (coin.balance >= mergeCost) {
@@ -445,17 +390,17 @@ export async function mergeWeapons(weapon1ObjectId, weapon2ObjectId, weaponType,
     }
     
     const tx = new Transaction()
-    tx.setGasBudget(30000000) // 0.03 SUI/OCT (burn coin + 两次销毁武器)
+    tx.setGasBudget(30000000) // 0.03 SUI/OCT (burn coin + two weapon burns)
     
-    // 分割出需要的金额
+    // Split out the required amount
     const coinToSplit = tx.object(selectedCoin)
     const splitCoin = tx.splitCoins(coinToSplit, [mergeCost])[0]
     
-    // 直接转账 LingStone 给游戏金库（使用 Sui 原生转账）
+    // Transfer LingStone directly to game treasury (using Sui native transfer)
     const GAME_TREASURY_ADDRESS = import.meta.env.VITE_GAME_TREASURY_ADDRESS
     tx.transferObjects([splitCoin], GAME_TREASURY_ADDRESS)
     
-    // 销毁第一把武器
+    // Burn first weapon
     tx.moveCall({
       target: `${PACKAGE_ID}::weapon::burn_weapon_by_player`,
       arguments: [
@@ -463,7 +408,7 @@ export async function mergeWeapons(weapon1ObjectId, weapon2ObjectId, weaponType,
       ],
     })
     
-    // 销毁第二把武器
+    // Burn second weapon
     tx.moveCall({
       target: `${PACKAGE_ID}::weapon::burn_weapon_by_player`,
       arguments: [
@@ -471,9 +416,7 @@ export async function mergeWeapons(weapon1ObjectId, weapon2ObjectId, weaponType,
       ],
     })
     
-    console.log('🔥 Signing and executing burn transactions...')
-    
-    // 玩家签名并执行交易
+    // Player signs and executes transaction
     const burnResult = await suiWallet.signAndExecuteTransaction({
       transaction: tx,
       options: {
@@ -483,12 +426,7 @@ export async function mergeWeapons(weapon1ObjectId, weapon2ObjectId, weaponType,
       },
     })
     
-    console.log('✅ LingStone paid and weapons burned successfully!')
-    console.log('  Digest:', burnResult.digest)
-    
-    // 步骤2：调用后端，sponsor铸造新武器（sponsor付gas）
-    console.log('💰 Step 2: Sponsor will mint upgraded weapon (sponsor pays gas)')
-    
+    // Step 2: Call backend, sponsor mints new weapon (sponsor pays gas)
     const mintResponse = await fetch(`${BACKEND_URL}/api/sponsor/merge-weapon`, {
       method: 'POST',
       headers: {
@@ -508,50 +446,42 @@ export async function mergeWeapons(weapon1ObjectId, weapon2ObjectId, weaponType,
     }
 
     const data = await mintResponse.json()
-    console.log('✅ New weapon minted successfully!')
-    console.log('  Result:', data.result)
     
     return {
       burnResult,
       mintResult: data.result
     }
   } catch (error) {
-    console.error('❌ Error merging weapons:', error)
     throw error
   }
 }
 
-// ========== 市场相关函数 ==========
+// ========== Market Related Functions ==========
 
 /**
- * 上架武器到市场 - 玩家自己签名
- * @param {string} weaponObjectId - 武器对象 ID
- * @param {number} price - 价格（LING，会自动转换为最小单位）
- * @returns {Promise<object>} 交易结果
+ * List weapon on market - Player signs themselves
+ * @param {string} weaponObjectId - Weapon object ID
+ * @param {number} price - Price (LING, will be automatically converted to smallest unit)
+ * @returns {Promise<object>} Transaction result
  */
 export async function listWeaponOnMarket(weaponObjectId, price) {
   try {
-    console.log('📦 Listing weapon on marketplace...')
-    console.log('  Weapon ID:', weaponObjectId)
-    console.log('  Price:', price, 'LING')
-    console.log('📝 You will need to sign this transaction')
-    
-    // 获取钱包
+    // Get wallet
     const suiWallet = window.suiWallet
     if (!suiWallet) {
       throw new Error('Wallet not connected')
     }
 
-    // 创建交易
+    // Create transaction
     const tx = new Transaction()
     
-    // 设置 gas budget
+    // Set gas budget
     tx.setGasBudget(20000000) // 0.02 SUI/OCT
     
-    // 将价格转换为最小单位（1 LING = 1_000_000_000 最小单位）
+    // Convert price to smallest unit (1 LING = 1_000_000_000 smallest unit)
     const priceInSmallestUnit = price * 1_000_000_000
     
-    // 调用 list_weapon 函数
+    // Call list_weapon function
     tx.moveCall({
       target: `${PACKAGE_ID}::marketplace::list_weapon`,
       arguments: [
@@ -561,11 +491,7 @@ export async function listWeaponOnMarket(weaponObjectId, price) {
       ],
     })
     
-    console.log('📦 Signing and executing list transaction...')
-    console.log('  Target:', `${PACKAGE_ID}::marketplace::list_weapon`)
-    console.log('  Marketplace ID:', MARKETPLACE_ID)
-    
-    // 玩家签名并执行交易
+    // Player signs and executes transaction
     const result = await suiWallet.signAndExecuteTransaction({
       transaction: tx,
       options: {
@@ -575,38 +501,28 @@ export async function listWeaponOnMarket(weaponObjectId, price) {
       },
     })
     
-    console.log('✅ Weapon listed successfully!')
-    console.log('  Digest:', result.digest)
-    
     return result
   } catch (error) {
-    console.error('❌ Error listing weapon:', error)
-    console.error('  Error details:', error.message)
     throw error
   }
 }
 
 /**
- * 购买市场上的武器 - 买家自己签名并支付
- * @param {string} escrowedObjectId - 托管武器对象 ID
- * @param {number} price - 价格（LING）
- * @param {string} buyerAddress - 买家地址
- * @returns {Promise<object>} 交易结果
+ * Buy weapon from market - Buyer signs and pays themselves
+ * @param {string} escrowedObjectId - Escrowed weapon object ID
+ * @param {number} price - Price (LING)
+ * @param {string} buyerAddress - Buyer address
+ * @returns {Promise<object>} Transaction result
  */
 export async function buyWeaponFromMarket(escrowedObjectId, price, buyerAddress) {
   try {
-    console.log('💰 Buying weapon from marketplace...')
-    console.log('  Escrowed Object ID:', escrowedObjectId)
-    console.log('  Price:', price, 'LING')
-    console.log('📝 You will need to sign this transaction and pay', price, 'LING')
-    
-    // 获取钱包
+    // Get wallet
     const suiWallet = window.suiWallet
     if (!suiWallet) {
       throw new Error('Wallet not connected')
     }
 
-    // 获取买家的 LingStone coin 对象
+    // Get buyer's LingStone coin objects
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
     
     const response = await fetch(`${BACKEND_URL}/api/lingstone/coins/${buyerAddress}`)
@@ -619,35 +535,25 @@ export async function buyWeaponFromMarket(escrowedObjectId, price, buyerAddress)
       throw new Error('No LingStone coins found')
     }
     
-    // 将价格转换为最小单位
+    // Convert price to smallest unit
     const priceInSmallestUnit = price * 1_000_000_000
     
-    // 找到足够余额的 coin
+    // Find coin with sufficient balance
     let selectedCoin = null
     let selectedCoinBalance = 0
     
-    console.log('💎 Available LingStone coins:')
-    coinsData.coins.forEach((coin, index) => {
-      const coinBalance = coin.balance / 1_000_000_000
-      console.log(`  Coin ${index + 1}: ${coin.coinObjectId}`)
-      console.log(`    Balance: ${coinBalance} LING (${coin.balance} raw)`)
-      console.log(`    Type: ${coin.coinType || 'unknown'}`)
-    })
-    
-    // 过滤出正确版本的 LingStone（匹配当前 PACKAGE_ID）
+    // Filter out correct version LingStone (matching current PACKAGE_ID)
     const correctVersionCoins = coinsData.coins.filter(coin => {
-      // 如果后端返回了 coinType，检查是否匹配当前 PACKAGE_ID
+      // If backend returns coinType, check if it matches current PACKAGE_ID
       if (coin.coinType) {
         return coin.coinType === `${PACKAGE_ID}::lingstone_coin::LINGSTONE_COIN`
       }
-      // 如果没有 coinType，假设是正确版本（向后兼容）
+      // If no coinType, assume correct version (backward compatibility)
       return true
     })
     
-    console.log(`💎 Found ${correctVersionCoins.length} coin(s) with correct version (${PACKAGE_ID})`)
-    
     if (correctVersionCoins.length === 0) {
-      throw new Error(`❌ LingStone 版本不匹配！\n\n你的 LingStone 代币是旧版本的。\n市场只接受当前版本 (${PACKAGE_ID}) 的 LingStone。\n\n请点击"领取 LingStone"按钮获取新版本的代币。`)
+      throw new Error(`LingStone version mismatch!\n\nYour LingStone tokens are from an old version.\nThe market only accepts current version (${PACKAGE_ID}) LingStone.\n\nPlease click the "Request LingStone" button to get new version tokens.`)
     }
     
     for (const coin of correctVersionCoins) {
@@ -663,23 +569,14 @@ export async function buyWeaponFromMarket(escrowedObjectId, price, buyerAddress)
       throw new Error(`Insufficient LingStone balance. Need ${price} LING, but total balance is ${totalBalance} LING`)
     }
     
-    console.log('💎 Selected coin:', selectedCoin)
-    console.log(`  Balance: ${selectedCoinBalance / 1_000_000_000} LING (${selectedCoinBalance} raw)`)
-    console.log(`  Required: ${price} LING (${priceInSmallestUnit} raw)`)
-    
-    // 创建交易
+    // Create transaction
     const tx = new Transaction()
     
-    // 设置 gas budget
+    // Set gas budget
     tx.setGasBudget(30000000) // 0.03 SUI/OCT
     
-    console.log('💎 Using LingStone coin:', selectedCoin)
-    console.log('  Balance:', selectedCoinBalance / 1_000_000_000, 'LING')
-    console.log('  Required:', price, 'LING')
-    console.log('💰 Calling buy_weapon (contract will handle change)...')
-    
-    // 直接传递整个 coin 给 buy_weapon，合约会处理找零
-    // 注意：必须使用正确的泛型类型参数
+    // Pass entire coin to buy_weapon, contract will handle change
+    // Note: Must use correct generic type parameter
     tx.moveCall({
       target: `${PACKAGE_ID}::marketplace::buy_weapon`,
       typeArguments: [],
@@ -690,10 +587,7 @@ export async function buyWeaponFromMarket(escrowedObjectId, price, buyerAddress)
       ],
     })
     
-    console.log('💰 Signing and executing buy transaction...')
-    console.log('  Target:', `${PACKAGE_ID}::marketplace::buy_weapon`)
-    
-    // 买家签名并执行交易
+    // Buyer signs and executes transaction
     const result = await suiWallet.signAndExecuteTransaction({
       transaction: tx,
       options: {
@@ -703,22 +597,15 @@ export async function buyWeaponFromMarket(escrowedObjectId, price, buyerAddress)
       },
     })
     
-    console.log('✅ Weapon purchased successfully!')
-    console.log('  Digest:', result.digest)
-    
     return result
   } catch (error) {
-    console.error('❌ Error buying weapon:', error)
-    console.error('  Error details:', error.message)
-    console.error('  Full error:', error)
-    
-    // 提供更友好的错误信息
+    // Provide more friendly error messages
     if (error.message && error.message.includes('Insufficient')) {
-      throw new Error(`余额不足。请确保你有足够的 LingStone (需要 ${price} LING) 和 OCT 代币支付 gas 费用。`)
+      throw new Error(`Insufficient balance. Please ensure you have enough LingStone (need ${price} LING) and OCT tokens to pay gas fees.`)
     } else if (error.message && error.message.includes('TypeMismatch')) {
-      throw new Error(`LingStone 版本不匹配！\n\n你的 LingStone 代币可能是旧版本的。\n市场只接受当前版本的 LingStone。\n\n请点击"领取 LingStone"按钮获取新版本的代币。`)
+      throw new Error(`LingStone version mismatch!\n\nYour LingStone tokens may be from an old version.\nThe market only accepts current version LingStone.\n\nPlease click the "Request LingStone" button to get new version tokens.`)
     } else if (error.message && error.message.includes('dry run')) {
-      throw new Error(`交易验证失败。可能原因：\n1. LingStone 版本不匹配（需要新版本）\n2. LingStone 余额不足\n3. 武器已被售出\n4. Gas 代币不足\n\n原始错误: ${error.message}`)
+      throw new Error(`Transaction validation failed. Possible reasons:\n1. LingStone version mismatch (need new version)\n2. Insufficient LingStone balance\n3. Weapon already sold\n4. Insufficient gas tokens\n\nOriginal error: ${error.message}`)
     }
     
     throw error
@@ -726,29 +613,25 @@ export async function buyWeaponFromMarket(escrowedObjectId, price, buyerAddress)
 }
 
 /**
- * 取消市场挂单 - 卖家自己签名
- * @param {string} escrowedObjectId - 托管武器对象 ID
- * @returns {Promise<object>} 交易结果
+ * Cancel market listing - Seller signs themselves
+ * @param {string} escrowedObjectId - Escrowed weapon object ID
+ * @returns {Promise<object>} Transaction result
  */
 export async function cancelMarketListing(escrowedObjectId) {
   try {
-    console.log('❌ Canceling marketplace listing...')
-    console.log('  Escrowed Object ID:', escrowedObjectId)
-    console.log('📝 You will need to sign this transaction')
-    
-    // 获取钱包
+    // Get wallet
     const suiWallet = window.suiWallet
     if (!suiWallet) {
       throw new Error('Wallet not connected')
     }
 
-    // 创建交易
+    // Create transaction
     const tx = new Transaction()
     
-    // 设置 gas budget
+    // Set gas budget
     tx.setGasBudget(20000000) // 0.02 SUI/OCT
     
-    // 调用 cancel_listing 函数
+    // Call cancel_listing function
     tx.moveCall({
       target: `${PACKAGE_ID}::marketplace::cancel_listing`,
       arguments: [
@@ -757,10 +640,7 @@ export async function cancelMarketListing(escrowedObjectId) {
       ],
     })
     
-    console.log('❌ Signing and executing cancel transaction...')
-    console.log('  Target:', `${PACKAGE_ID}::marketplace::cancel_listing`)
-    
-    // 卖家签名并执行交易
+    // Seller signs and executes transaction
     const result = await suiWallet.signAndExecuteTransaction({
       transaction: tx,
       options: {
@@ -770,20 +650,15 @@ export async function cancelMarketListing(escrowedObjectId) {
       },
     })
     
-    console.log('✅ Listing canceled successfully!')
-    console.log('  Digest:', result.digest)
-    
     return result
   } catch (error) {
-    console.error('❌ Error canceling listing:', error)
-    console.error('  Error details:', error.message)
     throw error
   }
 }
 
 /**
- * 获取所有市场挂单
- * @returns {Promise<Array>} 挂单列表
+ * Get all marketplace listings
+ * @returns {Promise<Array>} Listing list
  */
 export async function getAllMarketplaceListings() {
   try {
@@ -797,18 +672,16 @@ export async function getAllMarketplaceListings() {
 
     const data = await response.json()
     
-    console.log(`✅ Found ${data.count} listing(s)`)
     return data.listings || []
   } catch (error) {
-    console.error('❌ Error getting marketplace listings:', error)
     throw error
   }
 }
 
 /**
- * 获取单个挂单详情
- * @param {string} weaponId - 武器 ID
- * @returns {Promise<object|null>} 挂单详情或 null
+ * Get single listing details
+ * @param {string} weaponId - Weapon ID
+ * @returns {Promise<object|null>} Listing details or null
  */
 export async function getMarketplaceListing(weaponId) {
   try {
@@ -825,10 +698,8 @@ export async function getMarketplaceListing(weaponId) {
 
     const data = await response.json()
     
-    console.log(`✅ Listing found`)
     return data.listing
   } catch (error) {
-    console.error('❌ Error getting marketplace listing:', error)
     throw error
   }
 }

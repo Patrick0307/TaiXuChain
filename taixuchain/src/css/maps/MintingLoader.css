@@ -21,7 +21,7 @@
   to { opacity: 1; }
 }
 
-/* 马赛克背景效果 */
+/* Mosaic background effect */
 .minting-bg-mosaic {
   position: absolute;
   top: 0;
@@ -69,7 +69,7 @@
   }
 }
 
-/* 宝箱图标 */
+/* Treasure chest icon */
 .minting-treasure-icon {
   position: relative;
   width: 120px;
@@ -108,7 +108,7 @@
   }
 }
 
-/* 旋转光环 */
+/* Rotating ring */
 .minting-ring {
   position: absolute;
   top: 50%;
@@ -157,7 +157,7 @@
   }
 }
 
-/* 加载文字 */
+/* Loading text */
 .minting-text {
   position: absolute;
   bottom: -80px;
@@ -231,7 +231,7 @@
   }
 }
 
-/* 粒子效果 */
+/* Particle effects */
 .minting-particle {
   position: absolute;
   top: 50%;

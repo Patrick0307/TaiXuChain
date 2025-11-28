@@ -1,99 +1,99 @@
-# 测试指南
+# Test Guide
 
-## ✅ 已配置完成
+## ✅ Configuration Complete
 
-所有配置已经完成，可以直接测试！
+All configurations are complete, ready to test!
 
-### 配置信息
+### Configuration Info
 - **Package ID**: `0x2065f3f546d076e2a67de7900e471601e4fda71d34749143b3aa7fdf0fbcf9d5`
 - **Player Registry ID**: `0x1586d814c0cd790cf281073d8a2de6f8cf398001866b2c717154f4c5a18572d9`
-- **网络**: OneChain Testnet (`https://rpc-testnet.onelabs.cc:443`)
+- **Network**: OneChain Testnet (`https://rpc-testnet.onelabs.cc:443`)
 
-## 🚀 启动测试
+## 🚀 Start Testing
 
 ```bash
 cd taixuchain
 npm start
 ```
 
-## 📝 测试流程
+## 📝 Test Flow
 
-### 1. 连接钱包
-- 确保安装了 OneChain 钱包扩展
-- 切换到 Testnet 网络
-- 点击 "Connect OneChain Wallet"
+### 1. Connect Wallet
+- Ensure OneChain wallet extension is installed
+- Switch to Testnet network
+- Click "Connect OneChain Wallet"
 
-### 2. 选择职业
-- 选择 Mage（术士）、Warrior（武者）或 Archer（射手）
+### 2. Select Class
+- Choose Mage, Warrior, or Archer
 
-### 3. 自定义角色
-- 调整发型、脸型、身体颜色等
+### 3. Customize Character
+- Adjust hairstyle, face shape, body color, etc.
 
-### 4. 角色命名 ⭐ 新功能
-- 输入角色名称（3-20个字符）
-- 点击 "注册并开始冒险"
-- **这一步会调用区块链合约创建 SBT**
-- 等待交易确认（可能需要几秒钟）
+### 4. Name Character ⭐ New Feature
+- Enter character name (3-20 characters)
+- Click "Register and Start Adventure"
+- **This step calls blockchain contract to create SBT**
+- Wait for transaction confirmation (may take a few seconds)
 
-### 5. 选择地图 ⭐ 新功能
-- 注册成功后自动进入地图选择界面
-- 三个地图选项：
-  - 🌲 迷雾森林（简单）
-  - ⛰️ 雪峰山脉（中等）
-  - 🏜️ 炎热沙漠（困难）
-- 点击地图卡片选择，然后点击"进入地图"
+### 5. Select Map ⭐ New Feature
+- After successful registration, automatically enter map selection interface
+- Three map options:
+  - 🌲 Misty Forest (Easy)
+  - ⛰️ Snow Peak Mountains (Medium)
+  - 🏜️ Hot Desert (Hard)
+- Click map card to select, then click "Enter Map"
 
-### 6. 进入游戏
-- 显示角色信息和区块链注册信息
-- 显示 Player Object ID 和交易哈希
+### 6. Enter Game
+- Display character info and blockchain registration info
+- Display Player Object ID and transaction hash
 
-## 🔍 验证区块链注册
+## 🔍 Verify Blockchain Registration
 
-### 在浏览器中查看
-访问 OneChain 浏览器查看你的交易：
+### View in Browser
+Visit OneChain explorer to view your transaction:
 ```
-https://explorer.onelabs.cc/txblock/[你的交易哈希]?network=testnet
+https://explorer.onelabs.cc/txblock/[your-transaction-hash]?network=testnet
 ```
 
-### 在控制台查看
-打开浏览器开发者工具（F12），查看控制台输出：
-- "正在注册角色到区块链..."
-- "注册成功！" + 交易结果
+### View in Console
+Open browser developer tools (F12), check console output:
+- "Registering character to blockchain..."
+- "Registration successful!" + transaction result
 - Player Object ID
 
-## 🐛 常见问题
+## 🐛 Common Issues
 
-### 1. "请先连接 Sui 钱包"
-- 确保在第一步已经连接了 OneChain 钱包
-- 刷新页面重新连接
+### 1. "Please connect Sui wallet first"
+- Ensure OneChain wallet is connected in step 1
+- Refresh page and reconnect
 
-### 2. 交易失败
-- 检查钱包是否有足够的测试币
-- 确认钱包在 Testnet 网络
-- 查看控制台错误信息
+### 2. Transaction Failed
+- Check if wallet has enough test tokens
+- Confirm wallet is on Testnet network
+- Check console for error messages
 
-### 3. 注册按钮一直显示"注册中..."
-- 检查网络连接
-- 查看控制台是否有错误
-- 可能需要在钱包中确认交易
+### 3. Register button keeps showing "Registering..."
+- Check network connection
+- Check console for errors
+- May need to confirm transaction in wallet
 
-### 4. 地图选择界面没有出现
-- 确保角色注册成功
-- 查看控制台是否有错误信息
+### 4. Map selection interface doesn't appear
+- Ensure character registration succeeded
+- Check console for error messages
 
-## 📊 预期结果
+## 📊 Expected Results
 
-成功注册后，你应该看到：
-1. ✅ 角色已注册到区块链
-2. Player ID: 0x... (一个长的十六进制地址)
-3. 交易哈希: 一个交易 ID
+After successful registration, you should see:
+1. ✅ Character registered to blockchain
+2. Player ID: 0x... (a long hexadecimal address)
+3. Transaction hash: a transaction ID
 
-这些信息证明你的角色已经成功创建为 SBT 并存储在区块链上！
+This information proves your character has been successfully created as an SBT and stored on the blockchain!
 
-## 🎮 下一步
+## 🎮 Next Steps
 
-地图选择目前只是 UI，还没有实际的游戏逻辑。后续可以：
-- 实现地图场景渲染
-- 添加战斗系统
-- 实现经验值和升级
-- 添加武器系统集成
+Map selection is currently UI only, no actual game logic yet. Future plans:
+- Implement map scene rendering
+- Add combat system
+- Implement experience and leveling
+- Add weapon system integration

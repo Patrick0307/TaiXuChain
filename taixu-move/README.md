@@ -1,120 +1,120 @@
 # TaiXu Move Contracts
 
-太虚世界的智能合约项目，基于 Sui Move 开发。
+Smart contract project for TaiXu World, developed with Sui Move.
 
-## 项目结构
+## Project Structure
 
 ```
 taixu-move/
-├── sources/           # 智能合约源代码
-│   ├── lingstone.move      # 灵石代币合约
-│   ├── player.move         # 玩家系统合约
-│   ├── weapon.move         # 武器系统合约
-│   └── marketplace.move    # 市场合约
-├── scripts/           # 部署和测试脚本
-├── tests/            # 测试脚本
-├── Move.toml         # Move 项目配置
-└── .env.example      # 环境变量示例
+├── sources/           # Smart contract source code
+│   ├── lingstone.move      # LingStone token contract
+│   ├── player.move         # Player system contract
+│   ├── weapon.move         # Weapon system contract
+│   └── marketplace.move    # Marketplace contract
+├── scripts/           # Deployment and test scripts
+├── tests/            # Test scripts
+├── Move.toml         # Move project configuration
+└── .env.example      # Environment variables example
 
-# 以下目录包含敏感信息，不会提交到 Git
-├── deployments/      # 部署记录（私有）
-├── docs/            # 详细文档（私有）
-└── .env             # 环境变量（私有）
+# Following directories contain sensitive info, not committed to Git
+├── deployments/      # Deployment records (private)
+├── docs/            # Detailed documentation (private)
+└── .env             # Environment variables (private)
 ```
 
-## 合约模块
+## Contract Modules
 
-### 1. LingStone Token (灵石代币)
-- 游戏内的主要代币
-- 符号: LING
-- 小数位: 9
-- 用于市场交易和游戏内经济
+### 1. LingStone Token
+- Primary in-game token
+- Symbol: LING
+- Decimals: 9
+- Used for marketplace trading and in-game economy
 
-### 2. Player System (玩家系统)
-- 玩家角色 NFT
-- 支持三种职业：术士、武者、射手
-- 等级和经验系统
+### 2. Player System
+- Player character NFT
+- Supports three classes: Mage, Warrior, Archer
+- Level and experience system
 
-### 3. Weapon System (武器系统)
-- 武器 NFT
-- 三种武器类型：弓箭、剑、灵珠
-- 三种稀有度：凡品、灵品、玄品
-- 升级和强化系统
+### 3. Weapon System
+- Weapon NFT
+- Three weapon types: Bow, Sword, Spirit Orb
+- Three rarities: Common, Rare, Legendary
+- Upgrade and enhancement system
 
-### 4. Marketplace (市场)
-- 武器交易市场
-- 使用 LING 代币进行交易
-- 支持上架、购买、取消挂单
+### 4. Marketplace
+- Weapon trading marketplace
+- Uses LING token for transactions
+- Supports listing, buying, and canceling orders
 
-## 快速开始
+## Quick Start
 
-### 1. 安装依赖
+### 1. Install Dependencies
 
 ```bash
-# 安装 Sui CLI
+# Install Sui CLI
 cargo install --locked --git https://github.com/MystenLabs/sui.git --branch testnet sui
 ```
 
-### 2. 配置环境
+### 2. Configure Environment
 
 ```bash
-# 复制环境变量示例
+# Copy environment variables example
 cp .env.example .env
 
-# 编辑 .env 文件，填入你的私钥
+# Edit .env file and add your private key
 ```
 
-### 3. 构建合约
+### 3. Build Contracts
 
 ```bash
 sui move build
 ```
 
-### 4. 部署合约
+### 4. Deploy Contracts
 
 ```bash
-# 使用部署脚本
+# Use deployment script
 .\scripts\deploy-all.ps1
 ```
 
-## 网络配置
+## Network Configuration
 
-- **测试网**: OneChain Testnet
+- **Testnet**: OneChain Testnet
 - **RPC**: https://rpc-testnet.onelabs.cc:443
-- **水龙头**: https://faucet-testnet.onelabs.cc/
+- **Faucet**: https://faucet-testnet.onelabs.cc/
 
-## 开发指南
+## Development Guide
 
-### 添加新功能
+### Adding New Features
 
-1. 在 `sources/` 目录创建新的 .move 文件
-2. 在 `Move.toml` 中添加必要的依赖
-3. 运行 `sui move build` 测试编译
-4. 编写测试脚本
-5. 部署到测试网
+1. Create new .move file in `sources/` directory
+2. Add necessary dependencies in `Move.toml`
+3. Run `sui move build` to test compilation
+4. Write test scripts
+5. Deploy to testnet
 
-### 测试
+### Testing
 
 ```bash
-# 运行测试脚本
+# Run test scripts
 .\tests\test-weapon.ps1
 ```
 
-## 安全注意事项
+## Security Notes
 
-⚠️ **重要**: 以下文件包含敏感信息，请勿提交到公开仓库：
+⚠️ **Important**: Following files contain sensitive information, do not commit to public repository:
 
-- `.env` - 包含私钥
-- `deployments/` - 包含部署地址和 ID
-- `docs/` - 包含详细的部署信息
+- `.env` - Contains private keys
+- `deployments/` - Contains deployment addresses and IDs
+- `docs/` - Contains detailed deployment information
 
-这些文件已在 `.gitignore` 中配置。
+These files are configured in `.gitignore`.
 
-## 许可证
+## License
 
 MIT License
 
-## 联系方式
+## Contact
 
-- 项目: TaiXu Chain
-- 游戏: 太虚世界
+- Project: TaiXu Chain
+- Game: TaiXu World

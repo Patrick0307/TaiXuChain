@@ -379,7 +379,7 @@
   }
 }
 
-/* 滚动条样式 */
+/* Scrollbar styles */
 .tutorial-content::-webkit-scrollbar {
   width: 8px;
 }
@@ -399,7 +399,7 @@
   background: rgba(212, 175, 55, 0.6);
 }
 
-/* 手机端隐藏滚动条但保持功能 */
+/* Hide scrollbar on mobile but keep functionality */
 @media (max-width: 768px) {
   .tutorial-content::-webkit-scrollbar {
     width: 4px;
@@ -411,7 +411,7 @@
   }
 }
 
-/* 确认关闭对话框 */
+/* Confirm close dialog */
 .tutorial-confirm-overlay {
   position: fixed;
   top: 0;
@@ -539,7 +539,7 @@
     0 6px 0 #0a0a08;
 }
 
-/* 响应式设计 */
+/* Responsive design */
 @media (max-width: 1024px) {
   .tutorial-modal {
     max-width: 650px;
@@ -838,7 +838,7 @@
   }
 }
 
-/* 触摸设备优化 */
+/* Touch device optimization */
 @media (hover: none) and (pointer: coarse) {
   .tutorial-btn,
   .tutorial-link,
@@ -859,7 +859,7 @@
   }
 }
 
-/* 防止手机端文字选择 */
+/* Prevent text selection on mobile */
 .tutorial-header h2,
 .tutorial-progress,
 .tutorial-btn,
@@ -872,7 +872,7 @@
   user-select: none;
 }
 
-/* 确保内容可选择 */
+/* Ensure content is selectable */
 .tutorial-content p,
 .tutorial-content h3 {
   -webkit-user-select: text;
@@ -881,7 +881,7 @@
   user-select: text;
 }
 
-/* 横屏模式优化 */
+/* Landscape mode optimization */
 @media (max-height: 500px) and (orientation: landscape) {
   .tutorial-modal {
     max-height: 95vh;
@@ -923,7 +923,7 @@
   }
 }
 
-/* 超小屏幕优化 */
+/* Extra small screen optimization */
 @media (max-width: 320px) {
   .tutorial-modal {
     padding: 48px 12px 20px 12px;

@@ -1,8 +1,8 @@
-/* 黑金马赛克主题 - 地图选择 - 华丽版 */
+/* Black & Gold Mosaic Theme - Map Selection - Deluxe Version */
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700;900&display=swap');
 
-/* ========== 主容器 ========== */
+/* ========== Main container ========== */
 .map-selection-new {
   position: relative;
   width: 100%;
@@ -17,7 +17,7 @@
   font-family: 'Noto Sans SC', sans-serif;
 }
 
-/* 隐藏滚动条但保留滚动功能 */
+/* Hide scrollbar but keep scroll functionality */
 .map-selection-new::-webkit-scrollbar {
   display: none;
 }
@@ -27,7 +27,7 @@
   scrollbar-width: none;
 }
 
-/* ========== 马赛克背景 ========== */
+/* ========== Mosaic background ========== */
 .mosaic-bg {
   position: fixed;
   top: 0;
@@ -66,7 +66,7 @@
   pointer-events: none;
 }
 
-/* ========== 魔法圆环效果 ========== */
+/* ========== Magic circle effect ========== */
 .magic-circle {
   position: fixed;
   top: 50%;
@@ -114,7 +114,7 @@
   }
 }
 
-/* ========== 标题区域 ========== */
+/* ========== Title area ========== */
 .title-section {
   position: relative;
   z-index: 10;
@@ -209,7 +209,7 @@
   }
 }
 
-/* ========== 左侧栏 ========== */
+/* ========== Left sidebar ========== */
 .left-sidebar {
   position: relative;
   z-index: 10;
@@ -219,7 +219,7 @@
   grid-row: 2 / 3;
 }
 
-/* ========== 角色卡片 ========== */
+/* ========== Character card ========== */
 .character-card {
   position: relative;
   z-index: 10;
@@ -320,7 +320,7 @@
   letter-spacing: 0.5px;
 }
 
-/* ========== 区域标签 ========== */
+/* ========== Section label ========== */
 .section-label {
   font-size: 0.6rem;
   font-weight: 700;
@@ -334,7 +334,7 @@
   font-family: 'Press Start 2P', cursive;
 }
 
-/* ========== 游戏模式区域 ========== */
+/* ========== Game mode area ========== */
 .mode-section {
   position: relative;
   z-index: 10;
@@ -459,7 +459,7 @@
   100% { background-position: 10px 0; }
 }
 
-/* ========== 右侧主内容区 ========== */
+/* ========== Right main content area ========== */
 .right-content {
   position: relative;
   z-index: 10;
@@ -472,7 +472,7 @@
   padding-right: 5px;
 }
 
-/* 隐藏右侧内容区滚动条 */
+/* Hide right content area scrollbar */
 .right-content::-webkit-scrollbar {
   display: none;
 }
@@ -482,7 +482,7 @@
   scrollbar-width: none;
 }
 
-/* ========== 地图选择区域 ========== */
+/* ========== Map selection area ========== */
 .maps-section {
   position: relative;
   z-index: 10;
@@ -650,7 +650,7 @@
   animation: pixelScroll 1.5s linear infinite;
 }
 
-/* ========== 确认按钮 ========== */
+/* ========== Confirm button ========== */
 .action-section {
   position: relative;
   z-index: 100;
@@ -770,7 +770,7 @@
   }
 }
 
-/* ========== 粒子特效 ========== */
+/* ========== Particle effects ========== */
 .particles-container {
   position: fixed;
   top: 0;
@@ -914,7 +914,7 @@
   }
 }
 
-/* ========== 响应式设计 ========== */
+/* ========== Responsive design ========== */
 @media (min-width: 1400px) {
   .map-selection-new {
     padding: 40px 60px;
@@ -1260,7 +1260,7 @@
   }
 }
 
-/* ========== 锁定地图效果 ========== */
+/* ========== Locked map effect ========== */
 .map-tile.locked {
   cursor: not-allowed;
   opacity: 0.7;
@@ -1353,7 +1353,7 @@
   margin-top: 10px;
 }
 
-/* ========== 地图详情区域 ========== */
+/* ========== Map details area ========== */
 .map-details {
   position: relative;
   background: linear-gradient(135deg, rgba(26, 26, 26, 0.95) 0%, rgba(10, 10, 10, 0.98) 100%);
@@ -1436,14 +1436,14 @@
   padding-left: 5px;
 }
 
-/* ========== 响应式调整 ========== */
+/* ========== Responsive adjustments ========== */
 @media (max-width: 1200px) {
   .details-grid {
     grid-template-columns: 1fr;
   }
 }
 
-/* ========== 手机竖屏 ========== */
+/* ========== Mobile portrait ========== */
 @media (max-width: 480px) {
   .map-selection-new {
     padding: 10px 8px;
@@ -1627,7 +1627,7 @@
   }
 }
 
-/* ========== 小手机 ========== */
+/* ========== Small mobile ========== */
 @media (max-width: 360px) {
   .title-text {
     font-size: 0.7rem;
@@ -1658,7 +1658,7 @@
   }
 }
 
-/* ========== 奖励分栏样式 ========== */
+/* ========== Rewards column styles ========== */
 .rewards-section {
   grid-column: 1 / -1;
 }
@@ -1686,7 +1686,7 @@
   letter-spacing: 0.5px;
 }
 
-/* 手机端奖励分栏 */
+/* Mobile rewards columns */
 @media (max-width: 900px) {
   .rewards-columns {
     grid-template-columns: 1fr;

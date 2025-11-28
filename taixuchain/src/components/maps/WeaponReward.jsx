@@ -6,13 +6,13 @@ function WeaponReward({ weapon, onClose }) {
   const [animationStage, setAnimationStage] = useState('enter') // enter, reveal, exit
 
   useEffect(() => {
-    // 延迟显示，配合开箱动画
+    // Delayed display, coordinated with opening animation
     setTimeout(() => setShowReward(true), 500)
     
-    // 进入动画
+    // Enter animation
     setTimeout(() => setAnimationStage('reveal'), 800)
     
-    // 5秒后自动关闭
+    // Auto close after 5 seconds
     const autoCloseTimer = setTimeout(() => {
       handleClose()
     }, 5000)
@@ -29,13 +29,13 @@ function WeaponReward({ weapon, onClose }) {
 
   if (!showReward) return null
 
-  // 获取武器类型名称
+  // Get weapon type name
   const getWeaponTypeName = (weaponType) => {
     const names = { 1: 'Sword', 2: 'Bow', 3: 'Staff' }
     return names[weaponType] || 'Unknown'
   }
 
-  // 获取品质名称和颜色
+  // Get rarity name and color
   const getRarityInfo = (rarity) => {
     const info = {
       1: { name: 'Common', color: '#FFFFFF', glow: 'rgba(255, 255, 255, 0.5)' },
@@ -45,7 +45,7 @@ function WeaponReward({ weapon, onClose }) {
     return info[rarity] || info[1]
   }
 
-  // 获取武器图片路径
+  // Get weapon image path
   const getWeaponImage = (weaponName, weaponType) => {
     const typeFolder = { 1: 'swords', 2: 'bows', 3: 'staves' }
     const folder = typeFolder[weaponType] || 'swords'
@@ -57,23 +57,23 @@ function WeaponReward({ weapon, onClose }) {
   return (
     <div className={`weapon-reward-overlay ${animationStage}`} onClick={handleClose}>
       <div className="weapon-reward-container" onClick={(e) => e.stopPropagation()}>
-        {/* 背景光效 */}
+        {/* Background glow effect */}
         <div className="reward-bg-glow" style={{ 
           background: `radial-gradient(circle, ${rarityInfo.glow} 0%, transparent 70%)` 
         }}></div>
         
-        {/* 标题 */}
+        {/* Title */}
         <div className="reward-title">
           <div className="reward-title-text">🎉 WEAPON ACQUIRED 🎉</div>
         </div>
         
-        {/* 武器展示区 */}
+        {/* Weapon display area */}
         <div className="weapon-display">
-          {/* 旋转光环 */}
+          {/* Rotating rings */}
           <div className="weapon-ring" style={{ borderColor: rarityInfo.color }}></div>
           <div className="weapon-ring-2" style={{ borderColor: rarityInfo.color }}></div>
           
-          {/* 武器图标 */}
+          {/* Weapon icon */}
           <div className="weapon-icon-container">
             <img 
               src={getWeaponImage(weapon.name, weapon.weaponType)}
@@ -87,7 +87,7 @@ function WeaponReward({ weapon, onClose }) {
             />
           </div>
           
-          {/* 光芒效果 */}
+          {/* Light ray effects */}
           {[...Array(12)].map((_, i) => (
             <div 
               key={`ray-${i}`}
@@ -100,7 +100,7 @@ function WeaponReward({ weapon, onClose }) {
           ))}
         </div>
         
-        {/* 武器信息 */}
+        {/* Weapon information */}
         <div className="weapon-info">
           <div className="weapon-name" style={{ color: rarityInfo.color }}>
             {weapon.name}
@@ -125,17 +125,17 @@ function WeaponReward({ weapon, onClose }) {
           </div>
         </div>
         
-        {/* 提示文字 */}
+        {/* Hint text */}
         <div className="reward-hint">
           Weapon added to inventory
         </div>
         
-        {/* 关闭按钮 */}
+        {/* Close button */}
         <button className="reward-close-btn" onClick={handleClose}>
           CONFIRM
         </button>
         
-        {/* 粒子效果 */}
+        {/* Particle effects */}
         {[...Array(30)].map((_, i) => (
           <div 
             key={`star-${i}`}

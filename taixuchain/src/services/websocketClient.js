@@ -1,4 +1,4 @@
-// WebSocket 客户端服务
+// WebSocket client service
 class WebSocketClient {
   constructor() {
     this.ws = null;
@@ -104,7 +104,7 @@ class WebSocketClient {
     this.listeners.clear();
   }
 
-  // 房间相关方法
+  // Room-related methods
   createRoom(playerId, playerData, mapName, isPublic) {
     this.send('create_room', { playerId, playerData, mapName, isPublic });
   }
@@ -121,7 +121,7 @@ class WebSocketClient {
     this.send('get_public_rooms', {});
   }
 
-  // 游戏同步方法
+  // Game sync methods
   sendPlayerMove(position, direction, isMoving) {
     this.send('player_move', { position, direction, isMoving });
   }
@@ -138,7 +138,7 @@ class WebSocketClient {
     this.send('player_hp_update', { hp });
   }
 
-  // 游戏状态同步（主机专用）
+  // Game state sync (host only)
   syncGameState(gameState) {
     this.send('game_state_sync', { gameState });
   }
@@ -147,22 +147,22 @@ class WebSocketClient {
     this.send('request_game_state', {});
   }
 
-  // 宝箱拾取
+  // Loot box pickup
   pickupLootBox(lootBoxId) {
     this.send('lootbox_pickup', { lootBoxId });
   }
 
-  // 怪物受伤
+  // Monster damaged
   reportMonsterDamage(monsterId, damage, attackerId) {
     this.send('monster_damage', { monsterId, damage, attackerId });
   }
 
-  // 怪物死亡（通知主机生成宝箱）
+  // Monster death (notify host to spawn loot box)
   reportMonsterDeath(monsterId, killerId, killerName, position) {
     this.send('monster_death', { monsterId, killerId, killerName, position });
   }
 
-  // 野怪状态更新（主机广播攻击动作、血条变化等）
+  // Monster state update (host broadcasts attack actions, HP changes, etc.)
   sendMonsterStateUpdate(monsterId, state) {
     this.send('monster_state_update', { monsterId, state });
   }

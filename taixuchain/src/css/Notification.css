@@ -1,7 +1,7 @@
 /* Black & Gold Theme - Notification System */
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 
-/* ========== 通知容器 ========== */
+/* ========== Notification container ========== */
 .notification-container {
   position: fixed;
   top: 80px;
@@ -13,7 +13,7 @@
   pointer-events: none;
 }
 
-/* ========== 通知卡片 ========== */
+/* ========== Notification card ========== */
 .notification {
   position: relative;
   min-width: 320px;
@@ -29,7 +29,7 @@
   pointer-events: auto;
   font-family: 'Orbitron', sans-serif;
   animation: notificationSlideIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  /* 像素风格边框 */
+  /* Pixel-style border */
   clip-path: polygon(
     0 6px, 6px 6px, 6px 0,
     calc(100% - 6px) 0, calc(100% - 6px) 6px, 100% 6px,
@@ -38,7 +38,7 @@
   );
 }
 
-/* 通知光晕效果 */
+/* Notification glow effect */
 .notification::before {
   content: '';
   position: absolute;
@@ -69,7 +69,7 @@
   }
 }
 
-/* 退出动画 */
+/* Exit animation */
 .notification.exit {
   animation: notificationSlideOut 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
 }
@@ -85,8 +85,8 @@
   }
 }
 
-/* ========== 通知类型 ========== */
-/* 成功 */
+/* ========== Notification types ========== */
+/* Success */
 .notification.success {
   border-color: rgba(76, 175, 80, 0.7);
 }
@@ -95,7 +95,7 @@
   background: radial-gradient(ellipse, rgba(76, 175, 80, 0.3) 0%, transparent 70%);
 }
 
-/* 错误 */
+/* Error */
 .notification.error {
   border-color: rgba(244, 67, 54, 0.7);
 }
@@ -104,7 +104,7 @@
   background: radial-gradient(ellipse, rgba(244, 67, 54, 0.3) 0%, transparent 70%);
 }
 
-/* 警告 */
+/* Warning */
 .notification.warning {
   border-color: rgba(255, 152, 0, 0.7);
 }
@@ -113,7 +113,7 @@
   background: radial-gradient(ellipse, rgba(255, 152, 0, 0.3) 0%, transparent 70%);
 }
 
-/* 信息 */
+/* Info */
 .notification.info {
   border-color: rgba(33, 150, 243, 0.7);
 }
@@ -122,14 +122,14 @@
   background: radial-gradient(ellipse, rgba(33, 150, 243, 0.3) 0%, transparent 70%);
 }
 
-/* ========== 通知内容 ========== */
+/* ========== Notification content ========== */
 .notification-content {
   display: flex;
   align-items: flex-start;
   gap: 15px;
 }
 
-/* 图标 */
+/* Icon */
 .notification-icon {
   font-size: 2rem;
   flex-shrink: 0;
@@ -162,7 +162,7 @@
   color: #2196F3;
 }
 
-/* 文本区域 */
+/* Text area */
 .notification-text {
   flex: 1;
   display: flex;
@@ -208,7 +208,7 @@
   margin: 0;
 }
 
-/* 关闭按钮 */
+/* Close button */
 .notification-close {
   position: absolute;
   top: 12px;
@@ -250,7 +250,7 @@
   opacity: 1;
 }
 
-/* 进度条 */
+/* Progress bar */
 .notification-progress {
   position: absolute;
   bottom: 0;
@@ -291,7 +291,7 @@
   box-shadow: 0 0 15px rgba(33, 150, 243, 0.8);
 }
 
-/* ========== 确认对话框 ========== */
+/* ========== Confirm dialog ========== */
 .confirm-dialog-overlay {
   position: fixed;
   top: 0;
@@ -307,7 +307,7 @@
   backdrop-filter: blur(8px);
 }
 
-/* 马赛克背景 */
+/* Mosaic background */
 .confirm-dialog-overlay::before {
   content: '';
   position: absolute;
@@ -349,7 +349,7 @@
     inset 0 0 50px rgba(255, 215, 0, 0.08);
   animation: dialogZoomIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   font-family: 'Orbitron', sans-serif;
-  /* 像素风格边框 */
+  /* Pixel-style border */
   clip-path: polygon(
     0 8px, 8px 8px, 8px 0,
     calc(100% - 8px) 0, calc(100% - 8px) 8px, 100% 8px,
@@ -358,7 +358,7 @@
   );
 }
 
-/* 对话框光晕 */
+/* Dialog glow */
 .confirm-dialog::before {
   content: '';
   position: absolute;
@@ -456,7 +456,7 @@
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   font-family: 'Orbitron', sans-serif;
-  /* 像素风格 */
+  /* Pixel style */
   clip-path: polygon(
     0 4px, 4px 4px, 4px 0,
     calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px,
@@ -479,7 +479,7 @@
   opacity: 0.3;
 }
 
-/* 确认按钮 */
+/* Confirm button */
 .confirm-dialog-btn.confirm {
   background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 215, 0, 0.1) 100%);
   border-color: rgba(255, 215, 0, 0.6);
@@ -495,7 +495,7 @@
   box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
 }
 
-/* 取消按钮 */
+/* Cancel button */
 .confirm-dialog-btn.cancel {
   background: linear-gradient(135deg, rgba(100, 100, 100, 0.2) 0%, rgba(80, 80, 80, 0.1) 100%);
   border-color: rgba(150, 150, 150, 0.5);
@@ -511,7 +511,7 @@
   box-shadow: 0 0 25px rgba(150, 150, 150, 0.4);
 }
 
-/* ========== 响应式设计 ========== */
+/* ========== Responsive design ========== */
 @media (max-width: 768px) {
   .notification-container {
     top: 60px;

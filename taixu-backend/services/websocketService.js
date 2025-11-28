@@ -1,9 +1,9 @@
-// WebSocket 服务
+// WebSocket Service
 import { WebSocketServer } from 'ws';
 import roomService from './roomService.js';
 
-// 修复 WebSocket 常量引用
-const WS_OPEN = 1; // WebSocket.OPEN 的值
+// Fix WebSocket constant reference
+const WS_OPEN = 1; // Value of WebSocket.OPEN
 
 class WebSocketService {
   constructor() {
@@ -137,7 +137,7 @@ class WebSocketService {
       const room = roomService.joinRoom(roomId, playerId, playerData);
       this.clients.set(ws, { playerId, roomId });
 
-      // 通知新玩家房间状态
+      // Notify new player of room status
       ws.send(JSON.stringify({
         type: 'room_joined',
         data: {
@@ -150,7 +150,7 @@ class WebSocketService {
         }
       }));
 
-      // 通知房间内其他玩家
+      // Notify other players in room
       this.broadcastToRoom(roomId, {
         type: 'player_joined',
         data: {
@@ -173,7 +173,7 @@ class WebSocketService {
     const { playerId, roomId } = client;
     roomService.leaveRoom(playerId);
 
-    // 通知房间内其他玩家
+    // Notify other players in room
     this.broadcastToRoom(roomId, {
       type: 'player_left',
       data: { playerId }
@@ -190,7 +190,7 @@ class WebSocketService {
       const { playerId, roomId } = client;
       roomService.leaveRoom(playerId);
 
-      // 通知房间内其他玩家
+      // Notify other players in room
       this.broadcastToRoom(roomId, {
         type: 'player_disconnected',
         data: { playerId }
@@ -219,7 +219,7 @@ class WebSocketService {
 
     roomService.updatePlayerPosition(playerId, position, direction, isMoving);
 
-    // 广播给房间内其他玩家
+    // Broadcast to other players in room
     this.broadcastToRoom(roomId, {
       type: 'player_moved',
       data: {
@@ -238,7 +238,7 @@ class WebSocketService {
 
     const { roomId } = client;
 
-    // 广播攻击事件给房间内所有玩家
+    // Broadcast attack event to all players in room
     this.broadcastToRoom(roomId, {
       type: 'player_attacked',
       data: data
@@ -252,7 +252,7 @@ class WebSocketService {
 
     const { roomId, playerId } = client;
 
-    // 只有主机可以更新怪物状态
+    // Only host can update monster status
     if (!roomService.isHost(roomId, playerId)) {
       console.warn(`⚠️ Non-host ${playerId} tried to update monsters`);
       return;
@@ -261,7 +261,7 @@ class WebSocketService {
     const { monsters } = data;
     roomService.syncGameState(roomId, { monsters });
 
-    // 广播怪物状态给房间内其他玩家
+    // Broadcast monster status to other players in room
     this.broadcastToRoom(roomId, {
       type: 'monsters_updated',
       data: { monsters }
@@ -275,7 +275,7 @@ class WebSocketService {
 
     const { roomId, playerId } = client;
 
-    // 只有主机可以同步游戏状态
+    // Only host can sync game state
     if (!roomService.isHost(roomId, playerId)) {
       console.warn(`⚠️ Non-host ${playerId} tried to sync game state`);
       return;
@@ -284,7 +284,7 @@ class WebSocketService {
     const { gameState } = data;
     roomService.syncGameState(roomId, gameState);
 
-    // 广播游戏状态给房间内所有玩家
+    // Broadcast game state to all players in room
     this.broadcastToRoom(roomId, {
       type: 'game_state_synced',
       data: { gameState }
@@ -320,8 +320,8 @@ class WebSocketService {
     if (result.success) {
       console.log(`📦 Loot box ${lootBoxId} picked by ${playerId}, broadcasting to room ${roomId}`);
       
-      // 广播宝箱被拾取给房间内所有玩家（包括发起者）
-      // 注意：不要排除发起者，因为他也需要收到事件来移除UI
+      // Broadcast loot box pickup to all players in room (including initiator)
+      // Note: Don't exclude initiator, they also need event to remove UI
       this.broadcastToRoom(roomId, {
         type: 'lootbox_picked',
         data: {
@@ -331,9 +331,9 @@ class WebSocketService {
         }
       });
       
-      // 不需要再单独发送给发起者，broadcastToRoom 已经包含了所有人
+      // No need to send separately to initiator, broadcastToRoom already includes everyone
     } else {
-      // 通知玩家拾取失败
+      // Notify player of pickup failure
       ws.send(JSON.stringify({
         type: 'lootbox_pickup_failed',
         data: { 
@@ -352,7 +352,7 @@ class WebSocketService {
     const { roomId } = client;
     const { monsterId, damage, attackerId } = data;
 
-    // 广播怪物受伤事件
+    // Broadcast monster damaged event
     this.broadcastToRoom(roomId, {
       type: 'monster_damaged',
       data: { monsterId, damage, attackerId }
@@ -369,7 +369,7 @@ class WebSocketService {
 
     console.log(`💀 Monster ${monsterId} killed by ${killerName} in room ${roomId}`);
 
-    // 广播怪物死亡事件（通知主机生成宝箱）
+    // Broadcast monster death event (notify host to spawn loot box)
     this.broadcastToRoom(roomId, {
       type: 'monster_died',
       data: { monsterId, killerId, killerName, position }
@@ -386,7 +386,7 @@ class WebSocketService {
 
     roomService.updatePlayerHp(playerId, hp);
 
-    // 广播HP更新给房间内其他玩家
+    // Broadcast HP update to other players in room
     this.broadcastToRoom(roomId, {
       type: 'player_hp_updated',
       data: { playerId, hp }
@@ -400,7 +400,7 @@ class WebSocketService {
 
     const { roomId, playerId } = client;
 
-    // 只有主机可以广播野怪状态
+    // Only host can broadcast monster state
     if (!roomService.isHost(roomId, playerId)) {
       console.warn(`⚠️ Non-host ${playerId} tried to update monster state`);
       return;
@@ -408,14 +408,14 @@ class WebSocketService {
 
     const { monsterId, state } = data;
 
-    // 广播野怪状态给房间内其他玩家
+    // Broadcast monster state to other players in room
     this.broadcastToRoom(roomId, {
       type: 'monster_state_updated',
       data: { monsterId, state }
     }, playerId);
   }
 
-  // 广播消息到房间内所有玩家（可选排除某个玩家）
+  // Broadcast message to all players in room (optionally exclude a player)
   broadcastToRoom(roomId, message, excludePlayerId = null) {
     this.clients.forEach((client, ws) => {
       if (client.roomId === roomId && client.playerId !== excludePlayerId) {

@@ -1,4 +1,4 @@
-/* 市场覆盖层 - 黑金主题 */
+/* Marketplace overlay - Black & Gold theme */
 .marketplace-overlay {
   position: fixed;
   top: 0;
@@ -14,7 +14,7 @@
   backdrop-filter: blur(8px);
 }
 
-/* 马赛克背景效果 */
+/* Mosaic background effect */
 .marketplace-overlay::before {
   content: '';
   position: absolute;
@@ -55,7 +55,7 @@
 /* Black & Gold Theme - Marketplace UI */
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 
-/* 市场容器 - 黑金主题 */
+/* Marketplace container - Black & Gold theme */
 .marketplace-container {
   position: relative;
   background: linear-gradient(135deg, rgba(0, 0, 0, 0.98) 0%, rgba(15, 15, 15, 0.95) 100%);
@@ -72,7 +72,7 @@
     inset 0 0 50px rgba(255, 215, 0, 0.08);
   animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1), borderBreathing 3s ease-in-out infinite;
   font-family: 'Orbitron', sans-serif;
-  /* 像素风格边框 */
+  /* Pixel-style border */
   clip-path: polygon(
     0 8px, 8px 8px, 8px 0,
     calc(100% - 8px) 0, calc(100% - 8px) 8px, 100% 8px,
@@ -103,7 +103,7 @@
   }
 }
 
-/* 光辉扫描效果 */
+/* Glowing scan effect */
 .marketplace-container::after {
   content: '';
   position: absolute;
@@ -145,7 +145,7 @@
   }
 }
 
-/* 容器光晕效果 */
+/* Container glow effect */
 .marketplace-container::before {
   content: '';
   position: absolute;
@@ -176,7 +176,7 @@
   }
 }
 
-/* 市场头部 - 黑金主题 */
+/* Marketplace header - Black & Gold theme */
 .marketplace-header {
   display: flex;
   justify-content: space-between;
@@ -187,7 +187,7 @@
   position: relative;
 }
 
-/* 标题装饰线 */
+/* Title decoration lines */
 .marketplace-header::before,
 .marketplace-header::after {
   content: '';
@@ -264,7 +264,7 @@
     0 4px 12px rgba(255, 71, 87, 0.5),
     inset 0 -2px 4px rgba(0, 0, 0, 0.3),
     inset 0 2px 4px rgba(255, 255, 255, 0.3);
-  /* 像素风格 */
+  /* Pixel style */
   clip-path: polygon(
     0 5px, 5px 5px, 5px 0,
     calc(100% - 5px) 0, calc(100% - 5px) 5px, 100% 5px,
@@ -334,7 +334,7 @@
   }
 }
 
-/* 市场内容区域 */
+/* Marketplace content area */
 .marketplace-content {
   display: flex;
   flex: 1;
@@ -343,7 +343,7 @@
   gap: 20px;
 }
 
-/* 左侧：市场格子区域 */
+/* Left side: Marketplace grid area */
 .marketplace-grid-section {
   flex: 2;
   display: flex;
@@ -353,7 +353,7 @@
   padding-right: 10px;
 }
 
-/* 市场格子 - 黑金主题 */
+/* Marketplace grid - Black & Gold theme */
 .marketplace-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
@@ -370,7 +370,7 @@
   align-content: start;
 }
 
-/* 市场统计 - 黑金主题 */
+/* Marketplace stats - Black & Gold theme */
 .marketplace-stats {
   display: flex;
   justify-content: space-between;
@@ -391,7 +391,7 @@
   flex-shrink: 0;
 }
 
-/* 右侧：武器详情区域 */
+/* Right side: Weapon details area */
 .marketplace-details-section {
   flex: 1;
   background: rgba(0, 0, 0, 0.4);
@@ -401,7 +401,7 @@
   overflow-y: auto;
 }
 
-/* 加载状态 */
+/* Loading state */
 .marketplace-loading {
   display: flex;
   justify-content: center;
@@ -411,7 +411,7 @@
   font-size: 18px;
 }
 
-/* 空状态 */
+/* Empty state */
 .marketplace-empty {
   display: flex;
   flex-direction: column;
@@ -439,7 +439,7 @@
   font-style: italic;
 }
 
-/* 购买按钮 - 黑金主题 */
+/* Buy button - Black & Gold theme */
 .btn-buy {
   width: 100%;
   padding: 14px 20px;
@@ -457,7 +457,7 @@
   box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
   position: relative;
   font-family: 'Orbitron', sans-serif;
-  /* 像素风格 */
+  /* Pixel style */
   clip-path: polygon(
     0 4px, 4px 4px, 4px 0,
     calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px,
@@ -497,7 +497,7 @@
   transform: none;
 }
 
-/* 市场提示 */
+/* Marketplace notice */
 .marketplace-notice {
   margin-top: 15px;
   padding: 12px;
@@ -509,7 +509,7 @@
   line-height: 1.5;
 }
 
-/* 武器详情样式 */
+/* Weapon details styles */
 .weapon-details {
   display: flex;
   flex-direction: column;
@@ -626,7 +626,7 @@
   text-shadow: 0 0 10px rgba(156, 39, 176, 0.6), 0 1px 3px rgba(0, 0, 0, 0.9);
 }
 
-/* 价格显示 */
+/* Price display */
 .stat-value.price {
   color: #ffd700;
   font-weight: bold;
@@ -676,7 +676,7 @@
   font-size: 14px;
 }
 
-/* 动画 */
+/* Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -697,7 +697,7 @@
   }
 }
 
-/* 滚动条样式 */
+/* Scrollbar styles */
 .marketplace-grid-section::-webkit-scrollbar,
 .marketplace-details-section::-webkit-scrollbar {
   width: 8px;
@@ -720,7 +720,7 @@
   background: rgba(255, 215, 0, 0.5);
 }
 
-/* 响应式设计 */
+/* Responsive design */
 @media (max-width: 768px) {
   .marketplace-container {
     width: 95%;

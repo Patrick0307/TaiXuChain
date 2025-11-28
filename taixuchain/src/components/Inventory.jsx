@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import InventorySlot from './InventorySlot'
 import ConfirmDialog from './ConfirmDialog'
 import InputDialog from './InputDialog'
+import { alertManager } from './AlertDialog'
 import { getAllPlayerWeapons, getLingStoneBalance, requestLingStone, burnWeapon, mergeWeapons, listWeaponOnMarket } from '../utils/suiClient'
 import soundManager from '../utils/soundManager'
 import '../css/inventory.css'
@@ -117,24 +118,24 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
       const walletAddress = window.currentWalletAddress || character.owner
       
       if (!walletAddress) {
-        alert('❌ 无法获取钱包地址')
+        alertManager.error('Unable to get wallet address')
         return
       }
 
       console.log('💎 Requesting LingStone...')
       await requestLingStone(walletAddress)
       
-      // 等待交易确认（2秒）
-      console.log('⏳ 等待交易确认...')
+      // Wait for transaction confirmation (2 seconds)
+      console.log('⏳ Waiting for transaction confirmation...')
       await new Promise(resolve => setTimeout(resolve, 2000))
       
-      // 重新加载余额
+      // Reload balance
       await loadLingStoneBalance()
       
-      alert('✅ 成功获得 10000 LingStone!')
+      alertManager.success('Successfully received 10000 LingStone!')
     } catch (error) {
       console.error('Error requesting LingStone:', error)
-      alert(`❌ 请求失败: ${error.message}`)
+      alertManager.error(`Request failed: ${error.message}`)
     } finally {
       setIsRequestingLingStone(false)
     }
@@ -151,44 +152,44 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
     }
   }
 
-  // 处理合成模式下的武器选择
+  // Handle weapon selection in merge mode
   const handleMergeSelection = (weapon) => {
-    // 检查是否是已装备的武器
+    // Check if weapon is equipped
     if (equippedWeapon?.objectId === weapon.objectId) {
-      alert('⚠️ 无法合成已装备的武器！请先卸下装备。')
+      alertManager.warning('Cannot merge equipped weapon! Please unequip first.')
       return
     }
     
     const isSelected = selectedForMerge.some(w => w.objectId === weapon.objectId)
     
     if (isSelected) {
-      // 取消选择
+      // Deselect
       setSelectedForMerge(selectedForMerge.filter(w => w.objectId !== weapon.objectId))
     } else {
-      // 检查是否已选择2把
+      // Check if already selected 2 weapons
       if (selectedForMerge.length >= 2) {
-        alert('⚠️ 最多只能选择2把武器进行合成')
+        alertManager.warning('You can only select 2 weapons for merging')
         return
       }
       
-      // 检查是否与已选择的武器匹配
+      // Check if matches already selected weapon
       if (selectedForMerge.length > 0) {
         const first = selectedForMerge[0]
         if (first.weaponType !== weapon.weaponType) {
-          alert('⚠️ 只能合成相同类型的武器')
+          alertManager.warning('Can only merge weapons of the same type')
           return
         }
         if (first.rarity !== weapon.rarity) {
-          alert('⚠️ 只能合成相同稀有度的武器')
+          alertManager.warning('Can only merge weapons of the same rarity')
           return
         }
         if (first.level !== weapon.level) {
-          alert('⚠️ 只能合成相同等级的武器')
+          alertManager.warning('Can only merge weapons of the same level')
           return
         }
       }
       
-      // 添加到选择列表
+      // Add to selection list
       setSelectedForMerge([...selectedForMerge, weapon])
     }
   }
@@ -219,10 +220,10 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
     setConfirmDialog(prev => ({ ...prev, isOpen: false }))
   }
 
-  // 执行合成
+  // Execute merge
   const handleMergeWeapons = async () => {
     if (selectedForMerge.length !== 2) {
-      alert('⚠️ 请选择2把武器进行合成')
+      alertManager.warning('Please select 2 weapons to merge')
       return
     }
 
@@ -278,26 +279,26 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
         onEquipWeapon(null)
       }
       
-      // 等待交易确认（3秒，因为有两个交易）
-      console.log('⏳ 等待交易确认...')
+      // Wait for transaction confirmation (3 seconds, because there are two transactions)
+      console.log('⏳ Waiting for transaction confirmation...')
       await new Promise(resolve => setTimeout(resolve, 3000))
       
-      // 重新加载武器列表
+      // Reload weapon list
       await loadWeapons()
       
-      // 清除选中状态
+      // Clear selection state
       setSelectedForMerge([])
       setIsMerging(false)
       
-      alert(`✅ 合成成功！获得 ${weapon1.name} (Lv.${weapon1.level + 1})`)
+      alertManager.success(`Merge successful! Received ${weapon1.name} (Lv.${weapon1.level + 1})`)
     } catch (error) {
       console.error('Error merging weapons:', error)
       if (error.message.includes('User rejected') || error.message.includes('rejected')) {
-        alert(`❌ 你取消了交易`)
+        alertManager.error('You cancelled the transaction')
       } else if (error.message.includes('Insufficient') || error.message.includes('insufficient')) {
-        alert(`❌ Gas 不足\n\n请确保你的钱包有足够的 OCT 代币支付 gas 费用。`)
+        alertManager.error('Insufficient gas\n\nPlease make sure your wallet has enough OCT tokens for gas fees.')
       } else {
-        alert(`❌ 合成失败: ${error.message}`)
+        alertManager.error(`Merge failed: ${error.message}`)
       }
     } finally {
       setIsBurningWeapon(false)
@@ -330,24 +331,24 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
     return weapon.weaponType === expectedWeaponType
   }
 
-  // 装备武器
+  // Equip weapon
   const handleEquipWeapon = (weapon) => {
     if (!canEquipWeapon(weapon)) {
-      alert('⚠️ 此武器不适合你的职业！')
+      alertManager.warning('This weapon is not suitable for your class!')
       return
     }
     
-    // 如果已经装备了这个武器，不做任何操作
+    // If already equipped, do nothing
     if (equippedWeapon?.objectId === weapon.objectId) {
-      console.log('ℹ️ 武器已装备:', weapon.name)
+      console.log('ℹ️ Weapon already equipped:', weapon.name)
       return
     }
     
     if (onEquipWeapon) {
       onEquipWeapon(weapon)
-      console.log('✅ 装备武器:', weapon.name)
-      // 显示成功提示
-      alert(`✅ 已装备: ${weapon.name}`)
+      console.log('✅ Equipped weapon:', weapon.name)
+      // Show success message
+      alertManager.success(`Equipped: ${weapon.name}`)
     }
   }
 
@@ -392,7 +393,7 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
     const price = parseFloat(priceInput)
     
     if (isNaN(price) || price <= 0) {
-      alert('❌ Invalid price')
+      alertManager.error('Invalid price')
       return
     }
 
@@ -411,28 +412,28 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
         onEquipWeapon(null)
       }
       
-      // 等待更长时间确保区块链索引器更新（4秒）
-      console.log('⏳ 等待区块链索引更新（4秒）...')
+      // Wait longer to ensure blockchain indexer updates (4 seconds)
+      console.log('⏳ Waiting for blockchain indexer update (4 seconds)...')
       await new Promise(resolve => setTimeout(resolve, 4000))
       
-      // 重新加载武器列表
-      console.log('🔄 刷新背包...')
+      // Reload weapon list
+      console.log('🔄 Refreshing inventory...')
       await loadWeapons()
       
-      // 清除选中状态
+      // Clear selection state
       setSelectedWeapon(null)
       
-      console.log('✅ 上架完成！武器已托管到市场')
-      alert(`✅ 已上架: ${weapon.name}\n价格: ${price} LING\n\n💡 提示：武器已从背包移除并托管到市场`)
+      console.log('✅ Listing complete! Weapon has been escrowed to market')
+      alertManager.success(`Listed: ${weapon.name}\nPrice: ${price} LING\n\nTip: Weapon has been removed from inventory and escrowed to market`)
     } catch (error) {
       console.error('Error listing weapon:', error)
-      // 更友好的错误提示
+      // Friendly error messages
       if (error.message.includes('User rejected') || error.message.includes('rejected')) {
-        alert(`❌ 你取消了交易`)
+        alertManager.error('You cancelled the transaction')
       } else if (error.message.includes('Insufficient') || error.message.includes('insufficient')) {
-        alert(`❌ Gas 不足\n\n请确保你的钱包有足够的 OCT 代币支付 gas 费用。`)
+        alertManager.error('Insufficient gas\n\nPlease make sure your wallet has enough OCT tokens for gas fees.')
       } else {
-        alert(`❌ 上架失败: ${error.message}`)
+        alertManager.error(`Listing failed: ${error.message}`)
       }
     } finally {
       setIsListingWeapon(false)
@@ -471,28 +472,28 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
         onEquipWeapon(null)
       }
       
-      // 等待交易确认（2秒）
-      console.log('⏳ 等待交易确认...')
+      // Wait for transaction confirmation (2 seconds)
+      console.log('⏳ Waiting for transaction confirmation...')
       await new Promise(resolve => setTimeout(resolve, 2000))
       
-      // 重新加载武器列表
+      // Reload weapon list
       await loadWeapons()
       
-      // 清除选中状态
+      // Clear selection state
       setSelectedWeapon(null)
       
-      alert(`✅ 已丢弃: ${weapon.name}`)
+      alertManager.success(`Discarded: ${weapon.name}`)
     } catch (error) {
       console.error('Error burning weapon:', error)
-      // 更友好的错误提示
+      // Friendly error messages
       if (error.message.includes('User rejected') || error.message.includes('rejected')) {
-        alert(`❌ 你取消了交易`)
+        alertManager.error('You cancelled the transaction')
       } else if (error.message.includes('Insufficient') || error.message.includes('insufficient')) {
-        alert(`❌ Gas 不足\n\n请确保你的钱包有足够的 OCT 代币支付 gas 费用。\n你可以从水龙头获取测试代币：\nhttps://faucet-testnet.onelabs.cc/`)
+        alertManager.error('Insufficient gas\n\nPlease make sure your wallet has enough OCT tokens for gas fees.\nYou can get test tokens from faucet:\nhttps://faucet-testnet.onelabs.cc/')
       } else if (error.message.includes('dry run') || error.message.includes('dryrun')) {
-        alert(`❌ 交易模拟失败\n\n可能原因：\n1. Gas 不足（需要 OCT 代币）\n2. 这是旧版本合约的武器，无法删除\n3. 武器对象状态异常\n\n请检查你的钱包余额或尝试删除其他武器`)
+        alertManager.error('Transaction simulation failed\n\nPossible reasons:\n1. Insufficient gas (need OCT tokens)\n2. This is an old version weapon that cannot be deleted\n3. Weapon object state is abnormal\n\nPlease check your wallet balance or try deleting another weapon')
       } else {
-        alert(`❌ 丢弃失败: ${error.message}\n\n如果这是旧版本的武器，可能无法删除`)
+        alertManager.error(`Discard failed: ${error.message}\n\nIf this is an old version weapon, it may not be deletable`)
       }
     } finally {
       setIsBurningWeapon(false)

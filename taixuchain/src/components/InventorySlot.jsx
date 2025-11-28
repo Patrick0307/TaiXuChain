@@ -5,7 +5,7 @@ function InventorySlot({ weapon, isSelected, onClick, isEquipped, canEquip }) {
     <div 
       className={`inventory-slot ${weapon ? 'has-item' : ''} ${isSelected ? 'selected' : ''} ${isEquipped ? 'equipped' : ''} ${weapon && canEquip === false ? 'cannot-equip' : ''}`}
       onClick={onClick}
-      title={weapon && canEquip === false ? '此武器不适合你的职业' : ''}
+      title={weapon && canEquip === false ? 'This weapon is not suitable for your class' : ''}
     >
       {weapon ? (
         <div className="slot-content">
@@ -28,7 +28,7 @@ function InventorySlot({ weapon, isSelected, onClick, isEquipped, canEquip }) {
   )
 }
 
-// 获取武器图片路径
+// Get weapon image path
 function getWeaponImage(weaponName, weaponType) {
   const typeFolder = {
     1: 'swords',

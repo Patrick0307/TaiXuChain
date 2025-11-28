@@ -54,55 +54,6 @@ function WalletTutorial({ onClose, isForced = false, onComplete }) {
       confirmClose: 'Are you sure you want to close the tutorial?',
       confirmYes: 'Yes, Close',
       confirmNo: 'No, Continue',
-      languageSwitch: '中文'
-    },
-    zh: {
-      title: '新手教程',
-      steps: [
-        {
-          title: '步骤 1: 下载钱包插件',
-          content: '首先，您需要下载并安装 OneChain 钱包插件',
-          image: '/tutorial/step1.png',
-          link: 'https://chromewebstore.google.com/detail/onechain/gclmcgmpkgblaglfokkaclneihpnbkli'
-        },
-        {
-          title: '步骤 2: 注册钱包',
-          content: '安装完成后，点击浏览器右上角的插件图标，按照提示注册您的钱包账户',
-          image: '/tutorial/step2.png'
-        },
-        {
-          title: '步骤 3: 打开设置',
-          content: '进入钱包首页后，点击右上角的 Settings（设置）按钮',
-          image: '/tutorial/step3.png'
-        },
-        {
-          title: '步骤 4: 开启开发者模式',
-          content: '在设置页面中，找到并点击 Advanced Settings（高级设置），然后打开 Developer Mode（开发者模式）',
-          image: '/tutorial/step4.png'
-        },
-        {
-          title: '步骤 5: 切换到测试网',
-          content: '返回钱包首页，点击右上角的网络切换按钮（圆圈图标），选择 OneChain Testnet（测试网）',
-          image: '/tutorial/step5.png'
-        },
-        {
-          title: '步骤 6: 获取测试币',
-          content: '在测试网环境下，点击 Faucet（水龙头）按钮，获取初始测试币用于支付 Gas 费用',
-          image: '/tutorial/step6.png'
-        },
-        {
-          title: '步骤 7: 刷新页面',
-          content: '完成以上步骤后，请刷新本页面，然后点击"连接钱包"按钮开始游戏',
-          image: '/tutorial/step7.png'
-        }
-      ],
-      prev: '上一步',
-      next: '下一步',
-      finish: '完成',
-      downloadLink: '前往下载 OneChain 钱包 →',
-      confirmClose: '确定要关闭教程吗？',
-      confirmYes: '是的，关闭',
-      confirmNo: '不，继续学习',
       languageSwitch: 'English'
     }
   }

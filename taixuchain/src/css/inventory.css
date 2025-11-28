@@ -2,7 +2,7 @@
 /* Black & Gold Theme - Inventory UI */
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 
-/* 背包遮罩层 - 黑金主题 */
+/* Inventory overlay - Black & Gold theme */
 .inventory-overlay {
   position: fixed;
   top: 0;
@@ -19,7 +19,7 @@
   overflow: hidden;
 }
 
-/* 呼吸粒子容器 */
+/* Breathing particle container */
 .inventory-overlay::after {
   content: '';
   position: absolute;
@@ -61,7 +61,7 @@
   }
 }
 
-/* 马赛克背景效果 */
+/* Mosaic background effect */
 .inventory-overlay::before {
   content: '';
   position: absolute;
@@ -99,7 +99,7 @@
   }
 }
 
-/* 背包容器 - 黑金主题 */
+/* Inventory container - Black & Gold theme */
 .inventory-container {
   position: relative;
   background: linear-gradient(135deg, rgba(0, 0, 0, 0.98) 0%, rgba(15, 15, 15, 0.95) 100%);
@@ -118,7 +118,7 @@
   animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1), borderBreathing 3s ease-in-out infinite;
   font-family: 'Orbitron', sans-serif;
   z-index: 10;
-  /* 像素风格边框 */
+  /* Pixel-style border */
   clip-path: polygon(
     0 8px, 8px 8px, 8px 0,
     calc(100% - 8px) 0, calc(100% - 8px) 8px, 100% 8px,
@@ -149,7 +149,7 @@
   }
 }
 
-/* 光辉扫描效果 */
+/* Glowing scan effect */
 .inventory-container::after {
   content: '';
   position: absolute;
@@ -191,7 +191,7 @@
   }
 }
 
-/* 容器光晕效果 */
+/* Container glow effect */
 .inventory-container::before {
   content: '';
   position: absolute;
@@ -222,7 +222,7 @@
   }
 }
 
-/* 背包头部 - 黑金主题 */
+/* Inventory header - Black & Gold theme */
 .inventory-header {
   display: flex;
   justify-content: space-between;
@@ -233,7 +233,7 @@
   position: relative;
 }
 
-/* 标题装饰线 */
+/* Title decoration lines */
 .inventory-header::before,
 .inventory-header::after {
   content: '';
@@ -290,7 +290,7 @@
   }
 }
 
-/* LingStone 显示 - 黑金主题 */
+/* LingStone display - Black & Gold theme */
 .lingstone-display {
   display: flex;
   align-items: center;
@@ -305,7 +305,7 @@
   position: relative;
 }
 
-/* 货币图标 */
+/* Currency icon */
 .lingstone-display::before {
   content: '💰';
   font-size: 1.2rem;
@@ -411,7 +411,7 @@
     0 4px 12px rgba(255, 71, 87, 0.5),
     inset 0 -2px 4px rgba(0, 0, 0, 0.3),
     inset 0 2px 4px rgba(255, 255, 255, 0.3);
-  /* 像素风格 */
+  /* Pixel style */
   clip-path: polygon(
     0 4px, 4px 4px, 4px 0,
     calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px,
@@ -481,14 +481,14 @@
   }
 }
 
-/* 背包内容区 */
+/* Inventory content area */
 .inventory-content {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
-/* 左侧：背包格子区域 */
+/* Left side: Inventory grid area */
 .inventory-grid-section {
   flex: 1;
   display: flex;
@@ -496,12 +496,12 @@
   padding: 20px;
   border-right: 2px solid #4a4a6a;
   overflow-y: auto;
-  /* 优化滚动性能 */
+  /* Optimize scroll performance */
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
 }
 
-/* 滚动条样式 */
+/* Scrollbar styles */
 .inventory-grid-section::-webkit-scrollbar {
   width: 8px;
 }
@@ -520,7 +520,7 @@
   background: rgba(255, 255, 255, 0.5);
 }
 
-/* 合成信息面板 */
+/* Merge info panel */
 .merge-info-panel {
   background: rgba(0, 0, 0, 0.3);
   border-radius: 8px;
@@ -529,7 +529,7 @@
   margin-bottom: 10px;
 }
 
-/* 合成模式横幅 */
+/* Merge mode banner */
 .merge-mode-banner {
   background: linear-gradient(135deg, rgba(156, 39, 176, 0.3), rgba(123, 31, 162, 0.3));
   border: 2px solid #9c27b0;
@@ -584,7 +584,7 @@
   box-shadow: 0 4px 12px rgba(76, 175, 80, 0.6);
 }
 
-/* 装备栏 - 黑金主题 */
+/* Equipment bar - Black & Gold theme */
 .equipped-section {
   margin-bottom: 20px;
   padding-bottom: 20px;
@@ -641,12 +641,12 @@
   grid-template-columns: repeat(5, 1fr);
   gap: 12px;
   margin-bottom: 15px;
-  /* 优化大量元素渲染 */
+  /* Optimize rendering of many elements */
   will-change: scroll-position;
   padding: 5px;
 }
 
-/* 背包格子 - 黑金主题 */
+/* Inventory slot - Black & Gold theme */
 .inventory-slot {
   aspect-ratio: 1;
   background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(15, 15, 15, 0.8) 100%);
@@ -661,7 +661,7 @@
   box-shadow: 
     0 4px 12px rgba(0, 0, 0, 0.6),
     inset 0 2px 6px rgba(0, 0, 0, 0.8);
-  /* 像素风格边框 */
+  /* Pixel-style border */
   clip-path: polygon(
     0 4px, 4px 4px, 4px 0,
     calc(100% - 4px) 0, calc(100% - 4px) 4px, 100% 4px,
@@ -670,7 +670,7 @@
   );
 }
 
-/* 格子光晕效果 */
+/* Slot glow effect */
 .inventory-slot::before {
   content: '';
   position: absolute;
@@ -769,7 +769,7 @@
   margin-top: 2px;
 }
 
-/* 装备标记 */
+/* Equipped marker */
 .inventory-slot.equipped::after {
   content: '✓';
   position: absolute;
@@ -789,7 +789,7 @@
   z-index: 10;
 }
 
-/* 不可装备的武器 */
+/* Cannot equip weapon */
 .inventory-slot.cannot-equip {
   opacity: 0.6;
   border-color: #ff6b6b;
@@ -822,7 +822,7 @@
   color: rgba(255, 255, 255, 0.2);
 }
 
-/* 背包统计 */
+/* Inventory stats */
 .inventory-stats {
   padding: 10px;
   background: rgba(0, 0, 0, 0.3);
@@ -836,7 +836,7 @@
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 10px;
-  /* 固定在底部，不随滚动 */
+  /* Fixed at bottom, doesn't scroll */
   position: sticky;
   bottom: 0;
   z-index: 10;
@@ -847,7 +847,7 @@
   font-weight: bold;
 }
 
-/* 右侧：武器详情区域 */
+/* Right side: Weapon details area */
 .inventory-details-section {
   width: 350px;
   padding: 20px;
@@ -886,7 +886,7 @@
   margin: 0;
 }
 
-/* 武器详情 - 黑金主题 */
+/* Weapon details - Black & Gold theme */
 .weapon-details {
   display: flex;
   flex-direction: column;
@@ -896,7 +896,7 @@
   padding-right: 5px;
 }
 
-/* 滚动条样式 */
+/* Scrollbar styles */
 .weapon-details::-webkit-scrollbar {
   width: 6px;
 }
@@ -1062,7 +1062,7 @@
   border: 1px solid rgba(255, 215, 0, 0.2);
 }
 
-/* 描述区域滚动条 */
+/* Description area scrollbar */
 .weapon-description::-webkit-scrollbar {
   width: 4px;
 }
@@ -1266,7 +1266,7 @@
   }
 }
 
-/* 响应式设计 */
+/* Responsive design */
 @media (max-width: 768px) {
   .inventory-container {
     width: 95%;
@@ -1291,7 +1291,7 @@
   }
 }
 
-/* 上架市场按钮 - 黑金主题 */
+/* List to market button - Black & Gold theme */
 .btn-list-market {
   width: 48%;
   padding: 9px 12px;

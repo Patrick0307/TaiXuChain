@@ -24,8 +24,8 @@ function ConfirmDialog({
   tip = '',
   onConfirm,
   onCancel,
-  confirmText = '确定',
-  cancelText = '取消',
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
   type = 'warning'
 }) {
   const [isClosing, setIsClosing] = useState(false)
@@ -56,19 +56,19 @@ function ConfirmDialog({
   return (
     <div className={`confirm-dialog-overlay ${isClosing ? 'closing' : ''}`}>
       <div className={`confirm-dialog-container ${type} ${isClosing ? 'closing' : ''}`}>
-        {/* 装饰角 */}
+        {/* Decorative corners */}
         <div className="dialog-corner top-left"></div>
         <div className="dialog-corner top-right"></div>
         <div className="dialog-corner bottom-left"></div>
         <div className="dialog-corner bottom-right"></div>
         
-        {/* 标题 */}
+        {/* Title */}
         <div className="confirm-dialog-header">
           <span className="dialog-icon">{getTypeIcon()}</span>
           <h3>{title}</h3>
         </div>
 
-        {/* 内容 */}
+        {/* Content */}
         <div className="confirm-dialog-content">
           {message && <p className="dialog-message">{message}</p>}
           
@@ -100,7 +100,7 @@ function ConfirmDialog({
           )}
         </div>
 
-        {/* 按钮 */}
+        {/* Buttons */}
         <div className="confirm-dialog-actions">
           <button 
             className="dialog-btn btn-cancel"

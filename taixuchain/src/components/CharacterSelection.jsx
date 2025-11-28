@@ -41,27 +41,21 @@ function CharacterSelection({ onCharacterSelected, onWalletConnected, shouldShow
     {
       id: 'warrior',
       name: 'Warrior',
-      nameZh: '战士',
       description: 'Master of close combat with unbreakable defense',
-      descriptionZh: '近战大师，拥有坚不可摧的防御',
       stats: { hp: 500, attack: 15, defense: 12, speed: 8 },
       color: '#8b0000'
     },
     {
       id: 'archer',
       name: 'Archer',
-      nameZh: '弓箭手',
       description: 'Swift ranger with deadly precision strikes',
-      descriptionZh: '敏捷游侠，拥有致命的精准打击',
       stats: { hp: 500, attack: 18, defense: 8, speed: 12 },
       color: '#228b22'
     },
     {
       id: 'mage',
       name: 'Mage',
-      nameZh: '法师',
       description: 'Arcane wielder commanding devastating magic',
-      descriptionZh: '奥术使者，掌控毁灭性的魔法',
       stats: { hp: 500, attack: 20, defense: 6, speed: 10 },
       color: '#4b0082'
     }
