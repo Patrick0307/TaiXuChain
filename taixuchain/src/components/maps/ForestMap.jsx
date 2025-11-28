@@ -644,8 +644,19 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
     websocketClient.on('player_joined', (data) => {
       const { player } = data
       if (player.id !== currentPlayerId) {
-        console.log('👤 Player joined:', player.name)
+        console.log('👤 Player joined:', player.name, 'customization:', player.customization)
         setOtherPlayers(prev => new Map(prev).set(player.id, player))
+        
+        // Immediately send our current position to the new player
+        // This ensures they can see us right away without waiting for us to move
+        if (playerPosRef.current) {
+          console.log('📤 Sending my position to new player:', playerPosRef.current)
+          websocketClient.sendPlayerMove(
+            playerPosRef.current,
+            directionRef.current,
+            isMovingRef.current
+          )
+        }
         
         // 如果是主机，同步当前游戏状态给新玩家
         if (isHost) {
@@ -677,7 +688,13 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
         const newMap = new Map(prev)
         const player = newMap.get(playerId)
         if (player) {
+          // Update existing player's position
           newMap.set(playerId, { ...player, position, direction, isMoving })
+        } else {
+          // Player not in our list yet (race condition), add them with position
+          // This can happen if player_moved arrives before player_joined
+          console.log('⚠️ Received move from unknown player, adding:', playerId)
+          newMap.set(playerId, { id: playerId, position, direction, isMoving })
         }
         return newMap
       })
@@ -1374,7 +1391,7 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
     }
   }, [mapData, playerPos, showTeleportEffect])
 
-  // 作弊：loading结束后自动微移一下，强制触发角色渲染
+  // Auto-nudge after loading to force character render + sync position in multiplayer
   useEffect(() => {
     if (isLoading || !mapData || !playerPosRef.current) return
     
@@ -1386,6 +1403,12 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
         playerPosRef.current = nudgedPos
         setPlayerPos(nudgedPos)
         console.log('🎮 Auto-nudge to force character render')
+        
+        // Multiplayer: immediately sync our position so other players can see us
+        if (roomId) {
+          console.log('📤 Syncing initial position to other players:', nudgedPos)
+          websocketClient.sendPlayerMove(nudgedPos, directionRef.current, false)
+        }
       }
     }, 100)
     
@@ -2530,9 +2553,9 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
           <div key={player.id}>
             <MapCharacter 
               character={{
-                ...character,
                 name: player.name || 'Player',
-                id: player.classId || character.id
+                id: player.classId || character.id,
+                customization: player.customization // Use player's own customization for correct appearance
               }}
               screenPosition={otherPlayerScreenPos}
               walkOffset={{ x: 0, y: 0 }}
@@ -2740,29 +2763,50 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
         </div>
       )}
       
-      {/* 房间信息显示 */}
+      {/* Room Info Display - Bottom Right, Black & Gold Theme */}
       {roomId && (
         <div style={{
           position: 'fixed',
-          top: '20px',
+          bottom: '20px',
           right: '20px',
-          background: 'rgba(0, 0, 0, 0.8)',
-          color: 'white',
+          background: 'linear-gradient(135deg, rgba(15, 12, 41, 0.95) 0%, rgba(30, 25, 50, 0.95) 100%)',
+          color: '#ffd700',
           padding: '15px 20px',
-          borderRadius: '10px',
-          border: '2px solid #667eea',
-          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.5)',
+          borderRadius: '12px',
+          border: '2px solid rgba(255, 215, 0, 0.6)',
+          boxShadow: '0 0 20px rgba(255, 215, 0, 0.3), inset 0 0 15px rgba(255, 215, 0, 0.1)',
           zIndex: 100,
-          minWidth: '200px'
+          minWidth: '180px',
+          backdropFilter: 'blur(10px)'
         }}>
-          <div style={{ fontSize: '0.9rem', color: '#aaa', marginBottom: '5px' }}>
-            🏠 多人房间
+          <div style={{ 
+            fontSize: '0.85rem', 
+            color: 'rgba(255, 215, 0, 0.7)', 
+            marginBottom: '8px',
+            textTransform: 'uppercase',
+            letterSpacing: '1px'
+          }}>
+            🏠 Multiplayer Room
           </div>
-          <div style={{ fontSize: '1.2rem', fontWeight: 'bold', letterSpacing: '2px', marginBottom: '10px' }}>
+          <div style={{ 
+            fontSize: '1.3rem', 
+            fontWeight: 'bold', 
+            letterSpacing: '3px', 
+            marginBottom: '10px',
+            color: '#ffd700',
+            textShadow: '0 0 10px rgba(255, 215, 0, 0.5)'
+          }}>
             {roomId}
           </div>
-          <div style={{ fontSize: '0.85rem', color: '#8BC34A' }}>
-            👥 {otherPlayers.size + 1} 名玩家在线
+          <div style={{ 
+            fontSize: '0.9rem', 
+            color: '#ffed4e',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}>
+            <span style={{ filter: 'drop-shadow(0 0 4px rgba(255, 215, 0, 0.6))' }}>👥</span>
+            <span>{otherPlayers.size + 1} Players Online</span>
           </div>
         </div>
       )}

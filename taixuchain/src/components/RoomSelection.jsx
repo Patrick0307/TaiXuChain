@@ -76,7 +76,8 @@ function RoomSelection({ character, onRoomJoined, onBack }) {
       name: character.name,
       classId: character.id,
       hp: character.hp,
-      attack: character.attack
+      attack: character.attack,
+      customization: character.customization // Include character customization for appearance sync
     }
 
     websocketClient.createRoom(playerId, playerData, 'forest', isPublic)
@@ -100,7 +101,8 @@ function RoomSelection({ character, onRoomJoined, onBack }) {
       name: character.name,
       classId: character.id,
       hp: character.hp,
-      attack: character.attack
+      attack: character.attack,
+      customization: character.customization // Include character customization for appearance sync
     }
 
     console.log('🔍 Joining room:', finalRoomId, 'as player:', playerId)
