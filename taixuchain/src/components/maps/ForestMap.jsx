@@ -77,7 +77,7 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
 
   // 播放背景音乐
   useEffect(() => {
-    soundManager.playBGM(0.3)
+    soundManager.playBGM(0.1)
     
     // 组件卸载时停止背景音乐
     return () => {

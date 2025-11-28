@@ -4,7 +4,7 @@ class SoundManager {
     this.sounds = {}
     this.enabled = true
     this.bgm = null // Background music
-    this.bgmVolume = 0.3 // Background music volume
+    this.bgmVolume = 0.1 // Background music volume
   }
 
   // Load sound
@@ -66,7 +66,7 @@ class SoundManager {
   }
 
   // Play background music (loop)
-  playBGM(volume = 0.3) {
+  playBGM(volume = 0.1) {
     if (this.bgm) {
       // If already playing, don't play again
       if (!this.bgm.paused) return
