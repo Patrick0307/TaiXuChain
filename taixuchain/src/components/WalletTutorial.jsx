@@ -1,51 +1,28 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import '../css/WalletTutorial.css'
 
 function WalletTutorial({ onClose, isForced = false, onComplete }) {
   const [currentStep, setCurrentStep] = useState(0)
-  const [language, setLanguage] = useState('en') // 'en' or 'zh'
+  const [language, setLanguage] = useState('en')
   const [showConfirmClose, setShowConfirmClose] = useState(false)
+
+  useEffect(() => {
+    console.log('🎓 WalletTutorial mounted, isForced:', isForced)
+    return () => console.log('🎓 WalletTutorial unmounted')
+  }, [])
 
   const translations = {
     en: {
       title: 'Beginner Tutorial',
       steps: [
-        {
-          title: 'Step 1: Download Wallet Plugin',
-          content: 'First, you need to download and install the OneChain wallet extension',
-          image: '/tutorial/step1.png',
-          link: 'https://chromewebstore.google.com/detail/onechain/gclmcgmpkgblaglfokkaclneihpnbkli'
-        },
-        {
-          title: 'Step 2: Register Wallet',
-          content: 'After installation, click the extension icon in the top right corner of your browser and follow the prompts to register your wallet account',
-          image: '/tutorial/step2.png'
-        },
-        {
-          title: 'Step 3: Open Settings',
-          content: 'After entering the wallet homepage, click the Settings button in the top right corner',
-          image: '/tutorial/step3.png'
-        },
-        {
-          title: 'Step 4: Enable Developer Mode',
-          content: 'In the settings page, find and click Advanced Settings, then turn on Developer Mode',
-          image: '/tutorial/step4.png'
-        },
-        {
-          title: 'Step 5: Switch to Testnet',
-          content: 'Return to the wallet homepage, click the network switch button (circle icon) in the top right corner, and select OneChain Testnet',
-          image: '/tutorial/step5.png'
-        },
-        {
-          title: 'Step 6: Get Test Tokens',
-          content: 'In the testnet environment, click the Faucet button to get initial test tokens for paying gas fees',
-          image: '/tutorial/step6.png'
-        },
-        {
-          title: 'Step 7: Refresh Page',
-          content: 'After completing the above steps, please refresh this page, then click the "Connect Wallet" button to start the game',
-          image: '/tutorial/step7.png'
-        }
+        { title: 'Step 1: Download Wallet Plugin', content: 'First, you need to download and install the OneChain wallet extension', image: '/tutorial/step1.png', link: 'https://chromewebstore.google.com/detail/onechain/gclmcgmpkgblaglfokkaclneihpnbkli' },
+        { title: 'Step 2: Register Wallet', content: 'After installation, click the extension icon in the top right corner of your browser and follow the prompts to register your wallet account', image: '/tutorial/step2.png' },
+        { title: 'Step 3: Open Settings', content: 'After entering the wallet homepage, click the Settings button in the top right corner', image: '/tutorial/step3.png' },
+        { title: 'Step 4: Enable Developer Mode', content: 'In the settings page, find and click Advanced Settings, then turn on Developer Mode', image: '/tutorial/step4.png' },
+        { title: 'Step 5: Switch to Testnet', content: 'Return to the wallet homepage, click the network switch button (circle icon) in the top right corner, and select OneChain Testnet', image: '/tutorial/step5.png' },
+        { title: 'Step 6: Get Test Tokens', content: 'In the testnet environment, click the Faucet button to get initial test tokens for paying gas fees', image: '/tutorial/step6.png' },
+        { title: 'Step 7: Refresh Page', content: 'After completing the above steps, please refresh this page, then click the "Connect Wallet" button to start the game', image: '/tutorial/step7.png' }
       ],
       prev: 'Previous',
       next: 'Next',
@@ -60,19 +37,16 @@ function WalletTutorial({ onClose, isForced = false, onComplete }) {
 
   const t = translations[language]
   const steps = t.steps
+  const currentStepData = steps[currentStep]
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       const nextStep = currentStep + 1
       setCurrentStep(nextStep)
-      
-      // 如果进入最后一步（step 7，索引为 6），标记为已完成（但不关闭）
       if (nextStep === steps.length - 1) {
         localStorage.setItem('taixuchain_tutorial_completed', 'true')
-        console.log('✅ Reached final step - Tutorial marked as completed (will not auto-show next time)')
       }
     } else {
-      // 点击完成按钮时才关闭
       if (isForced && onComplete) {
         onComplete()
       } else {
@@ -82,16 +56,11 @@ function WalletTutorial({ onClose, isForced = false, onComplete }) {
   }
 
   const handlePrev = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1)
-    }
+    if (currentStep > 0) setCurrentStep(currentStep - 1)
   }
 
   const handleCloseClick = () => {
-    // 如果是强制模式，不允许关闭
-    if (isForced) {
-      return
-    }
+    if (isForced) return
     setShowConfirmClose(true)
   }
 
@@ -108,11 +77,9 @@ function WalletTutorial({ onClose, isForced = false, onComplete }) {
     setLanguage(language === 'en' ? 'zh' : 'en')
   }
 
-  const currentStepData = steps[currentStep]
-
-  return (
-    <div className="tutorial-overlay">
-      <div className="tutorial-modal">
+  const tutorialContent = (
+    <div className="tutorial-overlay" style={{ opacity: 1, visibility: 'visible', pointerEvents: 'auto' }}>
+      <div className="tutorial-modal" style={{ opacity: 1, visibility: 'visible', pointerEvents: 'auto' }}>
         <button className="tutorial-language-toggle" onClick={toggleLanguage}>
           🌐 {t.languageSwitch}
         </button>
@@ -203,6 +170,8 @@ function WalletTutorial({ onClose, isForced = false, onComplete }) {
       )}
     </div>
   )
+
+  return createPortal(tutorialContent, document.body)
 }
 
 export default WalletTutorial

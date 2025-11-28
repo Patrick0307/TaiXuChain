@@ -321,11 +321,15 @@ function WalletRegistration({ onRegistrationSuccess }) {
               </button>
               
               <button 
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation() // 阻止事件冒泡
+                  e.preventDefault()
+                  console.log('📖 Tutorial button clicked, setting showTutorial to true')
                   setShowTutorial(true)
                   setIsForcedTutorial(false) // 手动打开的不强制
                 }}
                 className="tutorial-button"
+                type="button"
               >
                 📖 Beginner Tutorial
               </button>
@@ -373,7 +377,10 @@ function WalletRegistration({ onRegistrationSuccess }) {
 
       {showTutorial && (
         <WalletTutorial 
-          onClose={() => setShowTutorial(false)} 
+          onClose={() => {
+            console.log('❌ Tutorial onClose called')
+            setShowTutorial(false)
+          }} 
           isForced={isForcedTutorial}
           onComplete={() => {
             // 完成教程后记录到 localStorage
