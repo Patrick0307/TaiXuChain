@@ -2,222 +2,139 @@
 
 <div align="center">
 
-<!-- Project Badges -->
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.0.0-brightgreen.svg)]()
-[![Status](https://img.shields.io/badge/Status-Active%20Development-yellow.svg)]()
+[![Live Demo](https://img.shields.io/badge/🎮%20Play%20Now-Live%20Demo-FF6B6B?style=for-the-badge)](https://tai-xu-chain.vercel.app)
+[![YouTube](https://img.shields.io/badge/📺%20Demo-YouTube-red?style=for-the-badge)](https://youtube.com/your-video-link)
 
-<!-- Live Demo -->
-[![Live Demo](https://img.shields.io/badge/🎮%20Live%20Demo-Play%20Now-FF6B6B.svg?style=for-the-badge)](https://tai-xu-chain.vercel.app)
+[![OneChain](https://img.shields.io/badge/Network-OneChain%20Testnet-purple)](https://onelabs.cc/)
+[![Sui Move](https://img.shields.io/badge/Smart%20Contract-Sui%20Move-4A90E2)](https://sui.io/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js)](https://nodejs.org/)
+[![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
 
-<!-- Deployment -->
-[![Frontend](https://img.shields.io/badge/Frontend-Vercel-000000.svg?logo=vercel&logoColor=white)](https://tai-xu-chain.vercel.app)
-[![Backend](https://img.shields.io/badge/Backend-Render-46E3B7.svg?logo=render&logoColor=white)](https://render.com)
-[![Uptime](https://img.shields.io/badge/Uptime-99.9%25-brightgreen.svg)]()
+**A Web3 Blockchain RPG with Zero Gas Fee Entry**
 
-<!-- Blockchain & Network -->
-[![OneChain](https://img.shields.io/badge/Network-OneChain%20Testnet-purple.svg)](https://onelabs.cc/)
-[![OCT Token](https://img.shields.io/badge/Token-OCT-gold.svg)]()
-[![OneWallet](https://img.shields.io/badge/Wallet-OneWallet-blueviolet.svg)]()
-[![Sui Move](https://img.shields.io/badge/Smart%20Contract-Sui%20Move-4A90E2.svg)](https://sui.io/)
-
-<!-- Frontend Stack -->
-[![React](https://img.shields.io/badge/React-19.1.1-61DAFB.svg?logo=react&logoColor=white)](https://react.dev/)
-[![Vite](https://img.shields.io/badge/Vite-7.1.7-646CFF.svg?logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Sui SDK](https://img.shields.io/badge/@mysten/sui-1.44.0-4A90E2.svg)](https://sdk.mystenlabs.com/typescript)
-
-<!-- Backend Stack -->
-[![Node.js](https://img.shields.io/badge/Node.js-18+-339933.svg?logo=node.js&logoColor=white)](https://nodejs.org/)
-[![Express](https://img.shields.io/badge/Express-4.18.2-000000.svg?logo=express&logoColor=white)](https://expressjs.com/)
-[![WebSocket](https://img.shields.io/badge/WebSocket-8.18.3-010101.svg?logo=socketdotio&logoColor=white)](https://github.com/websockets/ws)
-
-<!-- Smart Contract -->
-[![Move Edition](https://img.shields.io/badge/Move%20Edition-2024.beta-orange.svg)]()
-[![Sui Framework](https://img.shields.io/badge/Sui%20Framework-Testnet-blue.svg)](https://github.com/MystenLabs/sui)
-
-<!-- Code Quality -->
-[![ESLint](https://img.shields.io/badge/ESLint-9.36.0-4B32C3.svg?logo=eslint&logoColor=white)](https://eslint.org/)
-[![JavaScript](https://img.shields.io/badge/JavaScript-ES2024-F7DF1E.svg?logo=javascript&logoColor=black)]()
-[![CSS3](https://img.shields.io/badge/CSS3-Styled-1572B6.svg?logo=css3&logoColor=white)]()
-
----
-
-**🎮 A Web3 Blockchain RPG Game Built on OneChain Testnet**
-
-*Powered by Sui Move Smart Contracts | Zero Gas Fee Entry with Sponsored Transactions*
-
-[🎮 Play Now](https://tai-xu-chain.vercel.app) • [📖 Documentation](#documentation) • [🎯 Features](#features) • [🔗 Links](#links)
+*Sponsored Transactions • Real-time Multiplayer • NFT Weapons • On-chain Marketplace*
 
 </div>
 
 ---
 
-## 🏷️ Badge Legend
+## ✨ Features
 
-| Category | Badge | Description |
-|----------|-------|-------------|
-| **Live Demo** | ![Live](https://img.shields.io/badge/🎮%20Live%20Demo-Play%20Now-FF6B6B.svg) | Play the game at [tai-xu-chain.vercel.app](https://tai-xu-chain.vercel.app) |
-| **Frontend Host** | ![Vercel](https://img.shields.io/badge/Frontend-Vercel-000000.svg) | Frontend deployed on Vercel |
-| **Backend Host** | ![Render](https://img.shields.io/badge/Backend-Render-46E3B7.svg) | Backend API hosted on Render |
-| **Network** | ![OneChain](https://img.shields.io/badge/Network-OneChain%20Testnet-purple.svg) | Deployed on OneChain Testnet (Sui-compatible) |
-| **Token** | ![OCT](https://img.shields.io/badge/Token-OCT-gold.svg) | Native token for gas fees and transactions |
-| **Wallet** | ![OneWallet](https://img.shields.io/badge/Wallet-OneWallet-blueviolet.svg) | Browser extension wallet for OneChain |
-| **Contract** | ![Sui Move](https://img.shields.io/badge/Smart%20Contract-Sui%20Move-4A90E2.svg) | Smart contracts written in Sui Move language |
-| **Frontend** | ![React](https://img.shields.io/badge/React-19.1.1-61DAFB.svg) | Latest React with concurrent features |
-| **Build** | ![Vite](https://img.shields.io/badge/Vite-7.1.7-646CFF.svg) | Next-gen frontend build tool |
-| **SDK** | ![Sui SDK](https://img.shields.io/badge/@mysten/sui-1.44.0-4A90E2.svg) | Official Sui TypeScript SDK |
-| **Runtime** | ![Node.js](https://img.shields.io/badge/Node.js-18+-339933.svg) | Server-side JavaScript runtime |
-| **Server** | ![Express](https://img.shields.io/badge/Express-4.18.2-000000.svg) | Fast, minimalist web framework |
-| **Realtime** | ![WebSocket](https://img.shields.io/badge/WebSocket-8.18.3-010101.svg) | Real-time multiplayer communication |
+- 🎮 **Three Classes** — Mage, Warrior, Archer with unique stats
+- ⚔️ **NFT Weapons** — Mint, upgrade, merge, and trade weapons on-chain
+- 💎 **LING Token** — In-game currency for marketplace transactions
+- 🌐 **Multiplayer** — Real-time co-op monster hunting via WebSocket
+- 🆓 **Zero Entry Cost** — Sponsored transactions cover gas fees for new players
+- 🏪 **Decentralized Marketplace** — P2P weapon trading with escrow
 
 ---
 
-## 🌐 Deployment & Network
+## 🚀 Quick Start
 
-### Live URLs
+### Play Online
+👉 **[tai-xu-chain.vercel.app](https://tai-xu-chain.vercel.app)**
 
-| Service | URL | Platform |
-|---------|-----|----------|
-| **🎮 Game (Frontend)** | [tai-xu-chain.vercel.app](https://tai-xu-chain.vercel.app) | Vercel |
-| **⚙️ API (Backend)** | Hosted on Render | Render |
+1. Install [OneWallet](https://chromewebstore.google.com/detail/onechain/gclmcgmpkgblaglfokkaclneihpnbkli/) browser extension
+2. Get free OCT from [Faucet](https://faucet-testnet.onelabs.cc/)
+3. Start playing!
 
-### OneChain Testnet
+### Local Development
 
-| Property | Value |
-|----------|-------|
-| **Network Name** | OneChain Testnet |
-| **Native Token** | OCT (OneChain Token) |
-| **RPC Endpoint** | `https://rpc-testnet.onelabs.cc:443` |
-| **Faucet** | [faucet-testnet.onelabs.cc](https://faucet-testnet.onelabs.cc/) |
-| **Explorer** | [explorer.onelabs.cc](https://explorer.onelabs.cc/) |
-| **Wallet** | OneWallet Browser Extension |
-| **Compatibility** | Sui Move Framework |
+```bash
+# Clone
+git clone https://github.com/your-username/taixu-world.git
+cd taixu-world
+
+# Backend
+cd taixu-backend
+npm install
+cp .env.example .env  # Add SPONSOR_PRIVATE_KEY
+npm start
+
+# Frontend (new terminal)
+cd taixuchain
+npm install
+npm start
+```
 
 ---
-
 
 ## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                              TaiXu World Architecture                           │
-└─────────────────────────────────────────────────────────────────────────────────┘
-
-    ┌─────────────┐         ┌─────────────┐         ┌─────────────────────────┐
-    │   Player    │         │  OneWallet  │         │    OneChain Testnet     │
-    │  (Browser)  │◄───────►│  Extension  │◄───────►│      (Blockchain)       │
-    └──────┬──────┘         └─────────────┘         └─────────────────────────┘
-           │                                                     ▲
-           │ HTTPS                                               │
-           ▼                                                     │
-┌──────────────────────────────────────────────────────────────────────────────────┐
-│                           FRONTEND (Vercel)                                      │
-│  ┌────────────────────────────────────────────────────────────────────────────┐  │
-│  │                         taixuchain/ (React 19)                             │  │
-│  ├────────────────────────────────────────────────────────────────────────────┤  │
-│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐   │  │
-│  │  │  Character   │  │     Map      │  │   Weapon     │  │ Marketplace  │   │  │
-│  │  │  Selection   │  │   System     │  │   System     │  │    UI        │   │  │
-│  │  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘   │  │
-│  ├────────────────────────────────────────────────────────────────────────────┤  │
-│  │  ┌──────────────────────────────┐  ┌──────────────────────────────────┐   │  │
-│  │  │      @mysten/sui SDK         │  │       WebSocket Client           │   │  │
-│  │  │   (Blockchain Interaction)   │  │    (Real-time Multiplayer)       │   │  │
-│  │  └──────────────────────────────┘  └──────────────────────────────────┘   │  │
-│  └────────────────────────────────────────────────────────────────────────────┘  │
-└───────────────────────────────────┬──────────────────────────────────────────────┘
-                                    │
-                          REST API  │  WebSocket
-                                    ▼
-┌──────────────────────────────────────────────────────────────────────────────────┐
-│                            BACKEND (Render)                                      │
-│  ┌────────────────────────────────────────────────────────────────────────────┐  │
-│  │                      taixu-backend/ (Node.js)                              │  │
-│  ├────────────────────────────────────────────────────────────────────────────┤  │
-│  │  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────────────┐ │  │
-│  │  │ Sponsor Service  │  │ WebSocket Service│  │     Room Service         │ │  │
-│  │  │ (Pay Gas Fees)   │  │  (Multiplayer)   │  │  (Game Room Management)  │ │  │
-│  │  └────────┬─────────┘  └──────────────────┘  └──────────────────────────┘ │  │
-│  │           │                                                                │  │
-│  │           │ Sponsored Transactions (Project pays OCT gas fees)             │  │
-│  │           ▼                                                                │  │
-│  │  ┌──────────────────────────────────────────────────────────────────────┐ │  │
-│  │  │                    @mysten/sui SDK + Sponsor Wallet                  │ │  │
-│  │  └──────────────────────────────────────────────────────────────────────┘ │  │
-│  └────────────────────────────────────────────────────────────────────────────┘  │
-└───────────────────────────────────┬──────────────────────────────────────────────┘
-                                    │
-                          RPC Calls │ (https://rpc-testnet.onelabs.cc:443)
-                                    ▼
-┌──────────────────────────────────────────────────────────────────────────────────┐
-│                      SMART CONTRACTS (OneChain Testnet)                          │
-│  ┌────────────────────────────────────────────────────────────────────────────┐  │
-│  │                        taixu-move/ (Sui Move)                              │  │
-│  ├────────────────────────────────────────────────────────────────────────────┤  │
-│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐    │  │
-│  │  │ player.move  │  │ weapon.move  │  │lingstone.move│  │marketplace   │    │  │
-│  │  │              │  │              │  │              │  │   .move      │    │  │
-│  │  │  • SBT Token │  │  • NFT Token │  │  • LING Token│  │  • Trading   │    │  │
-│  │  │  • Character │  │  • 3 Types   │  │  • Currency  │  │  • Listings  │    │  │
-│  │  │  • Level/EXP │  │  • 3 Rarities│  │  • 9 Decimals│  │  • Buy/Sell  │    │  │
-│  │  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘    │  │
-│  └────────────────────────────────────────────────────────────────────────────┘  │
-└──────────────────────────────────────────────────────────────────────────────────┘
+┌─────────────┐     ┌─────────────┐     ┌─────────────────┐
+│   Frontend  │────>│   Backend   │────>│ OneChain Testnet│
+│   (React)   │ WS  │  (Node.js)  │ RPC │   (Sui Move)    │
+└─────────────┘     └─────────────┘     └─────────────────┘
+     Vercel             Render            Smart Contracts
 ```
 
-### Data Flow
+| Layer | Tech | Purpose |
+|-------|------|---------|
+| Frontend | React 19 + Vite | Game UI & wallet integration |
+| Backend | Express + WebSocket | Sponsored TX & multiplayer |
+| Contracts | Sui Move | Player SBT, Weapon NFT, LING token, Marketplace |
+
+---
+
+## 📁 Project Structure
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        Sponsored Transaction Flow                           │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-  Player                    Backend                      OneChain
-    │                          │                            │
-    │  1. Request Action       │                            │
-    │  (Create Character)      │                            │
-    ├─────────────────────────►│                            │
-    │                          │                            │
-    │                          │  2. Build Transaction      │
-    │                          │  3. Sign with Sponsor Key  │
-    │                          │  4. Submit to Blockchain   │
-    │                          ├───────────────────────────►│
-    │                          │                            │
-    │                          │  5. Transaction Result     │
-    │                          │◄───────────────────────────┤
-    │                          │                            │
-    │  6. Success Response     │                            │
-    │◄─────────────────────────┤                            │
-    │                          │                            │
-    │  ✅ Player pays: 0 OCT                                │
-    │  ✅ Project pays: ~0.001 OCT gas fee                  │
-    │                          │                            │
-
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         Multiplayer Game Flow                               │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-  Player A                  Backend                     Player B
-    │                          │                            │
-    │  1. Create Room          │                            │
-    ├─────────────────────────►│                            │
-    │                          │                            │
-    │  2. Room Created         │                            │
-    │◄─────────────────────────┤                            │
-    │                          │                            │
-    │                          │  3. Join Room              │
-    │                          │◄───────────────────────────┤
-    │                          │                            │
-    │  4. Player Joined        │  4. Room State             │
-    │◄─────────────────────────┼───────────────────────────►│
-    │                          │                            │
-    │  5. Move/Attack          │                            │
-    ├─────────────────────────►│                            │
-    │                          │  6. Broadcast State        │
-    │◄─────────────────────────┼───────────────────────────►│
-    │                          │                            │
+TaiXuWorld/
+├── taixuchain/      # Frontend (React)
+├── taixu-backend/   # Backend (Node.js)
+├── taixu-move/      # Smart Contracts (Sui Move)
+└── maps-design/     # Tiled map files
 ```
 
 ---
 
+## 📜 Smart Contracts
+
+| Module | Type | Description |
+|--------|------|-------------|
+| `player.move` | SBT | Non-transferable character token |
+| `weapon.move` | NFT | Tradeable weapons (3 types × 3 rarities) |
+| `lingstone.move` | Token | In-game currency (9 decimals) |
+| `marketplace.move` | DEX | P2P weapon trading with escrow |
+
+**Package ID:** `0x2065f3f546d076e2a67de7900e471601e4fda71d34749143b3aa7fdf0fbcf9d5`
+
+---
+
+## 🗺️ Roadmap
+
+- [x] Character system & customization
+- [x] Weapon NFT & marketplace
+- [x] Real-time multiplayer
+- [x] Sponsored transactions
+- [ ] More maps & monsters
+- [ ] PvP combat
+- [ ] Mobile support
+
+---
+
+## 📖 Documentation
+
+| Doc | Description |
+|-----|-------------|
+| [Backend](./taixu-backend/README.md) | API endpoints & WebSocket events |
+| [Contracts](./taixu-move/README.md) | Smart contract modules & deployment |
+| [Test Guide](./taixuchain/TEST_GUIDE.md) | Testing instructions |
+
+---
+
+## 🔗 Links
+
+| Resource | Link |
+|----------|------|
+| 🎮 Live Demo | [tai-xu-chain.vercel.app](https://tai-xu-chain.vercel.app) |
+| 📊 Explorer | [explorer.onelabs.cc](https://explorer.onelabs.cc/) |
+| 💧 Faucet | [faucet-testnet.onelabs.cc](https://faucet-testnet.onelabs.cc/) |
+
+---
+
+## 📄 License
+
+MIT © TaiXu World

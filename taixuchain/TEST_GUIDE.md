@@ -1,99 +1,60 @@
-# Test Guide
+# TaiXu Test Guide
 
-## ✅ Configuration Complete
+## Configuration (V7)
 
-All configurations are complete, ready to test!
+| Property | Value |
+|----------|-------|
+| Package ID | `0xb4c8177c0a999d5e49e532e17c67b69c83b059a018a94b70e24fcf1551f42888` |
+| Player Registry | `0x156c38f5923226135349a1439f84e237fa241c8c9359cdb452bd2e0f72477683` |
+| Marketplace | `0x45ec2626c88321b42d680ac6048b402f8ef0fcc5a4612503b1e17d65cc49350a` |
+| Network | OneChain Testnet |
 
-### Configuration Info
-- **Package ID**: `0x2065f3f546d076e2a67de7900e471601e4fda71d34749143b3aa7fdf0fbcf9d5`
-- **Player Registry ID**: `0x1586d814c0cd790cf281073d8a2de6f8cf398001866b2c717154f4c5a18572d9`
-- **Network**: OneChain Testnet (`https://rpc-testnet.onelabs.cc:443`)
-
-## 🚀 Start Testing
+## Start Testing
 
 ```bash
 cd taixuchain
 npm start
 ```
 
-## 📝 Test Flow
+## Test Flow
 
 ### 1. Connect Wallet
-- Ensure OneChain wallet extension is installed
-- Switch to Testnet network
+- Install OneWallet browser extension
+- Switch to Testnet
 - Click "Connect OneChain Wallet"
 
-### 2. Select Class
-- Choose Mage, Warrior, or Archer
+### 2. Create Character
+- Select class (Mage/Warrior/Archer)
+- Customize appearance
+- Enter name (3-20 characters)
+- Click "Register" — creates SBT on-chain
 
-### 3. Customize Character
-- Adjust hairstyle, face shape, body color, etc.
+### 3. Enter Game
+- Select map (Forest available)
+- Create or join multiplayer room
+- Hunt monsters, collect loot!
 
-### 4. Name Character ⭐ New Feature
-- Enter character name (3-20 characters)
-- Click "Register and Start Adventure"
-- **This step calls blockchain contract to create SBT**
-- Wait for transaction confirmation (may take a few seconds)
+### 4. Marketplace
+- List weapons for LING
+- Browse and buy weapons
+- Merge weapons to upgrade
 
-### 5. Select Map ⭐ New Feature
-- After successful registration, automatically enter map selection interface
-- Three map options:
-  - 🌲 Misty Forest (Easy)
-  - ⛰️ Snow Peak Mountains (Medium)
-  - 🏜️ Hot Desert (Hard)
-- Click map card to select, then click "Enter Map"
+## Verify On-Chain
 
-### 6. Enter Game
-- Display character info and blockchain registration info
-- Display Player Object ID and transaction hash
-
-## 🔍 Verify Blockchain Registration
-
-### View in Browser
-Visit OneChain explorer to view your transaction:
+Check your transaction on explorer:
 ```
-https://explorer.onelabs.cc/txblock/[your-transaction-hash]?network=testnet
+https://explorer.onelabs.cc/txblock/[tx-hash]?network=testnet
 ```
 
-### View in Console
-Open browser developer tools (F12), check console output:
-- "Registering character to blockchain..."
-- "Registration successful!" + transaction result
-- Player Object ID
+## Troubleshooting
 
-## 🐛 Common Issues
+| Issue | Solution |
+|-------|----------|
+| Wallet not connecting | Refresh page, ensure OneWallet installed |
+| Transaction failed | Check wallet has OCT for gas |
+| Stuck on "Registering..." | Check console (F12) for errors |
 
-### 1. "Please connect Sui wallet first"
-- Ensure OneChain wallet is connected in step 1
-- Refresh page and reconnect
+## Resources
 
-### 2. Transaction Failed
-- Check if wallet has enough test tokens
-- Confirm wallet is on Testnet network
-- Check console for error messages
-
-### 3. Register button keeps showing "Registering..."
-- Check network connection
-- Check console for errors
-- May need to confirm transaction in wallet
-
-### 4. Map selection interface doesn't appear
-- Ensure character registration succeeded
-- Check console for error messages
-
-## 📊 Expected Results
-
-After successful registration, you should see:
-1. ✅ Character registered to blockchain
-2. Player ID: 0x... (a long hexadecimal address)
-3. Transaction hash: a transaction ID
-
-This information proves your character has been successfully created as an SBT and stored on the blockchain!
-
-## 🎮 Next Steps
-
-Map selection is currently UI only, no actual game logic yet. Future plans:
-- Implement map scene rendering
-- Add combat system
-- Implement experience and leveling
-- Add weapon system integration
+- [Faucet](https://faucet-testnet.onelabs.cc/) — Get free OCT
+- [Explorer](https://explorer.onelabs.cc/) — View transactions

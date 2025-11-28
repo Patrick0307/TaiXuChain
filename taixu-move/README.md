@@ -1,120 +1,70 @@
 # TaiXu Move Contracts
 
-Smart contract project for TaiXu World, developed with Sui Move.
+Smart contracts for TaiXu World, built with Sui Move on OneChain Testnet.
+
+## Modules
+
+| Module | Type | Description |
+|--------|------|-------------|
+| `player.move` | SBT | Non-transferable character token |
+| `weapon.move` | NFT | Tradeable weapons (3 types × 3 rarities) |
+| `lingstone.move` | Token | In-game currency (LING, 9 decimals) |
+| `marketplace.move` | DEX | P2P weapon trading with escrow |
+| `random_utils.move` | Utility | On-chain randomness |
+
+## Current Deployment (V7)
+
+| Object | ID |
+|--------|-----|
+| Package | `0xb4c8177c0a999d5e49e532e17c67b69c83b059a018a94b70e24fcf1551f42888` |
+| PlayerRegistry | `0x156c38f5923226135349a1439f84e237fa241c8c9359cdb452bd2e0f72477683` |
+| Marketplace | `0x45ec2626c88321b42d680ac6048b402f8ef0fcc5a4612503b1e17d65cc49350a` |
+| WeaponMintCap | `0x36afa27278a7476b67909576551b0f3db308cfa2c1d739e9bcf990624e89961b` |
+| TreasuryCap | `0x48896cbf46e4849a05ad46e2b2456b8ccdc0724d8747665bef8fdbb9786c6693` |
+| UpgradeCap | `0x637630ea01c6ad475f040756c3ec987be4c0bd8e033fbcd7d99d594cbb20d7f9` |
+
+## Quick Start
+
+### Prerequisites
+- [Sui CLI](https://docs.sui.io/build/install)
+
+### Build
+```bash
+sui move build
+```
+
+### Deploy
+```bash
+sui client publish --gas-budget 100000000
+```
+
+## Network
+
+| Property | Value |
+|----------|-------|
+| Network | OneChain Testnet |
+| RPC | `https://rpc-testnet.onelabs.cc:443` |
+| Faucet | [faucet-testnet.onelabs.cc](https://faucet-testnet.onelabs.cc/) |
+| Explorer | [explorer.onelabs.cc](https://explorer.onelabs.cc/) |
 
 ## Project Structure
 
 ```
 taixu-move/
-├── sources/           # Smart contract source code
-│   ├── lingstone.move      # LingStone token contract
-│   ├── player.move         # Player system contract
-│   ├── weapon.move         # Weapon system contract
-│   └── marketplace.move    # Marketplace contract
-├── scripts/           # Deployment and test scripts
-├── tests/            # Test scripts
-├── Move.toml         # Move project configuration
-└── .env.example      # Environment variables example
-
-# Following directories contain sensitive info, not committed to Git
-├── deployments/      # Deployment records (private)
-├── docs/            # Detailed documentation (private)
-└── .env             # Environment variables (private)
-```
-
-## Contract Modules
-
-### 1. LingStone Token
-- Primary in-game token
-- Symbol: LING
-- Decimals: 9
-- Used for marketplace trading and in-game economy
-
-### 2. Player System
-- Player character NFT
-- Supports three classes: Mage, Warrior, Archer
-- Level and experience system
-
-### 3. Weapon System
-- Weapon NFT
-- Three weapon types: Bow, Sword, Spirit Orb
-- Three rarities: Common, Rare, Legendary
-- Upgrade and enhancement system
-
-### 4. Marketplace
-- Weapon trading marketplace
-- Uses LING token for transactions
-- Supports listing, buying, and canceling orders
-
-## Quick Start
-
-### 1. Install Dependencies
-
-```bash
-# Install Sui CLI
-cargo install --locked --git https://github.com/MystenLabs/sui.git --branch testnet sui
-```
-
-### 2. Configure Environment
-
-```bash
-# Copy environment variables example
-cp .env.example .env
-
-# Edit .env file and add your private key
-```
-
-### 3. Build Contracts
-
-```bash
-sui move build
-```
-
-### 4. Deploy Contracts
-
-```bash
-# Use deployment script
-.\scripts\deploy-all.ps1
-```
-
-## Network Configuration
-
-- **Testnet**: OneChain Testnet
-- **RPC**: https://rpc-testnet.onelabs.cc:443
-- **Faucet**: https://faucet-testnet.onelabs.cc/
-
-## Development Guide
-
-### Adding New Features
-
-1. Create new .move file in `sources/` directory
-2. Add necessary dependencies in `Move.toml`
-3. Run `sui move build` to test compilation
-4. Write test scripts
-5. Deploy to testnet
-
-### Testing
-
-```bash
-# Run test scripts
-.\tests\test-weapon.ps1
+├── sources/          # Contract source code
+├── build/            # Compiled output
+├── scripts/          # Deployment scripts
+├── docs/             # Deployment records (V1-V7)
+├── Move.toml         # Package config
+└── .env.example      # Environment template
 ```
 
 ## Security Notes
 
-⚠️ **Important**: Following files contain sensitive information, do not commit to public repository:
-
-- `.env` - Contains private keys
-- `deployments/` - Contains deployment addresses and IDs
-- `docs/` - Contains detailed deployment information
-
-These files are configured in `.gitignore`.
+⚠️ Files not committed to Git:
+- `.env` — Contains private keys
+- `docs/` — Contains deployment details
 
 ## License
 
-MIT License
-
-## Contact
-
-- Project: TaiXu Chain
-- Game: TaiXu World
+MIT

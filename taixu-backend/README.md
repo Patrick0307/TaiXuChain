@@ -1,161 +1,107 @@
-# Taixu Backend - Sponsored Transaction Server
+# TaiXu Backend
 
-Backend server for Taixu game, handling Sponsored Transactions.
+Sponsored transaction server & multiplayer WebSocket for TaiXu World.
 
 ## Features
 
-- 🎮 **Sponsored Character Creation** - Project pays gas fees when players create characters
-- 💰 **Zero Barrier** - Players don't need any tokens to start playing
-- 🔒 **Secure** - Players still need to sign to confirm operations
+- 🆓 **Sponsored Transactions** — Project pays gas fees for players
+- 🌐 **Real-time Multiplayer** — WebSocket server for co-op gameplay
+- 🎮 **Game API** — Player, weapon, marketplace endpoints
 
 ## Quick Start
 
-### 1. Install Dependencies
-
 ```bash
-cd taixu-backend
+# Install
 npm install
-```
 
-### 2. Configure Environment Variables
+# Configure
+cp .env.example .env
+# Edit .env and add your SPONSOR_PRIVATE_KEY
 
-Copy `.env.example` to `.env`:
-
-```bash
-copy .env.example .env
-```
-
-Edit `.env` file and add your wallet private key:
-
-```env
-# Export private key from OneChain wallet
-# Settings -> Security -> Export Private Key
-SPONSOR_PRIVATE_KEY=your_private_key
-
-# Other configurations are already preset
-```
-
-⚠️ **Important Security Notes:**
-- Do not commit `.env` file to Git
-- Keep private key confidential, don't share with anyone
-- Recommend using dedicated sponsor wallet, not main wallet
-
-### 3. Ensure Sponsor Wallet Has Balance
-
-Your sponsor wallet needs some SUI/OCT tokens to pay gas:
-
-- **Testnet Faucet**: https://faucet.onechain.com/
-- Recommend at least 1 SUI/OCT (can support thousands of transactions)
-
-### 4. Start Server
-
-```bash
+# Run
 npm start
 ```
 
-Or use development mode (auto-restart):
+Server runs at `http://localhost:3001`
 
-```bash
-npm run dev
-```
+## Environment Variables
 
-Server will start at `http://localhost:3001`.
+| Variable | Description |
+|----------|-------------|
+| `SPONSOR_PRIVATE_KEY` | Wallet private key for paying gas |
+| `WEAPON_DEPLOY_PRIVATE_KEY` | Wallet with WeaponMintCap |
+| `GAME_TREASURY_PRIVATE_KEY` | Wallet receiving LING payments |
+| `PORT` | Server port (default: 3001) |
 
-### 5. Test Server
-
-Open browser and visit:
-```
-http://localhost:3001/health
-```
-
-Should see:
-```json
-{
-  "status": "ok",
-  "message": "Taixu Backend is running"
-}
-```
+See `.env.example` for full configuration.
 
 ## API Endpoints
 
-### POST /api/sponsor/create-player
-
-Create player character (sponsored transaction)
-
-**Request Body:**
-```json
-{
-  "playerAddress": "0x...",
-  "name": "Player Name",
-  "classId": 1
-}
+### Health Check
+```
+GET /health
 ```
 
-**Response:**
-```json
-{
-  "success": true,
-  "result": {
-    "digest": "Transaction Hash",
-    "effects": { ... }
-  },
-  "message": "Player created successfully with sponsored gas"
-}
+### Player
+```
+GET  /api/player/:address          # Get player info
+POST /api/sponsor/create-player    # Create player (sponsored)
 ```
 
-## Cost Estimation
-
-- Per character creation: ~0.001 SUI/OCT
-- 1 SUI/OCT can support ~1000 player registrations
-- Testnet tokens are free, available from faucet
-
-## Frontend Configuration
-
-Add to frontend project's `.env` file:
-
-```env
-VITE_BACKEND_URL=http://localhost:3001
+### Weapons
+```
+GET  /api/weapons/:address              # Get player's weapons
+POST /api/sponsor/mint-weapon           # Mint class weapon
+POST /api/sponsor/mint-random-weapon    # Mint random drop
+POST /api/sponsor/burn-weapon           # Burn weapon
+POST /api/sponsor/merge-weapon          # Merge weapons
 ```
 
-## Deploy to Production
-
-### Using PM2 (Recommended)
-
-```bash
-npm install -g pm2
-pm2 start server.js --name taixu-backend
-pm2 save
-pm2 startup
+### LingStone
+```
+GET  /api/lingstone/balance/:address    # Get LING balance
+POST /api/sponsor/mint-lingstone        # Mint LING tokens
 ```
 
-### Using Docker
+### Marketplace
+```
+GET /api/marketplace/listings           # Get all listings
+```
 
+## WebSocket Events
+
+### Client → Server
+- `join_room` — Join multiplayer room
+- `leave_room` — Leave room
+- `player_move` — Broadcast movement
+- `player_attack` — Broadcast attack
+- `monster_damage` — Report monster damage
+- `monster_killed` — Report monster death
+
+### Server → Client
+- `room_joined` — Confirm join
+- `player_joined` / `player_left` — Player updates
+- `room_state` — Full state sync
+- `monster_died` — Monster death + loot
+
+## Deployment
+
+### Render
+Configure in `render.yaml` at project root.
+
+### Docker
 ```bash
 docker build -t taixu-backend .
 docker run -d -p 3001:3001 --env-file .env taixu-backend
 ```
 
-## Security Recommendations
+## Security Notes
 
-1. **Use Dedicated Sponsor Wallet** - Don't use main wallet
-2. **Limit Sponsorship Count** - Can add per-address sponsorship limit
-3. **Monitor Balance** - Regularly check sponsor wallet balance
-4. **Use HTTPS** - Production must use HTTPS
-5. **Add Rate Limiting** - Prevent abuse
+⚠️ Never commit `.env` to Git — contains private keys!
 
-## Troubleshooting
-
-### Error: SPONSOR_PRIVATE_KEY not set
-
-Ensure `.env` file exists and contains correct private key.
-
-### Error: Sponsor wallet has no gas coins
-
-Sponsor wallet balance insufficient, need to get tokens from faucet.
-
-### Error: Connection refused
-
-Ensure backend server is running, check if port is occupied.
+- Use dedicated sponsor wallet (not your main wallet)
+- Keep minimal OCT balance in sponsor wallet
+- Monitor balance regularly
 
 ## License
 
