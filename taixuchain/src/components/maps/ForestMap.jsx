@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import MapUI from './MapUI'
 import MapCharacter from './MapCharacter'
 import Monster from './Monster'
+import AttackEffect from './AttackEffect'
 import Inventory from '../Inventory'
 import Marketplace from '../Marketplace'
 import LootBox from './LootBox'
@@ -45,6 +46,7 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
   const [respawnCountdown, setRespawnCountdown] = useState(10) // 复活倒计时
   const [showWeaponReward, setShowWeaponReward] = useState(null) // 显示武器奖励弹窗
   const [isMintingWeapon, setIsMintingWeapon] = useState(false) // 是否正在mint武器
+  const [attackEffect, setAttackEffect] = useState(null) // 攻击特效 { type, startPos, targetPos }
   const lootBoxIdCounter = useRef(0) // 宝箱ID计数器
   const pickingLootBox = useRef(new Set()) // 正在拾取的宝箱ID（防止重复点击）
   const lastLootBoxOpenTime = useRef(0) // 上次打开宝箱的时间
@@ -1068,6 +1070,90 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
         // 触发武器攻击动画
         setIsPlayerAttacking(true)
         setTimeout(() => setIsPlayerAttacking(false), 200) // 200ms后恢复
+        
+        // 计算玩家屏幕位置（用于攻击特效）
+        const getPlayerScreenPos = () => {
+          if (!canvasRef.current || !mapData || !playerPosRef.current) return null
+          const canvas = canvasRef.current
+          const scaledMapWidth = mapData.width * TILE_SIZE * MAP_SCALE
+          const scaledMapHeight = mapData.height * TILE_SIZE * MAP_SCALE
+          const scaledPlayerX = Math.round(playerPosRef.current.x * MAP_SCALE)
+          const scaledPlayerY = Math.round(playerPosRef.current.y * MAP_SCALE)
+          const scaledPlayerSize = PLAYER_SIZE * MAP_SCALE
+          let cameraX = scaledPlayerX - canvas.width / 2 + scaledPlayerSize / 2
+          let cameraY = scaledPlayerY - canvas.height / 2 + scaledPlayerSize / 2
+          const maxCameraX = scaledMapWidth - canvas.width
+          const maxCameraY = scaledMapHeight - canvas.height
+          cameraX = Math.max(0, Math.min(cameraX, maxCameraX))
+          cameraY = Math.max(0, Math.min(cameraY, maxCameraY))
+          if (scaledMapWidth < canvas.width) cameraX = -(canvas.width - scaledMapWidth) / 2
+          if (scaledMapHeight < canvas.height) cameraY = -(canvas.height - scaledMapHeight) / 2
+          return {
+            x: Math.round(scaledPlayerX - cameraX) + scaledPlayerSize * 0.5,
+            y: Math.round(scaledPlayerY - cameraY) + scaledPlayerSize * 1.5
+          }
+        }
+        
+        // 找到最近的活着的怪物（用于射手/法师的粒子特效目标）
+        const findNearestMonsterScreenPos = () => {
+          if (!playerPosRef.current || !canvasRef.current || !mapData) return null
+          let closestMonster = null
+          let closestDistance = Infinity
+          monstersRef.current.forEach(monster => {
+            if (!monster.alive) return
+            const dx = playerPosRef.current.x - monster.x
+            const dy = playerPosRef.current.y - monster.y
+            const distance = Math.sqrt(dx * dx + dy * dy)
+            if (distance < closestDistance && distance <= PLAYER_ATTACK_RANGE) {
+              closestDistance = distance
+              closestMonster = monster
+            }
+          })
+          if (!closestMonster) return null
+          // 计算怪物屏幕位置
+          const canvas = canvasRef.current
+          const scaledMapWidth = mapData.width * TILE_SIZE * MAP_SCALE
+          const scaledMapHeight = mapData.height * TILE_SIZE * MAP_SCALE
+          const scaledPlayerX = Math.round(playerPosRef.current.x * MAP_SCALE)
+          const scaledPlayerY = Math.round(playerPosRef.current.y * MAP_SCALE)
+          const scaledPlayerSize = PLAYER_SIZE * MAP_SCALE
+          let cameraX = scaledPlayerX - canvas.width / 2 + scaledPlayerSize / 2
+          let cameraY = scaledPlayerY - canvas.height / 2 + scaledPlayerSize / 2
+          const maxCameraX = scaledMapWidth - canvas.width
+          const maxCameraY = scaledMapHeight - canvas.height
+          cameraX = Math.max(0, Math.min(cameraX, maxCameraX))
+          cameraY = Math.max(0, Math.min(cameraY, maxCameraY))
+          if (scaledMapWidth < canvas.width) cameraX = -(canvas.width - scaledMapWidth) / 2
+          if (scaledMapHeight < canvas.height) cameraY = -(canvas.height - scaledMapHeight) / 2
+          return {
+            x: Math.round(closestMonster.x * MAP_SCALE - cameraX),
+            y: Math.round(closestMonster.y * MAP_SCALE - cameraY)
+          }
+        }
+        
+        // 触发攻击特效
+        const playerScreenPos = getPlayerScreenPos()
+        const targetPos = findNearestMonsterScreenPos()
+        if (playerScreenPos) {
+          if (characterClass === 'warrior') {
+            // 武者：刀光特效（传递目标位置用于确定方向）
+            setAttackEffect({ type: 'warrior', startPos: playerScreenPos, targetPos: targetPos })
+          } else {
+            // 射手/法师：粒子飞向目标
+            if (targetPos) {
+              // 有目标时飞向目标
+              setAttackEffect({ type: characterClass, startPos: playerScreenPos, targetPos })
+            } else {
+              // 没有目标时也显示特效，向前方发射
+              const forwardOffset = 100 // 向前方100像素
+              setAttackEffect({
+                type: characterClass,
+                startPos: playerScreenPos,
+                targetPos: { x: playerScreenPos.x, y: playerScreenPos.y - forwardOffset }
+              })
+            }
+          }
+        }
         
         // 根据职业类型决定攻击方式
         // 编码格式：攻击力 * 10000 + 职业代码 * 100 + (时间戳 % 100)
@@ -2482,6 +2568,17 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
           mapScale={MAP_SCALE}
           weapon={playerWeapon}
           isAttacking={isPlayerAttacking}
+        />
+      )}
+      
+      {/* 攻击特效层 */}
+      {attackEffect && (
+        <AttackEffect
+          type={attackEffect.type}
+          startPos={attackEffect.startPos}
+          targetPos={attackEffect.targetPos}
+          mapScale={MAP_SCALE}
+          onComplete={() => setAttackEffect(null)}
         />
       )}
       

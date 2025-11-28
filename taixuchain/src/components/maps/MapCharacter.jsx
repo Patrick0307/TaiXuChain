@@ -13,9 +13,9 @@ const WEAPON_IMAGE_MAP = {
   'Cloud Piercer Bow': '/weapons/bows/Cloud Piercer Bow.png',
   
   // 法杖 (Mage)
-  'Wooden Staff': '/weapons/staves/Wooden  Stave.png',
-  'Starlight Staff': '/weapons/staves/Starlight Stave.png',
-  'Primordial Staff': '/weapons/staves/Primordial Stave.png',
+  'Wooden Staff': '/weapons/staves/Wooden Staff.png',
+  'Starlight Staff': '/weapons/staves/Starlight Staff.png',
+  'Primordial Staff': '/weapons/staves/Primordial Staff.png',
 }
 
 function MapCharacter({ 
