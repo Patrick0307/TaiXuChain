@@ -68,7 +68,7 @@ function LootBox({
       {/* 可点击提示 */}
       {canOpen && !isOpening && isOwner && (
         <div className="click-hint">
-          点击开启
+          Click to open
         </div>
       )}
       

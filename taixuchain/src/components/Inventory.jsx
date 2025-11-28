@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import InventorySlot from './InventorySlot'
+import ConfirmDialog from './ConfirmDialog'
+import InputDialog from './InputDialog'
 import { getAllPlayerWeapons, getLingStoneBalance, requestLingStone, burnWeapon, mergeWeapons, listWeaponOnMarket } from '../utils/suiClient'
 import soundManager from '../utils/soundManager'
 import '../css/inventory.css'
@@ -14,6 +16,27 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
   const [isMerging, setIsMerging] = useState(false)
   const [selectedForMerge, setSelectedForMerge] = useState([]) // 选中用于合成的武器
   const [isListingWeapon, setIsListingWeapon] = useState(false)
+  
+  // 确认弹窗状态
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    details: [],
+    warning: '',
+    tip: '',
+    type: 'warning',
+    onConfirm: null
+  })
+  
+  // 输入弹窗状态
+  const [inputDialog, setInputDialog] = useState({
+    isOpen: false,
+    title: '',
+    details: [],
+    placeholder: '',
+    onConfirm: null
+  })
 
   // 背包格子数量（动态扩展，无上限）
   // 根据武器数量动态计算，至少显示20个格子
@@ -177,6 +200,25 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
     setSelectedWeapon(null)
   }
 
+  // 显示确认弹窗
+  const showConfirmDialog = (config) => {
+    return new Promise((resolve) => {
+      setConfirmDialog({
+        ...config,
+        isOpen: true,
+        onConfirm: () => {
+          setConfirmDialog(prev => ({ ...prev, isOpen: false }))
+          resolve(true)
+        }
+      })
+    })
+  }
+
+  // 关闭确认弹窗
+  const closeConfirmDialog = () => {
+    setConfirmDialog(prev => ({ ...prev, isOpen: false }))
+  }
+
   // 执行合成
   const handleMergeWeapons = async () => {
     if (selectedForMerge.length !== 2) {
@@ -190,19 +232,23 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
     // 计算合成费用
     const mergeCost = 100 + (weapon1.level * 50)
     
-    // 确认对话框
-    const confirmed = window.confirm(
-      `⚔️ 确定要合成这两把武器吗？\n\n` +
-      `武器1: ${weapon1.name} (Lv.${weapon1.level})\n` +
-      `武器2: ${weapon2.name} (Lv.${weapon2.level})\n\n` +
-      `合成后将获得:\n` +
-      `${weapon1.name} (Lv.${weapon1.level + 1})\n\n` +
-      `💎 合成费用: ${mergeCost} LingStone\n` +
-      `💰 当前余额: ${lingStoneBalance.toLocaleString()} LingStone\n\n` +
-      `步骤1: 你需要签名支付 ${mergeCost} LingStone 和销毁 2把武器（你付gas）\n` +
-      `步骤2: Sponsor会铸造新武器给你（sponsor付gas）\n\n` +
-      `此操作不可撤销！`
-    )
+    // 显示确认弹窗
+    const confirmed = await showConfirmDialog({
+      title: 'Merge these two weapons?',
+      message: '',
+      details: [
+        { label: 'Weapon 1', value: `${weapon1.name} (Lv.${weapon1.level})` },
+        { label: 'Weapon 2', value: `${weapon2.name} (Lv.${weapon2.level})` },
+        { label: 'Result', value: `${weapon1.name} (Lv.${weapon1.level + 1})`, highlight: true },
+        { label: 'Cost', value: `${mergeCost} LingStone`, highlight: true },
+        { label: 'Balance', value: `${lingStoneBalance.toLocaleString()} LingStone` }
+      ],
+      warning: 'This action cannot be undone! You need to sign this transaction (requires gas fee)',
+      tip: 'If wallet shows error, make sure you have enough OCT tokens for gas',
+      type: 'warning',
+      confirmText: 'Confirm',
+      cancelText: 'Cancel'
+    })
     
     if (!confirmed) {
       return
@@ -305,16 +351,39 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
     }
   }
 
+  // 显示输入弹窗
+  const showInputDialog = (config) => {
+    return new Promise((resolve) => {
+      setInputDialog({
+        ...config,
+        isOpen: true,
+        onConfirm: (value) => {
+          setInputDialog(prev => ({ ...prev, isOpen: false }))
+          resolve(value)
+        }
+      })
+    })
+  }
+
+  // 关闭输入弹窗
+  const closeInputDialog = () => {
+    setInputDialog(prev => ({ ...prev, isOpen: false }))
+  }
+
   // 上架到市场
   const handleListWeapon = async (weapon) => {
-    // 输入价格
-    const priceInput = prompt(
-      `📦 上架武器到市场\n\n` +
-      `武器: ${weapon.name} (Lv.${weapon.level})\n` +
-      `攻击力: +${weapon.attack}\n` +
-      `品质: ${getRarityName(weapon.rarity)}\n\n` +
-      `请输入价格（LingStone）：`
-    )
+    // 显示输入价格弹窗
+    const priceInput = await showInputDialog({
+      title: 'List Weapon on Market',
+      details: [
+        { label: 'Weapon', value: `${weapon.name} (Lv.${weapon.level})` },
+        { label: 'Attack', value: `+${weapon.attack}` },
+        { label: 'Rarity', value: getRarityName(weapon.rarity) }
+      ],
+      placeholder: 'Enter price (LingStone):',
+      confirmText: 'List',
+      cancelText: 'Cancel'
+    })
     
     if (!priceInput) {
       return
@@ -323,23 +392,7 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
     const price = parseFloat(priceInput)
     
     if (isNaN(price) || price <= 0) {
-      alert('❌ 无效的价格')
-      return
-    }
-    
-    // 确认对话框
-    const confirmed = window.confirm(
-      `📦 确定要上架这把武器吗？\n\n` +
-      `武器: ${weapon.name} (Lv.${weapon.level})\n` +
-      `攻击力: +${weapon.attack}\n` +
-      `品质: ${getRarityName(weapon.rarity)}\n\n` +
-      `💎 价格: ${price} LingStone\n\n` +
-      `你需要签名确认此操作（需要少量 gas 费用）\n` +
-      `武器将被托管到市场，直到售出或取消挂单\n\n` +
-      `💡 提示：如果钱包显示错误，请确保你有足够的 OCT 代币支付 gas`
-    )
-    
-    if (!confirmed) {
+      alert('❌ Invalid price')
       return
     }
 
@@ -388,15 +441,20 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
 
   // 丢弃武器
   const handleBurnWeapon = async (weapon) => {
-    // 确认对话框
-    const confirmed = window.confirm(
-      `⚠️ 确定要丢弃 ${weapon.name} 吗？\n\n` +
-      `等级: Lv.${weapon.level}\n` +
-      `攻击力: +${weapon.attack}\n\n` +
-      `此操作不可撤销！\n` +
-      `你需要签名确认此操作（需要少量 gas 费用）\n\n` +
-      `💡 提示：如果钱包显示错误，请确保你有足够的 OCT 代币支付 gas`
-    )
+    // 显示确认弹窗
+    const confirmed = await showConfirmDialog({
+      title: `Discard ${weapon.name}?`,
+      message: '',
+      details: [
+        { label: 'Level', value: `Lv.${weapon.level}` },
+        { label: 'Attack', value: `+${weapon.attack}` }
+      ],
+      warning: 'This action cannot be undone! You need to sign this transaction (requires gas fee)',
+      tip: 'If wallet shows error, make sure you have enough OCT tokens for gas',
+      type: 'danger',
+      confirmText: 'Confirm',
+      cancelText: 'Cancel'
+    })
     
     if (!confirmed) {
       return
@@ -446,6 +504,33 @@ function Inventory({ character, isOpen, onClose, equippedWeapon, onEquipWeapon }
   return (
     <div className="inventory-overlay" onClick={onClose}>
       <div className="inventory-container" onClick={(e) => e.stopPropagation()}>
+        
+        {/* 确认弹窗 */}
+        <ConfirmDialog
+          isOpen={confirmDialog.isOpen}
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          details={confirmDialog.details}
+          warning={confirmDialog.warning}
+          tip={confirmDialog.tip}
+          type={confirmDialog.type}
+          confirmText={confirmDialog.confirmText}
+          cancelText={confirmDialog.cancelText}
+          onConfirm={confirmDialog.onConfirm}
+          onCancel={closeConfirmDialog}
+        />
+        
+        {/* 输入弹窗 */}
+        <InputDialog
+          isOpen={inputDialog.isOpen}
+          title={inputDialog.title}
+          details={inputDialog.details}
+          placeholder={inputDialog.placeholder}
+          confirmText={inputDialog.confirmText}
+          cancelText={inputDialog.cancelText}
+          onConfirm={inputDialog.onConfirm}
+          onCancel={closeInputDialog}
+        />
         <div className="inventory-header">
           <h2>🎒 INVENTORY</h2>
           <div className="lingstone-display">

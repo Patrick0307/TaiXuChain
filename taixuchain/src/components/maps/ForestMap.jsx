@@ -37,6 +37,7 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
   const monstersRef = useRef([]) // 怪物列表的 ref，用于主机的实时更新
   const lootBoxesRef = useRef([]) // 宝箱列表的 ref
   const [playerAttackTrigger, setPlayerAttackTrigger] = useState(0) // 玩家攻击触发器
+  const [isPlayerAttacking, setIsPlayerAttacking] = useState(false) // 玩家是否正在攻击（用于武器动画）
   const [playerCurrentHp, setPlayerCurrentHp] = useState(character.hp) // 玩家当前生命值
   const [lootBoxes, setLootBoxes] = useState([]) // 宝箱列表
   const [isDead, setIsDead] = useState(false) // 玩家是否死亡
@@ -71,6 +72,16 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
   // 预加载开宝箱音效
   useEffect(() => {
     soundManager.loadSound('openchest', '/sounds/openchest.mp3')
+  }, [])
+
+  // 播放背景音乐
+  useEffect(() => {
+    soundManager.playBGM(0.3)
+    
+    // 组件卸载时停止背景音乐
+    return () => {
+      soundManager.stopBGM()
+    }
   }, [])
 
   // 初始化其他玩家、主机状态和怪物（从props）
@@ -1049,6 +1060,13 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
         
         // 获取职业类型
         const characterClass = character.id.toLowerCase()
+        
+        // 播放武器攻击音效
+        soundManager.playWeaponAttack(characterClass)
+        
+        // 触发武器攻击动画
+        setIsPlayerAttacking(true)
+        setTimeout(() => setIsPlayerAttacking(false), 200) // 200ms后恢复
         
         // 根据职业类型决定攻击方式
         // 编码格式：攻击力 * 10000 + 职业代码 * 100 + (时间戳 % 100)
@@ -2462,6 +2480,7 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
           playerSize={scaledPlayerSize}
           mapScale={MAP_SCALE}
           weapon={playerWeapon}
+          isAttacking={isPlayerAttacking}
         />
       )}
       

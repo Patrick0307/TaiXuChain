@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import soundManager from '../../utils/soundManager'
 
 function Monster({ 
   id,
@@ -55,7 +56,14 @@ function Monster({
   useEffect(() => {
     if (isAttacking && !isDead) {
       attackIntervalRef.current = setInterval(() => {
-        setAttackFrame(prev => (prev + 1) % ATTACK_FRAMES)
+        setAttackFrame(prev => {
+          const nextFrame = (prev + 1) % ATTACK_FRAMES
+          // 在最后一帧（第11帧）时播放攻击音效
+          if (nextFrame === ATTACK_FRAMES - 1) {
+            soundManager.playMonsterAttack()
+          }
+          return nextFrame
+        })
       }, 80) // 每80ms切换一帧，快速播放攻击动画
     } else {
       if (attackIntervalRef.current) {

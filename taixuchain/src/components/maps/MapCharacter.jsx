@@ -25,7 +25,8 @@ function MapCharacter({
   direction, 
   playerSize, 
   mapScale,
-  weapon 
+  weapon,
+  isAttacking = false
 }) {
   // 获取武器图片路径
   const weaponImagePath = weapon ? WEAPON_IMAGE_MAP[weapon.name] : null
@@ -78,10 +79,12 @@ function MapCharacter({
             height: `${playerSize * 1.2}px`,
             right: '15%',
             top: '185%',
-            transform: 'translate(0, -50%) rotateY(180deg)',
+            transform: `translate(0, -50%) rotateY(180deg) rotate(${isAttacking ? '-45deg' : '0deg'})`,
+            transformOrigin: 'bottom center',
             imageRendering: 'pixelated',
             pointerEvents: 'none',
             zIndex: 1,
+            transition: isAttacking ? 'transform 0.1s ease-out' : 'transform 0.15s ease-in',
           }}
         />
       )}

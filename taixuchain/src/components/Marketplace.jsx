@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import InventorySlot from './InventorySlot'
+import ConfirmDialog from './ConfirmDialog'
 import { getAllMarketplaceListings, buyWeaponFromMarket, getLingStoneBalance } from '../utils/suiClient'
 import soundManager from '../utils/soundManager'
 import '../css/marketplace.css'
@@ -10,6 +11,18 @@ function Marketplace({ character, isOpen, onClose }) {
   const [selectedListing, setSelectedListing] = useState(null)
   const [lingStoneBalance, setLingStoneBalance] = useState(0)
   const [isBuying, setIsBuying] = useState(false)
+  
+  // Confirm dialog state
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    details: [],
+    warning: '',
+    tip: '',
+    type: 'warning',
+    onConfirm: null
+  })
 
   // 添加点击音效监听
   useEffect(() => {
@@ -83,29 +96,54 @@ function Marketplace({ character, isOpen, onClose }) {
     }
   }
 
+  // Show confirm dialog
+  const showConfirmDialog = (config) => {
+    return new Promise((resolve) => {
+      setConfirmDialog({
+        ...config,
+        isOpen: true,
+        onConfirm: () => {
+          setConfirmDialog(prev => ({ ...prev, isOpen: false }))
+          resolve(true)
+        }
+      })
+    })
+  }
+
+  // Close confirm dialog
+  const closeConfirmDialog = () => {
+    setConfirmDialog(prev => ({ ...prev, isOpen: false }))
+  }
+
   const handleBuyWeapon = async (listing) => {
-    // 使用卖家设定的价格（从最小单位转换为 LING）
+    // Use seller's price (convert from smallest unit to LING)
     const price = listing.price / 1_000_000_000
     
     console.log('💰 Buying weapon with seller price:', price, 'LING')
     
-    // 检查余额是否足够
+    // Check if balance is sufficient
     if (price > lingStoneBalance) {
       alert(`❌ Insufficient LingStone\n\nRequired: ${price} LING\nBalance: ${lingStoneBalance} LING`)
       return
     }
     
-    // 确认对话框
-    const confirmed = window.confirm(
-      `💰 Are you sure you want to buy this weapon?\n\n` +
-      `Weapon: ${listing.weapon.name} (Lv.${listing.weapon.level})\n` +
-      `Attack: +${listing.weapon.attack}\n` +
-      `Rarity: ${getRarityName(listing.weapon.rarity)}\n\n` +
-      `💎 Price: ${price} LingStone\n` +
-      `💰 Your Balance: ${lingStoneBalance.toLocaleString()} LingStone\n\n` +
-      `You need to sign to pay ${price} LING and gas fees\n\n` +
-      `This action cannot be undone!`
-    )
+    // Show confirm dialog
+    const confirmed = await showConfirmDialog({
+      title: 'Buy this weapon?',
+      message: '',
+      details: [
+        { label: 'Weapon', value: `${listing.weapon.name} (Lv.${listing.weapon.level})` },
+        { label: 'Attack', value: `+${listing.weapon.attack}` },
+        { label: 'Rarity', value: getRarityName(listing.weapon.rarity) },
+        { label: 'Price', value: `${price} LingStone`, highlight: true },
+        { label: 'Your Balance', value: `${lingStoneBalance.toLocaleString()} LingStone` }
+      ],
+      warning: 'This action cannot be undone!',
+      tip: `You need to sign to pay ${price} LING and gas fees`,
+      type: 'info',
+      confirmText: 'Buy',
+      cancelText: 'Cancel'
+    })
     
     if (!confirmed) {
       return
@@ -158,6 +196,22 @@ function Marketplace({ character, isOpen, onClose }) {
   return (
     <div className="marketplace-overlay" onClick={onClose}>
       <div className="marketplace-container" onClick={(e) => e.stopPropagation()}>
+        
+        {/* Confirm Dialog */}
+        <ConfirmDialog
+          isOpen={confirmDialog.isOpen}
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          details={confirmDialog.details}
+          warning={confirmDialog.warning}
+          tip={confirmDialog.tip}
+          type={confirmDialog.type}
+          confirmText={confirmDialog.confirmText}
+          cancelText={confirmDialog.cancelText}
+          onConfirm={confirmDialog.onConfirm}
+          onCancel={closeConfirmDialog}
+        />
+        
         <div className="marketplace-header">
           <h2>🏪 Weapon Market</h2>
           <div className="lingstone-display">
