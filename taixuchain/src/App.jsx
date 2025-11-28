@@ -26,9 +26,22 @@ function App() {
   const [initialMonsters, setInitialMonsters] = useState([]) // Initial monster list
   const [isCheckingPlayer, setIsCheckingPlayer] = useState(false)
 
-  // Add global click sound effect
+  // Play overall background music on app load
+  useEffect(() => {
+    // Reset isInMap flag on app load (in case of page refresh)
+    soundManager.isInMap = false
+    soundManager.playOverallBGM(0.1) // Volume set to 10%
+    
+    // Don't stop overall BGM on cleanup - it should keep playing
+    // Only stop when actually leaving the app (which we can't detect reliably)
+  }, [])
+
+  // Add global click sound effect and try to play pending BGM
   useEffect(() => {
     const handleClick = () => {
+      // Try to play pending overall BGM on user interaction (do this first!)
+      soundManager.tryPlayPendingOverallBGM()
+      // Then play click sound
       soundManager.play('click', 0.3) // Volume set to 30%
     }
 

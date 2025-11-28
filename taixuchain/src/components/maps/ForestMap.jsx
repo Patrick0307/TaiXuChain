@@ -77,13 +77,17 @@ function ForestMap({ character, onExit, roomId = null, initialPlayers = [], isHo
     soundManager.loadSound('openchest', '/sounds/openchest.mp3')
   }, [])
 
-  // 播放背景音乐
+  // 播放背景音乐（进入地图时停止全局音乐，播放地图音乐）
   useEffect(() => {
+    // 停止全局背景音乐
+    soundManager.stopOverallBGM()
+    // 播放地图背景音乐
     soundManager.playBGM(0.1)
     
-    // 组件卸载时停止背景音乐
+    // 组件卸载时停止地图音乐，恢复全局音乐
     return () => {
       soundManager.stopBGM()
+      soundManager.resumeOverallBGM()
     }
   }, [])
 

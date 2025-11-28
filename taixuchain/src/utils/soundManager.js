@@ -3,8 +3,12 @@ class SoundManager {
   constructor() {
     this.sounds = {}
     this.enabled = true
-    this.bgm = null // Background music
+    this.bgm = null // Map background music
     this.bgmVolume = 0.1 // Background music volume
+    this.overallBgm = null // Overall background music (plays on website load)
+    this.overallBgmVolume = 0.1
+    this.overallBgmPending = false // Whether overall BGM is waiting for user interaction
+    this.isInMap = false // Whether user is currently in a map
   }
 
   // Load sound
@@ -65,7 +69,75 @@ class SoundManager {
     this.play('monsterattack', volume)
   }
 
-  // Play background music (loop)
+  // Play overall background music (website-wide, plays on load)
+  playOverallBGM(volume = 0.1) {
+    // Don't play if user is in a map
+    if (this.isInMap) {
+      console.log('🎵 User is in map, skipping overall BGM')
+      return
+    }
+    
+    this.overallBgmVolume = volume
+    
+    // Create audio if not exists
+    if (!this.overallBgm) {
+      this.overallBgm = new Audio('/sounds/OverallBackground.mp3')
+      this.overallBgm.loop = true
+      this.overallBgm.volume = volume
+    }
+    
+    // If already playing, don't play again
+    if (!this.overallBgm.paused) return
+    
+    this.overallBgm.play().then(() => {
+      console.log('🎵 Overall background music started')
+      this.overallBgmPending = false
+    }).catch(err => {
+      console.warn('Failed to play overall BGM (waiting for user interaction):', err.message)
+      // Mark as pending, will be triggered on first user interaction
+      this.overallBgmPending = true
+    })
+  }
+
+  // Try to play pending overall BGM (call this on user interaction)
+  tryPlayPendingOverallBGM() {
+    if (this.overallBgmPending && !this.isInMap && this.overallBgm) {
+      this.overallBgm.play().then(() => {
+        console.log('🎵 Overall background music started after user interaction')
+        this.overallBgmPending = false
+      }).catch(err => {
+        console.warn('Still failed to play overall BGM:', err.message)
+      })
+    }
+  }
+
+  // Stop overall background music (when entering map)
+  stopOverallBGM() {
+    this.isInMap = true
+    this.overallBgmPending = false
+    if (this.overallBgm) {
+      this.overallBgm.pause()
+      this.overallBgm.currentTime = 0
+      console.log('🎵 Overall background music stopped')
+    }
+  }
+
+  // Resume overall background music (when exiting map)
+  resumeOverallBGM() {
+    this.isInMap = false
+    if (this.overallBgm) {
+      this.overallBgm.play().then(() => {
+        console.log('🎵 Overall background music resumed')
+      }).catch(err => {
+        console.warn('Failed to resume overall BGM:', err.message)
+      })
+    } else {
+      // If not initialized, play it
+      this.playOverallBGM(this.overallBgmVolume)
+    }
+  }
+
+  // Play map background music (loop)
   playBGM(volume = 0.1) {
     if (this.bgm) {
       // If already playing, don't play again
@@ -77,39 +149,39 @@ class SoundManager {
     this.bgm.loop = true
     this.bgm.volume = volume
     this.bgm.play().then(() => {
-      console.log('🎵 Background music started')
+      console.log('🎵 Map background music started')
     }).catch(err => {
-      console.warn('Failed to play BGM:', err.message)
+      console.warn('Failed to play map BGM:', err.message)
     })
   }
 
-  // Stop background music
+  // Stop map background music
   stopBGM() {
     if (this.bgm) {
       this.bgm.pause()
       this.bgm.currentTime = 0
-      console.log('🎵 Background music stopped')
+      console.log('🎵 Map background music stopped')
     }
   }
 
-  // Pause background music
+  // Pause map background music
   pauseBGM() {
     if (this.bgm && !this.bgm.paused) {
       this.bgm.pause()
-      console.log('🎵 Background music paused')
+      console.log('🎵 Map background music paused')
     }
   }
 
-  // Resume background music
+  // Resume map background music
   resumeBGM() {
     if (this.bgm && this.bgm.paused) {
       this.bgm.play().catch(err => {
-        console.warn('Failed to resume BGM:', err.message)
+        console.warn('Failed to resume map BGM:', err.message)
       })
     }
   }
 
-  // Set background music volume
+  // Set map background music volume
   setBGMVolume(volume) {
     this.bgmVolume = volume
     if (this.bgm) {
