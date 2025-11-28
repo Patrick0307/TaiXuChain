@@ -1,6 +1,8 @@
-# TaiXu World 🌌
-
 <div align="center">
+
+<img src="./taixuchain/public/logo.png" alt="TaiXu World Logo" width="200"/>
+
+# TaiXu World �
 
 [![Live Demo](https://img.shields.io/badge/🎮%20Play%20Now-Live%20Demo-FF6B6B?style=for-the-badge)](https://tai-xu-chain.vercel.app)
 [![YouTube](https://img.shields.io/badge/📺%20Demo-YouTube-red?style=for-the-badge)](https://www.youtube.com/watch?v=l86PfXooajU)
